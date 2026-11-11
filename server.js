@@ -190,21 +190,30 @@ ${reportUrl || 'http://localhost:3000'}`;
 
   // 3. 파일 서비스 (Vercel 및 로컬 공통 완벽 호환)
   let cleanUrl = req.url.split('?')[0];
-  let fileName = cleanUrl === '/' ? 'index.html' : cleanUrl.replace(/^\//, '');
+  let reqPath = cleanUrl.replace(/^\//, '');
+  if (!reqPath || reqPath === '') reqPath = 'index.html';
 
-  let targetPath = path.resolve(__dirname, fileName);
+  // 1차 탐색: __dirname 기준
+  let targetPath = path.join(__dirname, reqPath);
+  // 2차 탐색: process.cwd() 기준 (Vercel 런타임 호환)
+  if (!fs.existsSync(targetPath)) {
+    targetPath = path.join(process.cwd(), reqPath);
+  }
 
   if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
     let contentType = 'text/html; charset=utf-8';
-    if (fileName.endsWith('.js')) contentType = 'application/javascript';
-    if (fileName.endsWith('.css')) contentType = 'text/css';
-    if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) contentType = 'image/jpeg';
-    if (fileName.endsWith('.png')) contentType = 'image/png';
+    if (reqPath.endsWith('.js')) contentType = 'application/javascript';
+    if (reqPath.endsWith('.css')) contentType = 'text/css';
+    if (reqPath.endsWith('.jpg') || reqPath.endsWith('.jpeg')) contentType = 'image/jpeg';
+    if (reqPath.endsWith('.png')) contentType = 'image/png';
     res.writeHead(200, { 'Content-Type': contentType });
     fs.createReadStream(targetPath).pipe(res);
   } else {
-    // 무조건 메인 index.html(랜딩페이지) 서빙
-    let indexPath = path.resolve(__dirname, 'index.html');
+    // 요청한 파일이 없거나 첫 진입 시 index.html 서빙
+    let indexPath = path.join(__dirname, 'index.html');
+    if (!fs.existsSync(indexPath)) {
+      indexPath = path.join(process.cwd(), 'index.html');
+    }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     fs.createReadStream(indexPath).pipe(res);
   }
