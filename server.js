@@ -1,11 +1,10 @@
-// Local Development Server (Excluded from Vercel)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const crypto = require('crypto');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const SOLAPI_API_KEY = 'NCSK8Y3GEABTX0B0KKZJU8';
 const SOLAPI_API_SECRET = 'ANWFHRCJW1UD3OTT9TBJTO2XEQ1N3GED';
 const SENDER_PHONE = '01093442378';
@@ -30,7 +29,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 1. OpenAI (GPT-4o-mini) 초고속 실시간 진료 요약 API
+  // 1. OpenAI (GPT-4o-mini) 실시간 진료 요약 API
   if (req.url === '/api/summarize' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
@@ -50,12 +49,6 @@ const server = http.createServer((req, res) => {
 의사와 환자의 진료실 대화 내용을 분석하여 환자(${patientNameClean})가 집에 가서도 안심하고 복약/관리할 수 있도록 친절하고 신뢰감 넘치는 한국어로 안내 리포트를 작성하세요.
 
 오늘 기준 날짜는 ${currentYear}년 ${currentMonth}월 ${currentDate}일(${currentDay}요일)입니다.
-
-[작성 및 환각(Hallucination) 방지 절대 규칙]
-1. 진료실 대화에 등장하지 않은 가상의 병명, 가상의 약물, 가상의 증상을 절대 지어내지 마세요.
-2. 환자가 의사로부터 직접 들은 진단, 안내사항, 처방 주의사항을 핵심 위주로 명확히 정리하세요.
-3. 재방문 예정일(nextVisitDate)은 진료실 대화에 날짜/요일이나 기간이 명시된 경우 오늘 날짜 기준으로 계산해서 적고, 언급이 없으면 "불편한 증상이 지속되거나 심해지실 경우 내원"이라고 적으세요.
-4. 반드시 순수 JSON 문자열만 출력하세요.
 
 JSON 출력 형식:
 {
@@ -135,7 +128,7 @@ JSON 출력 형식:
     req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
       try {
-        const { receiverPhone, patientName, summary, medication, nextDate, reportUrl, userPlan, hospitalName } = JSON.parse(body);
+        const { receiverPhone, patientName, summary, medication, nextDate, reportUrl, hospitalName } = JSON.parse(body);
         const toPhone = (receiverPhone || SENDER_PHONE).replace(/[^0-9]/g, '');
 
         const currentHospital = hospitalName || '행복내과의원';
@@ -195,24 +188,34 @@ ${reportUrl || 'http://localhost:3000'}`;
     return;
   }
 
-  // 3. 정적 웹 서빙
-  let reqPath = req.url === '/' ? 'index.html' : req.url.split('?')[0].replace(/^\//, '');
-  let filePath = path.join(__dirname, reqPath);
+  // 3. 파일 서비스 (Vercel 및 로컬 공통 완벽 호환)
+  let cleanUrl = req.url.split('?')[0];
+  let fileName = cleanUrl === '/' ? 'index.html' : cleanUrl.replace(/^\//, '');
 
-  if (fs.existsSync(filePath)) {
+  let targetPath = path.resolve(__dirname, fileName);
+
+  if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
     let contentType = 'text/html; charset=utf-8';
-    if (filePath.endsWith('.js')) contentType = 'application/javascript';
-    if (filePath.endsWith('.css')) contentType = 'text/css';
-    if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) contentType = 'image/jpeg';
-    if (filePath.endsWith('.png')) contentType = 'image/png';
+    if (fileName.endsWith('.js')) contentType = 'application/javascript';
+    if (fileName.endsWith('.css')) contentType = 'text/css';
+    if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) contentType = 'image/jpeg';
+    if (fileName.endsWith('.png')) contentType = 'image/png';
     res.writeHead(200, { 'Content-Type': contentType });
-    fs.createReadStream(filePath).pipe(res);
+    fs.createReadStream(targetPath).pipe(res);
   } else {
+    // 무조건 메인 index.html(랜딩페이지) 서빙
+    let indexPath = path.resolve(__dirname, 'index.html');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
+    fs.createReadStream(indexPath).pipe(res);
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`🚀 토닥토닥노트 로컬 서버 가동 완료: http://localhost:${PORT}`);
-});
+// Vercel Serverless Function으로 내보내기
+module.exports = server;
+
+// 로컬 단독 실행 지원
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`🚀 토닥토닥노트 로컬 서버 가동 완료: http://localhost:${PORT}`);
+  });
+}
