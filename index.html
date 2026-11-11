@@ -1,1173 +1,812 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>토닥토닥노트 - 의사용 진료실 PC 프로그램 (실전 AI)</title>
+  <title>토닥토닥노트 - 의사를 위한 AI 진료 요약 및 환자 안심 케어 솔루션</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      word-break: keep-all;
     }
+
     body {
-      background-color: #f1f5f9;
-      color: #1e293b;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
-    header {
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 14px 28px;
+
+    /* 상단 글로벌 내비게이션 */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      z-index: 1000;
     }
-    .logo-area {
+
+    .nav-logo {
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    .logo-img {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      object-fit: cover;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-    .logo-title {
-      font-size: 19px;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    /* 테마별 스타일 정의 */
-    /* 1안: 소프트 스카이 블루 */
-    body.theme-sky {
-      background-color: #f0f7ff;
-    }
-    body.theme-sky header {
-      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-      border-bottom: 1px solid #0284c7;
-    }
-    body.theme-sky .logo-title {
-      color: #ffffff;
-    }
-    body.theme-sky .theme-selector-label {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    /* 2안: 힐링 세이지 그린 */
-    body.theme-green {
-      background-color: #f0fdf4;
-    }
-    body.theme-green header {
-      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-      border-bottom: 1px solid #047857;
-    }
-    body.theme-green .logo-title {
-      color: #ffffff;
-    }
-    body.theme-green .theme-selector-label {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    /* 3안: 웜 라벤더 */
-    body.theme-lavender {
-      background-color: #f5f3ff;
-    }
-    body.theme-lavender header {
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-      border-bottom: 1px solid #4338ca;
-    }
-    body.theme-lavender .logo-title {
-      color: #ffffff;
-    }
-    body.theme-lavender .theme-selector-label {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    /* 4안: 포근한 웜 허니 옐로우 */
-    body.theme-yellow {
-      background-color: #fffbeb;
-    }
-    body.theme-yellow header {
-      background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-      border-bottom: 1px solid #b45309;
-    }
-    body.theme-yellow .logo-title {
-      color: #ffffff;
-    }
-    body.theme-yellow .theme-selector-label {
-      color: rgba(255, 255, 255, 0.95);
-    }
-
-    /* 5안: 활기찬 선셋 오렌지 / 탠저린 */
-    body.theme-orange {
-      background-color: #fff7ed;
-    }
-    body.theme-orange header {
-      background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-      border-bottom: 1px solid #c2410c;
-    }
-    body.theme-orange .logo-title {
-      color: #ffffff;
-    }
-    body.theme-orange .theme-selector-label {
-      color: rgba(255, 255, 255, 0.95);
-    }
-
-    /* 6안: 기존 모던 화이트 */
-    body.theme-white {
-      background-color: #f1f5f9;
-    }
-    body.theme-white header {
-      background: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    body.theme-white .logo-title {
-      color: #0f172a;
-    }
-    body.theme-white .theme-selector-label {
-      color: #475569;
-    }
-
-    /* 7안: 프리미엄 다크 블랙 */
-    body.theme-black {
-      background-color: #0f172a;
-      color: #f8fafc;
-    }
-    body.theme-black header {
-      background: #020617;
-      border-bottom: 1px solid #1e293b;
-    }
-    body.theme-black .logo-title {
-      color: #ffffff;
-    }
-    body.theme-black .theme-selector-label {
-      color: rgba(255, 255, 255, 0.9);
-    }
-    body.theme-black .section-title {
-      color: #f1f5f9;
-    }
-    body.theme-black .card {
-      background: #1e293b;
-      border-color: #334155;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-    }
-    body.theme-black .input-box-wrapper {
-      background: #0f172a;
-      border-color: #334155;
-    }
-    body.theme-black .input-label {
-      color: #94a3b8;
-    }
-    body.theme-black .input-unit {
-      color: #64748b;
-    }
-    body.theme-black .input-field-clean {
-      color: #f8fafc;
-    }
-    body.theme-black .mic-control-box {
-      background: #0f172a;
-      border-color: #334155;
-    }
-    body.theme-black .record-status-text {
-      color: #e2e8f0;
-    }
-    body.theme-black .realtime-live-transcript {
-      background: #020617;
-      border-color: #334155;
-      color: #f1f5f9;
-    }
-
-    /* 상단 대시보드 링크 버튼 */
-    .dashboard-nav-link {
-      background: rgba(255, 255, 255, 0.22);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
       text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(8px);
-      transition: all 0.2s;
-    }
-    .dashboard-nav-link:hover {
-      background: rgba(255, 255, 255, 0.35);
-      transform: translateY(-1px);
-    }
-    body.theme-white .dashboard-nav-link {
-      background: #f1f5f9;
-      color: #0f172a;
-      border: 1px solid #cbd5e1;
-    }
-    body.theme-white .dashboard-nav-link:hover {
-      background: #e2e8f0;
-    }
-    .theme-palette-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.22);
-      padding: 6px 14px;
-      border-radius: 30px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-    body.theme-white .theme-palette-wrapper,
-    body.theme-black .theme-palette-wrapper {
-      background: #1e293b;
-      border: 1px solid #334155;
-    }
-    body.theme-white .theme-palette-wrapper {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-    }
-    .color-chip-btn {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid #ffffff;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-      position: relative;
-    }
-    .color-chip-btn:hover {
-      transform: scale(1.22);
-    }
-    .color-chip-btn.active {
-      transform: scale(1.3);
-      box-shadow: 0 0 0 2px #ffffff, 0 3px 8px rgba(0, 0, 0, 0.3);
-    }
-    .engine-status-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #ecfdf5;
-      color: #047857;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid #a7f3d0;
-    }
-    .engine-status-badge::before {
-      content: "●";
-      color: #10b981;
-      font-size: 10px;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: -0.5px;
     }
 
-    .main-container {
-      flex: 1;
+    .nav-logo img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-links {
       display: flex;
+      align-items: center;
       gap: 28px;
-      padding: 24px 28px;
-      max-width: 1440px;
-      margin: 0 auto;
-      width: 100%;
     }
 
-    /* 좌측: 의사용 화면 */
-    .doctor-side {
-      flex: 1.15;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .section-title {
-      font-size: 17px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #1e293b;
-    }
-    .card {
-      background: white;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-    }
-
-    .patient-input-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .input-box-wrapper {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 0 12px;
-      transition: all 0.2s;
-    }
-    .input-box-wrapper:focus-within {
-      border-color: #0284c7;
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
-    }
-    .input-label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #475569;
-      white-space: nowrap;
-      margin-right: 6px;
-      user-select: none;
-    }
-    .input-unit {
-      font-size: 13px;
+    .nav-links a {
+      text-decoration: none;
+      color: #94a3b8;
       font-weight: 600;
-      color: #64748b;
-      white-space: nowrap;
-      margin-left: 4px;
-      user-select: none;
-    }
-    .input-field-clean {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 10px 4px;
-      font-size: 14px;
-      outline: none;
-      color: #0f172a;
-      width: 100%;
+      font-size: 14.5px;
+      transition: color 0.2s;
     }
 
-    .mic-control-box {
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 20px 16px;
+    .nav-links a:hover {
+      color: #38bdf8;
+    }
+
+    .btn-cta-nav {
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(254, 229, 0, 0.25);
+    }
+
+    .btn-cta-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 229, 0, 0.4);
+    }
+
+    /* 히어로 섹션 */
+    .hero-section {
+      position: relative;
+      background: radial-gradient(circle at 50% 15%, rgba(14, 165, 233, 0.15) 0%, rgba(11, 15, 25, 0) 70%), #0b0f19;
+      padding: 90px 24px 70px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
-      background: #f8fafc;
-      transition: all 0.25s;
     }
-    .mic-control-box.recording {
-      border-color: #ef4444;
-      background: #fef2f2;
-    }
-    .mic-btn {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      border: none;
-      background: #fee500;
-      color: #191919;
-      font-size: 30px;
-      display: flex;
+
+    .early-bird-tag {
+      display: inline-flex;
       align-items: center;
+      gap: 8px;
+      background: rgba(14, 165, 233, 0.12);
+      color: #38bdf8;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+    }
+
+    .hero-headline {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1.2px;
+      line-height: 1.35;
+      color: #ffffff;
+      margin-bottom: 22px;
+      max-width: 960px;
+    }
+
+    .hero-headline span {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 18.5px;
+      color: #94a3b8;
+      max-width: 720px;
+      margin-bottom: 40px;
+      line-height: 1.65;
+    }
+
+    .hero-btn-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 54px;
+      flex-wrap: wrap;
       justify-content: center;
+    }
+
+    .btn-hero-primary {
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 16px 36px;
+      border-radius: 12px;
+      border: none;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(254, 229, 0, 0.45);
+      box-shadow: 0 4px 20px rgba(254, 229, 0, 0.35);
       transition: all 0.2s;
     }
-    .mic-btn:hover {
-      background: #fedc00;
-      transform: translateY(-1px);
-    }
-    .mic-btn.active {
-      background: #ef4444;
-      color: white;
-      animation: pulse 1.4s infinite;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(254, 229, 0, 0.5);
     }
 
-    .realtime-live-transcript {
-      width: 100%;
-      min-height: 95px;
-      max-height: 140px;
-      overflow-y: auto;
-      background: white;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px;
-      color: #0f172a;
-      line-height: 1.6;
-      text-align: left;
-      white-space: pre-wrap;
-    }
-
-    /* 직접 실행 트리거 버튼 */
-    .trigger-btn-group {
+    .btn-hero-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px 30px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
       display: flex;
-      gap: 10px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-hero-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 목업 프리뷰 래퍼 (중앙 로고 유지) */
+    .hero-mockup-wrapper {
+      max-width: 1000px;
       width: 100%;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
       margin-top: 10px;
     }
-    .btn-analyze-now {
-      background: #fee500;
-      color: #191919;
-      border: 1px solid #fada0a;
-      padding: 13px;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 14.5px;
-      cursor: pointer;
-      flex: 1;
-      transition: all 0.2s;
-      box-shadow: 0 2px 6px rgba(254, 229, 0, 0.3);
-    }
-    .btn-analyze-now:hover {
-      background: #fedc00;
-      transform: translateY(-1px);
-    }
 
-    /* AI 분석 완료 검토 카드 */
-    .summary-review-card {
-      display: none;
-      border: 2px solid #0284c7;
-      background: #f0f9ff;
-      border-radius: 12px;
-      padding: 18px;
-      margin-top: 16px;
-    }
-    .summary-review-title {
-      font-weight: 700;
-      color: #0369a1;
-      margin-bottom: 10px;
+    .mockup-header-bar {
+      background: #1a2234;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 14px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-    .summary-view-mode {
-      background: white;
-      padding: 14px 16px;
-      border-radius: 10px;
-      border: 1px solid #bae6fd;
-      font-size: 14px;
-      color: #1e293b;
-      line-height: 1.7;
-      margin-bottom: 14px;
+      gap: 8px;
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-    }
-    .btn {
-      padding: 12px 18px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: #0284c7;
-      color: white;
-      flex: 1;
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
     }
 
-    /* 우측: 스마트폰 목업 */
-    .patient-side {
-      flex: 0.85;
+    .dot-red {
+      background: #ef4444;
+    }
+
+    .dot-yellow {
+      background: #f59e0b;
+    }
+
+    .dot-green {
+      background: #10b981;
+    }
+
+    .mockup-inner {
+      padding: 50px 24px;
+      background: #0f172a;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      gap: 16px;
     }
-    .phone-mockup {
-      width: 375px;
-      height: 740px;
-      background: white;
-      border-radius: 40px;
-      border: 8px solid #0f172a;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      overflow: hidden;
+
+    .mockup-inner img {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* 3대 핵심 혜택 섹션 */
+    .features-section {
+      padding: 110px 24px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      text-align: center;
+      color: #38bdf8;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .section-heading {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.8px;
+      margin-bottom: 56px;
+      line-height: 1.35;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .feature-box {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 38px 30px;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 35px -10px rgba(14, 165, 233, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: #172138;
+    }
+
+    .feature-icon {
+      font-size: 34px;
+      width: 62px;
+      height: 62px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .feature-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .feature-desc {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.65;
+    }
+
+    /* 요금제 섹션 */
+    .pricing-section {
+      background: #0d121f;
+      padding: 110px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 36px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: #131b2e;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 44px 38px;
       display: flex;
       flex-direction: column;
       position: relative;
     }
-    .phone-notch {
-      width: 130px;
-      height: 22px;
-      background: #0f172a;
-      margin: 0 auto;
-      border-bottom-left-radius: 12px;
-      border-bottom-right-radius: 12px;
-    }
-    .phone-screen {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      background: #fafafa;
+
+    .pricing-card.featured {
+      background: #152037;
+      border: 2px solid #0284c7;
+      box-shadow: 0 25px 40px -10px rgba(2, 132, 199, 0.25);
     }
 
-    .report-empty-state {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #94a3b8;
-      text-align: center;
-      gap: 12px;
-      padding: 24px;
-    }
-    .report-card {
-      display: none;
-    }
-    .report-header {
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 12px;
-      margin-bottom: 14px;
-    }
-    .hospital-tag {
-      font-size: 13px;
-      color: #0284c7;
-      font-weight: 700;
-    }
-    .patient-greet {
-      font-size: 19px;
+    .featured-badge {
+      position: absolute;
+      top: -15px;
+      right: 32px;
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: #ffffff;
+      font-size: 12.5px;
       font-weight: 800;
-      color: #0f172a;
-      margin-top: 4px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
     }
 
-    .audio-player-btn {
-      background: linear-gradient(135deg, #0284c7, #38bdf8);
-      color: white;
-      border: none;
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      margin-bottom: 16px;
-    }
-
-    .info-section {
-      background: white;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid #f1f5f9;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-    .info-section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .pricing-plan-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
       margin-bottom: 8px;
     }
 
-    .next-visit-box {
-      background: #eff6ff;
-      border-left: 4px solid #0284c7;
+    .pricing-plan-desc {
+      font-size: 14.5px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      min-height: 42px;
     }
-    .date-badge {
+
+    .pricing-price-box {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .origin-price {
       font-size: 16px;
-      font-weight: 800;
-      color: #0284c7;
-      margin-top: 4px;
+      font-weight: 700;
+      color: #ef4444;
+      text-decoration: line-through;
+      margin-bottom: 6px;
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.12);
+      padding: 2px 10px;
+      border-radius: 6px;
     }
 
-    .share-btn {
-      background: #fee500;
-      color: #191919;
-      border: none;
-      width: 100%;
-      padding: 13px 10px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: clamp(12.5px, 3.8vw, 14px);
-      margin-top: 8px;
-      cursor: pointer;
+    .discount-price-row {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      white-space: nowrap;
-      word-break: keep-all;
-    }
-
-    .review-btn {
-      background: #03c75a;
-      color: white;
-      border: none;
-      width: 100%;
-      padding: 13px 10px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: clamp(12.5px, 3.8vw, 14px);
-      margin-top: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      white-space: nowrap;
-      word-break: keep-all;
-    }
-
-    /* 빙글빙글 회전하는 세련된 로딩 스피너 애니메이션 */
-    .loading-spinner-box {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      padding: 28px 16px;
-      background: #f0fdf4;
-      border: 2px dashed #86efac;
-      border-radius: 12px;
-      margin-top: 14px;
-    }
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid #bbf7d0;
-      border-top: 4px solid #16a34a;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .loading-text {
-      font-weight: 700;
-      font-size: 15px;
-      color: #15803d;
-      text-align: center;
-    }
-
-    /* 약 봉투 안전 경고 배지 스타일 */
-    .med-safety-warning {
-      margin-top: 10px;
-      padding: 10px 12px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #b91c1c;
-      font-weight: 700;
-      line-height: 1.5;
-      display: flex;
-      align-items: flex-start;
+      align-items: baseline;
       gap: 6px;
     }
 
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #0f172a;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 9999px;
-      font-weight: 600;
+    .price-num {
+      font-size: 42px;
+      font-weight: 900;
+      color: #38bdf8;
+      letter-spacing: -1px;
+    }
+
+    .pricing-card.featured .price-num {
+      color: #fee500;
+    }
+
+    .price-period {
       font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-bottom: 34px;
+      flex: 1;
+    }
+
+    .feature-list li {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      color: #38bdf8;
+      font-weight: 900;
+    }
+
+    .pricing-card.featured .feature-list li::before {
+      color: #fee500;
+    }
+
+    /* 원장님 무료 신청 모달 */
+    .modal-overlay {
       display: none;
-      z-index: 9999;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      padding: 40px 36px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #64748b;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #f1f5f9;
+    }
+
+    .modal-title {
+      font-size: 23px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 26px;
+      line-height: 1.55;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15.5px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 229, 0, 0.35);
+    }
+
+    /* 푸터 */
+    footer {
+      background: #070a12;
+      color: #64748b;
+      padding: 56px 24px;
+      font-size: 13px;
+      line-height: 1.85;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    footer strong {
+      color: #cbd5e1;
+    }
+
+    /* 반응형 모바일 최적화 */
+    @media (max-width: 900px) {
+      nav {
+        padding: 14px 20px;
+      }
+
+      .nav-links a {
+        display: none;
+      }
+
+      .hero-headline {
+        font-size: 32px;
+      }
+
+      .hero-sub {
+        font-size: 16px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-mockup-wrapper {
+        border-radius: 14px;
+      }
+
+      .modal-content {
+        padding: 30px 22px;
+      }
     }
   </style>
 </head>
-<body class="theme-sky">
 
-  <header>
-    <div class="logo-area">
-      <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고" class="logo-img">
-      <h1 class="logo-title">토닥토닥노트 진료실 프로그램</h1>
+<body>
+
+  <!-- 상단 내비게이션 -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
+      <span>토닥토닥노트</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">주요 기능</a>
+      <a href="#pricing">얼리버드 요금제</a>
+      <a href="login.html" style="color: #cbd5e1;">🔑 로그인</a>
+      <a href="signup.html" class="btn-cta-nav" style="text-decoration: none; color: #111827 !important; font-weight: 900;">얼리버드 가입</a>
     </div>
+  </nav>
 
-    <!-- 우측 내비게이션 및 컬러 칩 -->
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <a href="landing.html" target="_blank" class="dashboard-nav-link" title="토닥토닥노트 서비스 소개 페이지 열기">
-        🌐 서비스 소개
-      </a>
-      <a href="admin.html" class="dashboard-nav-link" title="원장님 경영 대시보드 열기">
-        📊 병원 경영 대시보드
-      </a>
-      <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
-        🚪 로그아웃
-      </a>
-
-      <!-- 세련된 미니멀 컬러 칩 팔레트 (글자 없이 동그란 색상만) -->
-      <div class="theme-palette-wrapper" title="진료실 테마 색상 변경">
-        <button class="color-chip-btn active" id="btnThemeSky" style="background: linear-gradient(135deg, #0284c7, #38bdf8);" onclick="setTheme('theme-sky')" title="소프트 스카이"></button>
-        <button class="color-chip-btn" id="btnThemeGreen" style="background: linear-gradient(135deg, #059669, #34d399);" onclick="setTheme('theme-green')" title="힐링 민트"></button>
-        <button class="color-chip-btn" id="btnThemeLavender" style="background: linear-gradient(135deg, #6366f1, #a5b4fc);" onclick="setTheme('theme-lavender')" title="웜 라벤더"></button>
-        <button class="color-chip-btn" id="btnThemeYellow" style="background: linear-gradient(135deg, #f59e0b, #fde047);" onclick="setTheme('theme-yellow')" title="웜 옐로우"></button>
-        <button class="color-chip-btn" id="btnThemeOrange" style="background: linear-gradient(135deg, #ea580c, #fb923c);" onclick="setTheme('theme-orange')" title="선셋 오렌지"></button>
-        <button class="color-chip-btn" id="btnThemeWhite" style="background: #ffffff; border: 2px solid #cbd5e1;" onclick="setTheme('theme-white')" title="모던 화이트"></button>
-        <button class="color-chip-btn" id="btnThemeBlack" style="background: #0f172a; border: 2px solid #475569;" onclick="setTheme('theme-black')" title="프리미엄 다크 블랙"></button>
-      </div>
+  <!-- 히어로 섹션 -->
+  <section class="hero-section">
+    <div class="early-bird-tag">
+      ✨ 선착순 50명 한정 · 얼리버드 평생 할인가 혜택 제공
     </div>
-  </header>
+    <h1 class="hero-headline">
+      환자가 집에 가서도 감동하는 <span>AI 진료 리포트</span>,<br>
+      우리 동네 1등 병원의 재방문율 비결입니다
+    </h1>
+    <p class="hero-sub" style="margin-bottom: 24px;">
+      진료 중 단축키 <strong>[F9]</strong>만 누르면 끝!<br>
+      원장님의 진료 대화를 AI가 알기 쉬운 맞춤 리포트로 요약하여 환자 카카오톡으로 자동 발송합니다.
+    </p>
 
-  <main class="main-container">
-    <!-- 좌측: 의사용 화면 -->
-    <div class="doctor-side">
-      <div class="section-header">
-        <div class="section-title">
-          <span>🩺 진료 대화 자동 타이핑 및 요약</span>
-        </div>
-        <span style="font-size: 13px; color: #64748b;">단축키: <strong>[F9]</strong> 녹음 시작/종료</span>
+    <!-- 대시보드 및 프로그램 프리뷰 목업 (중앙 로고 유지 - 배포 후 캡처 이미지로 교체 가능) -->
+    <div class="hero-mockup-wrapper">
+      <div class="mockup-header-bar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span style="font-size: 12px; color: #94a3b8; margin-left: 8px;">todaknote.com - 진료실 프로그램 & 원장님 대시보드</span>
       </div>
-
-      <div class="card">
-        <div class="patient-input-group">
-          <!-- 환자 이름 & 나이 입력 양식 -->
-          <div class="input-box-wrapper" style="flex: 1.3;">
-            <span class="input-label">이름 :</span>
-            <input type="text" id="patientName" class="input-field-clean" value="김영희" placeholder="성함 입력">
-            <span class="input-label" style="margin-left: 10px;">나이 :</span>
-            <input type="text" id="patientAge" class="input-field-clean" style="max-width: 48px; text-align: center;" value="32" placeholder="선택">
-            <span class="input-unit">세</span>
-          </div>
-
-          <!-- 전화번호 입력 양식 -->
-          <div class="input-box-wrapper" style="flex: 1.1;">
-            <span class="input-label">전화번호 :</span>
-            <input type="text" id="patientPhone" class="input-field-clean" value="01093442378" placeholder="010-0000-0000">
-          </div>
-        </div>
-
-        <div class="mic-control-box" id="micBox">
-          <button class="mic-btn" id="micBtn" title="진료 녹음 시작 (F9)">🎙️</button>
-          <div class="record-status-text" id="recordStatus" style="font-weight: 700; font-size: 15px;">
-            [마이크 클릭] 또는 [F9]를 눌러 녹음을 시작하세요.
-          </div>
-
-          <div class="realtime-live-transcript" id="liveTranscript">
-            <span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>
-          </div>
-
-          <div class="trigger-btn-group">
-            <button class="btn-analyze-now" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()">
-              기록된 대화로 AI 요약 생성하기
-            </button>
-          </div>
-
-          <!-- 🌀 빙글빙글 도는 로딩 인디케이터 박스 -->
-          <div class="loading-spinner-box" id="loadingSpinnerBox">
-            <div class="spinner"></div>
-            <div class="loading-text">
-              🧠 AI가 진료 대화를 꼼꼼하게 분석하고 있습니다...<br>
-              <span style="font-size: 13px; font-weight: normal; color: #166534;">(보통 3~5초 소요됩니다)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI 분석 완료 검토 카드 -->
-        <div class="summary-review-card" id="summaryReviewCard">
-          <div class="summary-review-title">
-            <span>✨ AI 진료 요약 완료 (원장님 최종 검토)</span>
-            <span style="font-size: 12px; color: #0284c7;" id="analysisTime">소요 시간: 1.2초</span>
-          </div>
-
-          <!-- 보기 모드 -->
-          <div class="summary-view-mode" id="summaryViewMode">
-            • <strong>진료 핵심:</strong> <span id="viewSummaryText"></span><br>
-            • <strong>처방/복약:</strong> <span id="viewMedText"></span><br>
-            • <strong>다음 내원:</strong> <span id="viewNextDateText" style="color:#0284c7; font-weight:700;"></span> (<span id="viewNextNoticeText"></span>)
-          </div>
-
-          <!-- 편집 모드 (내용 수정 클릭 시 열림) -->
-          <div class="summary-edit-mode" id="summaryEditMode" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 14px;">
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">진료 핵심 요약:</div>
-              <textarea id="editSummaryInput" class="input-field" style="width: 100%; height: 60px; resize: vertical;"></textarea>
-            </div>
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">처방 및 복약법:</div>
-              <textarea id="editMedInput" class="input-field" style="width: 100%; height: 50px; resize: vertical;"></textarea>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <div style="flex: 1;">
-                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">다음 내원일:</div>
-                <input type="text" id="editNextDateInput" class="input-field" style="width: 100%;">
-              </div>
-              <div style="flex: 1.5;">
-                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">환자 안내사항:</div>
-                <input type="text" id="editNextNoticeInput" class="input-field" style="width: 100%;">
-              </div>
-            </div>
-          </div>
-
-          <div class="action-buttons">
-            <button class="btn" id="editToggleBtn" style="background: white; border: 1px solid #cbd5e1; color: #475569;" onclick="toggleEditMode()">✏️ 내용 수정</button>
-            <button class="btn" id="saveEditBtn" style="background: #059669; color: white; display: none;" onclick="saveEditMode()">💾 수정 완료</button>
-            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 확인 및 환자 카톡 발송 (Enter)</button>
-          </div>
-        </div>
+      <div class="mockup-inner">
+        <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
+        <div style="font-size: 14.5px; color: #cbd5e1; font-weight: 700;">의사와 환자를 잇는 가장 따뜻한 AI 케어 솔루션</div>
       </div>
     </div>
+  </section>
 
-    <!-- 우측: 스마트폰 목업 -->
-    <div class="patient-side">
-      <div class="section-title" style="margin-bottom: 12px;">
-        <span>📱 환자 카카오톡 도착 화면</span>
+  <!-- 3대 핵심 혜택 섹션 -->
+  <section class="features-section" id="features">
+    <div class="section-eyebrow">WHY TODAKNOTE?</div>
+    <h2 class="section-heading">진료 시간을 뺏지 않고 감동 리포트와 마케팅을 한번에!</h2>
+
+    <div class="feature-grid">
+      <!-- 1 -->
+      <div class="feature-box">
+        <div class="feature-icon">🎙️</div>
+        <h3 class="feature-title">단축키 [F9] 하나로 끝</h3>
+        <p class="feature-desc">
+          진료 시작과 끝에 F9만 누르면 AI가 음성을 받아적고 환자 눈높이로 알기 쉽게 요약/정리합니다.(확인 후 카톡 발송)
+        </p>
       </div>
-
-      <div class="phone-mockup">
-        <div class="phone-notch"></div>
-        <div class="phone-screen" id="phoneScreen">
-          <div class="report-empty-state" id="emptyState">
-            <span style="font-size: 40px;">💬</span>
-            <p><strong>아직 발송된 리포트가 없습니다.</strong><br>좌측에서 AI 요약 후 [카톡 발송]을 누르면 여기에 리포트가 도착합니다.</p>
-          </div>
-
-          <div class="report-card" id="reportCard">
-            <div class="report-header">
-              <span class="hospital-tag">🏥 연세바른내과의원 · 박준혁 원장</span>
-              <h2 class="patient-greet" id="reportPatientName">김영희 님의 안심 진료노트</h2>
-              <span style="font-size: 13px; color: #64748b;" id="reportTodayDate"></span>
-            </div>
-
-            <!-- 1. 요약 -->
-            <div class="info-section">
-              <div class="info-section-title">📢 오늘 원장님 말씀 요약</div>
-              <div id="reportSummaryText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
-            </div>
-
-            <!-- 2. 약 복용법 -->
-            <div class="info-section">
-              <div class="info-section-title">💊 오늘 처방된 약 & 복용 방법</div>
-              <div id="reportMedText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
-
-              <!-- 눈에 번쩍 띄는 굵은 주황색 안전 경고 배지 -->
-              <div class="med-safety-warning">
-                <span>⚠️</span>
-                <span>정확한 하루 복용 횟수와 상세 복약법은 반드시 <strong>약국에서 받으신 약 봉투의 안내</strong>를 꼭 확인해 주세요!</span>
-              </div>
-            </div>
-
-            <!-- 3. 다음 병원 오시는 날 -->
-            <div class="info-section next-visit-box">
-              <div class="info-section-title">🗓️ 다음 병원 오시는 날 (놓치지 마세요!)</div>
-              <div class="date-badge" id="reportNextDate"></div>
-              <p style="font-size: 13px; color: #1e3a8a; margin-top: 6px; line-height: 1.5;" id="reportNextNotice"></p>
-            </div>
-
-            <!-- 4. 맞춤 생활 건강 팁 -->
-            <div class="info-section" style="background: #fffbeb; border-left: 4px solid #f59e0b;">
-              <div class="info-section-title" style="color: #b45309;">💡 꼭 지켜주셔야 할 맞춤 생활 팁</div>
-              <div id="reportLifestyleTips" style="font-size: 14px; line-height: 1.6; color: #78350f; white-space: pre-wrap;"></div>
-            </div>
-
-            <!-- 5. 토닥토닥 안심 한마디 -->
-            <div class="info-section" style="background: #fdf2f8; border-left: 4px solid #ec4899;">
-              <div class="info-section-title" style="color: #be185d;">🌷 토닥토닥 마음 안심 한마디</div>
-              <div id="reportWarmMessage" style="font-size: 14px; line-height: 1.6; color: #831843; font-weight: 500;"></div>
-            </div>
-
-            <!-- 6. 눈에 확 띄는 안심 법적 고지 배너 -->
-            <div style="margin-top: 16px; padding: 14px 16px; background: #fefce8; border: 2px solid #fde047; border-radius: 12px; font-size: 13px; color: #854d0e; line-height: 1.6;">
-              📢 <strong>[보호자 및 환자 안내]</strong><br>
-              본 리포트는 진료실 대화를 AI로 알기 쉽게 요약한 건강 참고용 자료입니다. 
-              <strong>실제 처방약 복용은 약국 약 봉투의 안내를 절대적으로 우선</strong>해 주시기 바랍니다.
-            </div>
-
-            <button class="share-btn" onclick="showToast('👨‍👩‍👧 가족 단톡방으로 공유되었습니다!')">
-              👨‍👩‍👧 자녀/가족에게 이 리포트 공유하기
-            </button>
-
-            <!-- 전략 1: 원장님께 감사/응원 남기기 박스 -->
-            <div style="margin-top: 14px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px; text-align: center;">
-              <p style="font-size: 13.5px; font-weight: 700; color: #166534; margin-bottom: 4px;">
-                🩺 오늘 진료와 설명이 안심이 되셨나요?
-              </p>
-              <p style="font-size: 12px; color: #15803d; line-height: 1.4; margin-bottom: 10px;">
-                원장님과 의료진에게 따뜻한 응원의 한마디를 남겨주세요.<br>정성껏 진료하는 데 가장 큰 보람과 힘이 됩니다! ❤️
-              </p>
-              <button class="review-btn" style="margin-top: 0;" onclick="showToast('⭐ 네이버 영수증 리뷰 작성 페이지로 이동합니다!')">
-                ⭐ 네이버 영수증 리뷰 남기기
-              </button>
-            </div>
-          </div>
-        </div>
+      <!-- 2 -->
+      <div class="feature-box">
+        <div class="feature-icon">📱</div>
+        <h3 class="feature-title">카톡으로 받는 감동 리포트</h3>
+        <p class="feature-desc">
+          환자와 보호자가 스마트폰에서 진료 내용, 처방약 복용법, 재방문 일자를 큰 글씨로 다시 확인할 수 있어 환자 만족도가 매우 높습니다.
+        </p>
+      </div>
+      <!-- 3 -->
+      <div class="feature-box">
+        <div class="feature-icon">⭐</div>
+        <h3 class="feature-title">네이버 영수증 리뷰 폭발</h3>
+        <p class="feature-desc">
+          리포트 하단의 감사 리뷰 유도 버튼을 통해, 위험한 가짜 리뷰가 아닌 실제 우리 병원에서 진료를 받은 환자의 찐 네이버 플레이스 별점 5개 리뷰가 등록됩니다.
+        </p>
       </div>
     </div>
-  </main>
+  </section>
 
-  <div class="toast" id="toast">메시지</div>
+  <!-- 요금제 섹션 -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-eyebrow" style="text-align: center;">PRICING PLAN</div>
+    <h2 class="section-heading" style="margin-bottom: 12px;">합리적인 비용으로 병원 가치를 극대화하세요</h2>
+    <p style="text-align: center; color: #38bdf8; font-size: 19px; font-weight: 800; margin-bottom: 48px; letter-spacing: -0.5px; text-shadow: 0 0 16px rgba(56, 189, 248, 0.4);">
+      🚨 얼리버드 50명 마감 시 정가로 인상되오니, 특가 표기 중 빠른 신청 바랍니다.
+    </p>
+
+    <div class="pricing-grid">
+      <!-- 기본형 -->
+      <div class="pricing-card">
+        <h3 class="pricing-plan-title">기본형 (Standard)</h3>
+        <p class="pricing-plan-desc">꼭 필요한 핵심 기능으로 환자 재방문율을 높이는 실속 플랜</p>
+        <div class="pricing-price-box">
+          <span class="origin-price">정가 월 149,000원</span>
+          <div class="discount-price-row">
+            <span class="price-num">89,000</span>
+            <span class="price-period">원 / 월 (얼리버드 한정)</span>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
+          <li>환자 눈높이 쉬운 맞춤 건강 팁 생성</li>
+          <li>가족에게 리포트 공유 가능 (바이럴 홍보)</li>
+          <li>네이버 영수증 리뷰 원클릭 연동</li>
+        </ul>
+        <a href="signup.html?plan=standard" class="btn-cta-nav" style="text-align: center; text-decoration: none; padding: 13px; color: #111827 !important; font-weight: 800; display: block; border-radius: 10px;">
+          기본형 얼리버드 선택하기
+        </a>
+      </div>
+
+      <!-- 고급형 -->
+      <div class="pricing-card featured">
+        <div class="featured-badge">가장 인기 ⭐</div>
+        <h3 class="pricing-plan-title">고급형 (Pro)</h3>
+        <p class="pricing-plan-desc">우리 병원 전용 CI 로고와 경영 데이터까지 챙기는 프리미엄 플랜</p>
+        <div class="pricing-price-box">
+          <span class="origin-price">정가 월 199,000원</span>
+          <div class="discount-price-row">
+            <span class="price-num">139,000</span>
+            <span class="price-period">원 / 월 (얼리버드 한정)</span>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><strong>기본형의 모든 기능 100% 포함</strong></li>
+          <li><strong>우리 병원 전용 CI 로고 탑재 (자체 시스템 브랜딩 효과)</strong></li>
+          <li><strong>원장님 전용 환자 관리 & 재방문 경영 통계 대시보드</strong></li>
+          <li><strong>재방문일 카카오톡 자동 안내 (노쇼 방지)</strong></li>
+        </ul>
+        <a href="signup.html?plan=pro" class="btn-cta-nav" style="text-align: center; text-decoration: none; padding: 13px; background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: white !important; font-weight: 800; display: block; border-radius: 10px;">
+          고급형 Pro 얼리버드 선택하기
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 원장님 체험 신청 모달 -->
+  <div class="modal-overlay" id="applyModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeApplyModal()">✕</button>
+      <h3 class="modal-title">🚀 얼리버드 50명 한정 신청</h3>
+      <p class="modal-sub">별도의 프로그램 설치 없이 브라우저에서 바로 시작하실 수 있습니다. 정보를 입력하시면 즉시 이용 링크를 안내해 드립니다.</p>
+
+      <form onsubmit="handleApplySubmit(event)">
+        <div class="form-group">
+          <label class="form-label">원장님 성함</label>
+          <input type="text" id="applyDoctorName" class="form-input" placeholder="예: 박준혁 원장" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">병원명</label>
+          <input type="text" id="applyHospitalName" class="form-input" placeholder="예: 연세바른내과의원" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처 (휴대폰)</label>
+          <input type="text" id="applyPhone" class="form-input" placeholder="010-0000-0000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이메일 주소</label>
+          <input type="email" id="applyEmail" class="form-input" placeholder="doctor@hospital.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">신청 플랜</label>
+          <select id="applyPlan" class="form-input">
+            <option value="고급형 Pro (얼리버드 139,000원) - 추천">고급형 Pro (병원 CI 로고 + 대시보드 포함 / 월 139,000원)</option>
+            <option value="기본형 Standard (얼리버드 89,000원)">기본형 Standard (월 89,000원)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">
+          얼리버드 혜택 신청 완료하기
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer>
+    <p>
+      <strong>상호명:</strong> 그래비템 | <strong>서비스명:</strong> 토닥토닥노트 | <strong>대표자:</strong> 이제권<br>
+      <strong>사업자등록번호:</strong> 확인 완료 | <strong>고객지원:</strong> 010-9344-2378 | <strong>이메일:</strong>
+      hayabusak@hotmail.com<br>
+      © 2026 GRAVITEM. All rights reserved.
+    </p>
+  </footer>
 
   <script>
-    let isRecording = false;
-    let recognition = null;
-    let fullTranscript = '';
-    let parsedResult = null;
-
-    const micBtn = document.getElementById('micBtn');
-    const micBox = document.getElementById('micBox');
-    const recordStatus = document.getElementById('recordStatus');
-    const liveTranscript = document.getElementById('liveTranscript');
-    const summaryReviewCard = document.getElementById('summaryReviewCard');
-    const emptyState = document.getElementById('emptyState');
-    const reportCard = document.getElementById('reportCard');
-    const toast = document.getElementById('toast');
-
-    const now = new Date();
-    document.getElementById('reportTodayDate').innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
-
-    function promptApiKey() {
-      const current = localStorage.getItem('openai_api_key') || '';
-      const key = prompt("발급받으신 OpenAI API 키(sk-proj-...)를 입력해 주세요:", current);
-      if (key) {
-        localStorage.setItem('openai_api_key', key.trim());
-        showToast('🔑 OpenAI 키가 저장되었습니다!');
-      }
+    function openApplyModal(plan) {
+      if (plan) document.getElementById('applyPlan').value = plan;
+      document.getElementById('applyModal').style.display = 'flex';
     }
-
-    // 음성인식 초기화
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'ko-KR';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      recognition.onstart = () => {
-        isRecording = true;
-        micBtn.classList.add('active');
-        micBox.classList.add('recording');
-        recordStatus.innerHTML = '🔴 <strong>진료 대화 녹음 중...</strong> [클릭 또는 F9로 종료]';
-      };
-
-      recognition.onresult = (e) => {
-        let interimText = '';
-        fullTranscript = '';
-        for (let i = 0; i < e.results.length; i++) {
-          if (e.results[i].isFinal) fullTranscript += e.results[i][0].transcript + ' ';
-          else interimText += e.results[i][0].transcript;
-        }
-        liveTranscript.innerText = (fullTranscript + interimText).trim();
-      };
-
-      recognition.onend = () => {
-        isRecording = false;
-        micBtn.classList.remove('active');
-        micBox.classList.remove('recording');
-      };
+    function closeApplyModal() {
+      document.getElementById('applyModal').style.display = 'none';
     }
+    function handleApplySubmit(e) {
+      e.preventDefault();
+      const doc = document.getElementById('applyDoctorName').value;
+      const hosp = document.getElementById('applyHospitalName').value;
+      const phone = document.getElementById('applyPhone').value;
+      const email = document.getElementById('applyEmail').value;
+      const plan = document.getElementById('applyPlan').value;
 
-    micBtn.addEventListener('click', toggleRecording);
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'F9') { e.preventDefault(); toggleRecording(); }
-      else if (e.key === 'Enter' && summaryReviewCard.style.display === 'block') { e.preventDefault(); sendReport(); }
-    });
-
-    function toggleRecording() {
-      if (!isRecording) {
-        liveTranscript.innerText = '';
-        fullTranscript = '';
-        summaryReviewCard.style.display = 'none';
-        try { recognition.start(); } catch(e){}
-      } else {
-        try { recognition.stop(); } catch(e){}
-        recordStatus.innerHTML = '녹음 완료! <strong>AI 분석을 시작합니다... ⏳</strong>';
-        setTimeout(triggerAnalyzeDirectly, 300);
-      }
+      alert(`🎉 [얼리버드 신청 완료]\n${hosp} ${doc}님, 얼리버드 50명 한정 신청이 정상 접수되었습니다!\n입력하신 연락처(${phone}) 및 이메일(${email})로 서비스 이용 링크를 보내드립니다.`);
+      closeApplyModal();
     }
-
-    // 🌟 핵심: 텍스트를 검증하고 OpenAI 서버로 100% 전송하는 함수
-    async function triggerAnalyzeDirectly() {
-      let text = liveTranscript.innerText.trim();
-      text = text.replace('진료실 대화가 여기에 실시간으로 기록됩니다...', '').trim();
-
-      if (!text || text.length < 5) {
-        alert("기록된 대화 내용이 없습니다! 마이크를 켜고 말씀하시거나 텍스트를 입력해 주세요.");
-        recordStatus.innerText = '대화 내용이 부족합니다.';
-        return;
-      }
-
-      const apiKey = localStorage.getItem('openai_api_key') || '';
-      if (!apiKey) {
-        promptApiKey();
-        return;
-      }
-
-      // 로딩 스피너 켜기
-      document.getElementById('loadingSpinnerBox').style.display = 'flex';
-      recordStatus.innerHTML = '⏳ <strong>OpenAI 최신 엔진으로 풍성한 리포트 생성 중...</strong>';
-      showToast('🧠 챗GPT 엔진이 꼼꼼하게 요약 리포트를 작성 중입니다...');
-      const startTime = Date.now();
-
-      try {
-        const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
-        const pAge = document.getElementById('patientAge').value.trim();
-        const pInfoString = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
-
-        const res = await fetch('/api/summarize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey, transcript: text, patientInfo: pInfoString })
-        });
-
-        // 로딩 스피너 끄기
-        document.getElementById('loadingSpinnerBox').style.display = 'none';
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error?.message || `서버 에러 (${res.status})`);
-
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        document.getElementById('analysisTime').innerText = `GPT-4o-mini 생성 완료: ${elapsed}초 ✨`;
-
-        parsedResult = data;
-
-        // 의사용 검토창에 렌더링
-        document.getElementById('viewSummaryText').innerText = data.summary;
-        document.getElementById('viewMedText').innerText = data.medication;
-        document.getElementById('viewNextDateText').innerText = data.nextDate;
-        document.getElementById('viewNextNoticeText').innerText = data.nextNotice;
-
-        summaryReviewCard.style.display = 'block';
-        recordStatus.innerHTML = '✅ <strong>AI 요약 완료!</strong> 아래 내용을 확인하고 [카톡 발송]을 누르세요.';
-        showToast('✨ AI 요약이 성공적으로 생성되었습니다!');
-
-      } catch (err) {
-        document.getElementById('loadingSpinnerBox').style.display = 'none';
-        console.error("통신 에러:", err);
-        recordStatus.innerHTML = `<span style="color:red; font-weight:bold;">⚠️ 에러: ${err.message}</span>`;
-        alert("AI 분석 오류: " + err.message);
-      }
-    }
-
-    function toggleEditMode() {
-      if (!parsedResult) return;
-      isEditing = true;
-      document.getElementById('editSummaryInput').value = parsedResult.summary;
-      document.getElementById('editMedInput').value = parsedResult.medication;
-      document.getElementById('editNextDateInput').value = parsedResult.nextDate;
-      document.getElementById('editNextNoticeInput').value = parsedResult.nextNotice;
-
-      document.getElementById('summaryViewMode').style.display = 'none';
-      document.getElementById('summaryEditMode').style.display = 'flex';
-      document.getElementById('editToggleBtn').style.display = 'none';
-      document.getElementById('saveEditBtn').style.display = 'block';
-      showToast('✏️ 원하시는 내용으로 직접 수정하세요!');
-    }
-
-    function saveEditMode() {
-      isEditing = false;
-      parsedResult.summary = document.getElementById('editSummaryInput').value;
-      parsedResult.medication = document.getElementById('editMedInput').value;
-      parsedResult.nextDate = document.getElementById('editNextDateInput').value;
-      parsedResult.nextNotice = document.getElementById('editNextNoticeInput').value;
-
-      document.getElementById('viewSummaryText').innerText = parsedResult.summary;
-      document.getElementById('viewMedText').innerText = parsedResult.medication;
-      document.getElementById('viewNextDateText').innerText = parsedResult.nextDate;
-      document.getElementById('viewNextNoticeText').innerText = parsedResult.nextNotice;
-
-      document.getElementById('summaryEditMode').style.display = 'none';
-      document.getElementById('summaryViewMode').style.display = 'block';
-      document.getElementById('saveEditBtn').style.display = 'none';
-      document.getElementById('editToggleBtn').style.display = 'block';
-      showToast('💾 수정 내용이 저장되었습니다!');
-    }
-
-    async function sendReport() {
-      if (!parsedResult) return;
-      const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
-      const pAge = document.getElementById('patientAge').value.trim();
-      const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
-      const pPhone = document.getElementById('patientPhone').value;
-
-      showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
-      summaryReviewCard.style.display = 'none';
-      recordStatus.innerText = '발송 완료! 다음 환자 진료 시 [F9]를 누르세요.';
-
-      // 화면 목업 렌더링
-      document.getElementById('reportPatientName').innerText = `${pDisplayName}의 안심 진료노트`;
-      document.getElementById('reportSummaryText').innerText = parsedResult.summary;
-      document.getElementById('reportMedText').innerText = parsedResult.medication;
-      document.getElementById('reportNextDate').innerText = parsedResult.nextDate;
-      document.getElementById('reportNextNotice').innerText = parsedResult.nextNotice;
-      document.getElementById('reportLifestyleTips').innerText = parsedResult.lifestyleTips;
-      document.getElementById('reportWarmMessage').innerText = parsedResult.warmMessage;
-
-      emptyState.style.display = 'none';
-      reportCard.style.display = 'block';
-
-      // 🌟 솔라피(Solapi) 실제 스마트폰 발송 API 호출
-      try {
-        const res = await fetch('/api/send-sms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            receiverPhone: pPhone,
-            patientName: pDisplayName,
-            summary: parsedResult.summary,
-            medication: parsedResult.medication,
-            nextDate: parsedResult.nextDate
-          })
-        });
-        const sendRes = await res.json();
-        console.log("발송 응답:", sendRes);
-        showToast(`🎉 대표님 스마트폰(${pPhone})으로 진짜 메시지가 발송되었습니다!`);
-      } catch (e) {
-        console.error("발송 실패:", e);
-        showToast(`발송 중 오류: ${e.message}`);
-      }
-    }
-
-    function showToast(msg) {
-      toast.innerText = msg;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2500);
-    }
-
-    // 🎨 실시간 컬러 테마 전환 함수
-    function setTheme(themeName) {
-      document.body.className = themeName;
-      document.querySelectorAll('.color-chip-btn').forEach(btn => btn.classList.remove('active'));
-
-      if (themeName === 'theme-sky') document.getElementById('btnThemeSky').classList.add('active');
-      else if (themeName === 'theme-green') document.getElementById('btnThemeGreen').classList.add('active');
-      else if (themeName === 'theme-lavender') document.getElementById('btnThemeLavender').classList.add('active');
-      else if (themeName === 'theme-yellow') document.getElementById('btnThemeYellow').classList.add('active');
-      else if (themeName === 'theme-orange') document.getElementById('btnThemeOrange').classList.add('active');
-      else if (themeName === 'theme-white') document.getElementById('btnThemeWhite').classList.add('active');
-      else if (themeName === 'theme-black') document.getElementById('btnThemeBlack').classList.add('active');
-
-      localStorage.setItem('todak_theme', themeName);
-    }
-
-    // 저장된 테마 불러오기 (기본값: 소프트 스카이)
-    const savedTheme = localStorage.getItem('todak_theme') || 'theme-sky';
-    setTheme(savedTheme);
-
   </script>
 </body>
+
 </html>
