@@ -1,11 +1,5 @@
 {
   "name": "todak-note",
   "version": "1.0.0",
-  "description": "토닥토닥노트 - AI 진료 요약 및 환자 안심 케어 서비스",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {}
+  "description": "토닥토닥노트 - AI 진료 요약 및 환자 안심 케어 서비스"
 }
-
