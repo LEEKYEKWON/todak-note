@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>토닥토닥노트 - 원장님 경영 통계 대시보드</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", system-ui, sans-serif;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hospital-badge {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: white;
+      color: #0284c7;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #f0f9ff;
+      transform: translateY(-1px);
+    }
+
+    /* 메인 컨테이너 */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 28px 32px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* 4대 핵심 지표 카드 그리드 */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      padding: 22px 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .metric-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .metric-value-box {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: #0f172a;
+    }
+
+    .metric-unit {
+      font-size: 14px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .metric-footer {
+      font-size: 12px;
+      font-weight: 600;
+      color: #059669;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 2열 메인 섹션 */
+    .dashboard-body-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* 환자 테이블 */
+    .patient-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .patient-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #64748b;
+      font-weight: 700;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .patient-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .patient-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .tag-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .status-done {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .status-ready {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .status-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* 마케팅 ROI 박스 (카카오 옐로우 테마 적용) */
+    .roi-banner {
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      color: #191919;
+      border: 1px solid #f59e0b;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    }
+
+    .roi-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .roi-top-row h4 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #191919;
+      white-space: nowrap;
+    }
+
+    .roi-sub-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #78350f;
+      white-space: nowrap;
+    }
+
+    .roi-bottom-row {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .roi-value-text {
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #b45309;
+      white-space: nowrap;
+    }
+
+    .roi-detail-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #451a03;
+      white-space: nowrap;
+    }
+
+    /* 리뷰 활동 피드 */
+    .review-feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .review-feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .feed-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e0f2fe;
+      color: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .feed-content {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .feed-time {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1 class="header-title">📊 토닥토닥노트 병원 경영 대시보드</h1>
+      <span class="hospital-badge">🏥 연세바른내과의원 · 박준혁 원장</span>
+    </div>
+
+    <div class="header-nav">
+      <span style="font-size: 13px; opacity: 0.85;">⭐ Pro 플랜 사용 중</span>
+      <a href="landing.html" target="_blank" class="nav-btn" style="background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.35);">
+        🌐 서비스 소개(랜딩)
+      </a>
+      <a href="index.html" class="nav-btn">
+        🩺 진료실 프로그램으로 이동
+      </a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 4대 핵심 경영 지표 -->
+    <div class="metric-grid">
+      <!-- 1. 오늘의 케어 현황 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">오늘 안심 리포트 발송</span>
+          <div class="metric-icon-box" style="background:#e0f2fe; color:#0284c7;">📱</div>
+        </div>
+        <div class="metric-value-box">
+          <span class="metric-value">42</span>
+          <span class="metric-unit">건 / 오늘</span>
+        </div>
+        <div class="metric-footer">
+          <span>✓ 발송 성공률 100% (오류 0건)</span>
+        </div>
+      </div>
+
+      <!-- 2. 재방문 Follow-up 대기 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">이번 주 재방문 예정 환자</span>
+          <div class="metric-icon-box" style="background:#eff6ff; color:#3b82f6;">🗓️</div>
+        </div>
+        <div class="metric-value-box">
+          <span class="metric-value">28</span>
+          <span class="metric-unit">명</span>
+        </div>
+        <div class="metric-footer" style="color:#2563eb;">
+          <span>🔔 재방문일 알림톡 발송 대기 중</span>
+        </div>
+      </div>
+
+      <!-- 3. 가족 공유 바이럴 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">가족 단톡방 공유 건수</span>
+          <div class="metric-icon-box" style="background:#fef9c3; color:#ca8a04;">👨‍👩‍👧</div>
+        </div>
+        <div class="metric-value-box">
+          <span class="metric-value">16</span>
+          <span class="metric-unit">회 (38.1%)</span>
+        </div>
+        <div class="metric-footer" style="color:#b45309;">
+          <span>📈 보호자 신규 문의 유입 효과</span>
+        </div>
+      </div>
+
+      <!-- 4. 네이버 영수증 리뷰 유입 (핵심 킬러!) -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">네이버 영수증 리뷰 클릭</span>
+          <div class="metric-icon-box" style="background:#dcfce7; color:#16a34a;">⭐</div>
+        </div>
+        <div class="metric-value-box">
+          <span class="metric-value">14</span>
+          <span class="metric-unit">건 (클릭률 33.3%)</span>
+        </div>
+        <div class="metric-footer" style="color:#16a34a;">
+          <span>🔥 이번 달 누적 194건 달성!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 2열 상세 대시보드 -->
+    <div class="dashboard-body-grid">
+
+      <!-- 좌측: 재방문 일정 및 노쇼 방지 실시간 모니터링 -->
+      <div class="section-card">
+        <div class="section-title-row">
+          <div class="section-title">
+            <span>🗓️ 재방문(Follow-up) 환자 케어 명단</span>
+          </div>
+          <span class="section-badge" style="background:#eff6ff; color:#1d4ed8;">이번 주 예정 28명</span>
+        </div>
+
+        <table class="patient-table">
+          <thead>
+            <tr>
+              <th>환자명</th>
+              <th>연락처</th>
+              <th>초진/진료일</th>
+              <th>재방문 예정일</th>
+              <th>안내 상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>김영희 님 (32세)</strong></td>
+              <td>010-9344-****</td>
+              <td>11.08</td>
+              <td><span style="color:#0284c7; font-weight:700;">11.12 (목) 14:00</span></td>
+              <td><span class="tag-status status-ready">재방문 알림톡 대기</span></td>
+            </tr>
+            <tr>
+              <td><strong>박철수 님 (78세)</strong></td>
+              <td>010-3849-****</td>
+              <td>11.08</td>
+              <td><span style="color:#0284c7; font-weight:700;">11.15 (일) 오전</span></td>
+              <td><span class="tag-status status-done">리포트 확인 완료</span></td>
+            </tr>
+            <tr>
+              <td><strong>이순자 님 (65세)</strong></td>
+              <td>010-4491-****</td>
+              <td>11.02</td>
+              <td><span style="color:#ef4444; font-weight:700;">11.09 (오늘 내원)</span></td>
+              <td><span class="tag-status status-danger">⚠️ 당일 재방문 확인 필요</span></td>
+            </tr>
+            <tr>
+              <td><strong>최민수 님 (45세)</strong></td>
+              <td>010-8219-****</td>
+              <td>11.07</td>
+              <td><span style="color:#0284c7; font-weight:700;">11.14 (토) 10:30</span></td>
+              <td><span class="tag-status status-done">가족 공유 완료</span></td>
+            </tr>
+            <tr>
+              <td><strong>정다은 님 (28세)</strong></td>
+              <td>010-5192-****</td>
+              <td>11.06</td>
+              <td><span style="color:#64748b;">필요시 내원</span></td>
+              <td><span class="tag-status status-done">치료 종결 안내</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 우측: 네이버 영수증 리뷰 & 바이럴 기여도 분석 -->
+      <div class="section-card">
+        <div class="section-title-row">
+          <div class="section-title">
+            <span>⭐ 네이버 리뷰 & 마케팅 성과</span>
+          </div>
+          <span class="section-badge" style="background:#fef3c7; color:#b45309;">ROI 1,480% 달성</span>
+        </div>
+
+        <!-- 마케팅 성과 배너 (상하 2단 정렬로 텍스트 줄바꿈 완전 해결) -->
+        <div class="roi-banner">
+          <div class="roi-top-row">
+            <h4>이번 달 네이버 플레이스 유입 가치</h4>
+            <span class="roi-sub-label">월 9.9만원 투자 대비 효과</span>
+          </div>
+          <div class="roi-bottom-row">
+            <span class="roi-detail-tag">영수증 리뷰 194건 발생 환산</span>
+            <div class="roi-value-text">약 1,460,000원 상당</div>
+          </div>
+        </div>
+
+        <h4 style="font-size:14px; color:#475569; margin-bottom:12px; font-weight:700;">실시간 환자 반응 로그 (최근)</h4>
+
+        <div class="review-feed-item">
+          <div class="feed-avatar" style="background:#dcfce7; color:#16a34a;">★</div>
+          <div class="feed-content">
+            <strong>김영희 님</strong>이 리포트 확인 후 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.
+            <div class="feed-time">12분 전</div>
+          </div>
+        </div>
+
+        <div class="review-feed-item">
+          <div class="feed-avatar" style="background:#fef9c3; color:#ca8a04;">👨‍👩‍👧</div>
+          <div class="feed-content">
+            <strong>박철수 님</strong>의 보호자(자녀)가 <strong>가족 단톡방에 진료 리포트를 공유</strong>했습니다.
+            <div class="feed-time">34분 전</div>
+          </div>
+        </div>
+
+        <div class="review-feed-item">
+          <div class="feed-avatar" style="background:#e0f2fe; color:#0284c7;">✓</div>
+          <div class="feed-content">
+            <strong>최민수 님</strong>이 카카오톡 알림톡으로 안심 리포트를 열람했습니다.
+            <div class="feed-time">1시간 전</div>
+          </div>
+        </div>
+
+        <div class="review-feed-item">
+          <div class="feed-avatar" style="background:#dcfce7; color:#16a34a;">★</div>
+          <div class="feed-content">
+            <strong>이순자 님</strong>이 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.
+            <div class="feed-time">2시간 전</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+
+</html>

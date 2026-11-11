@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#fb7185" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#0369a1" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- 부드러운 라운드 사각 배경 -->
+  <rect width="640" height="640" fill="url(#bgGrad)" />
+
+  <!-- 중앙 메인 카드 아이콘 -->
+  <g filter="url(#shadow)">
+    <!-- 원형 배경 백플레이트 -->
+    <circle cx="320" cy="320" r="220" fill="#ffffff" />
+    
+    <!-- 따뜻한 케어 하트 심볼 -->
+    <path d="M320,380 C320,380 200,290 200,210 C200,165 235,130 280,130 C305,130 318,145 320,152 C322,145 335,130 360,130 C405,130 440,165 440,210 C440,290 320,380 320,380 Z" fill="url(#heartGrad)" />
+
+    <!-- 의료 청진기/노트 모티브 라인 -->
+    <path d="M260,330 C230,370 230,420 280,450 C320,470 370,455 385,420" fill="none" stroke="url(#mainGrad)" stroke-width="24" stroke-linecap="round" />
+    <circle cx="385" cy="415" r="18" fill="url(#mainGrad)" />
+
+    <!-- 토닥토닥 케어 손길/잎새 모티브 -->
+    <path d="M320,250 C300,220 310,185 340,175 C370,165 390,195 375,225 C360,255 335,260 320,250 Z" fill="#ffffff" opacity="0.9" />
+
+    <!-- 중앙 플러스(의료/케어) 마크 -->
+    <rect x="306" y="200" width="28" height="70" rx="14" fill="#ffffff" />
+    <rect x="285" y="221" width="70" height="28" rx="14" fill="#ffffff" />
+  </g>
+
+  <!-- 하단 미니 텍스트: TODAK NOTE -->
+  <text x="320" y="565" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="34" font-weight="900" fill="#0369a1" text-anchor="middle" letter-spacing="4">TODAK NOTE</text>
+  <text x="320" y="598" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="20" font-weight="700" fill="#64748b" text-anchor="middle" letter-spacing="2">토닥토닥 안심진료</text>
+</svg>

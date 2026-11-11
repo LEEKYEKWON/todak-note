@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - 원장님 회원가입</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+
+    .signup-card {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      max-width: 480px;
+      width: 100%;
+      padding: 44px 38px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .brand-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .brand-sub {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .plan-selector-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .plan-radio-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .plan-radio-box:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .plan-radio-box.active {
+      border-color: #38bdf8;
+      background: rgba(14, 165, 233, 0.15);
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+    }
+
+    .plan-radio-box.active.plan-pro {
+      border-color: #38bdf8;
+      background: rgba(14, 165, 233, 0.15);
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.25);
+    }
+
+    .plan-radio-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .plan-radio-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fee500;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 7px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      font-size: 14.5px;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 14px;
+      box-shadow: 0 4px 18px rgba(254, 229, 0, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(254, 229, 0, 0.45);
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13.5px;
+      color: #94a3b8;
+    }
+
+    .auth-footer a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="signup-card">
+    <div class="brand-header">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고" class="brand-logo">
+      <h1 class="brand-title">토닥토닥노트 원장님 가입</h1>
+      <p class="brand-sub">간편 가입 후 즉시 진료실 AI 요약 프로그램을 이용하실 수 있습니다.</p>
+    </div>
+
+    <!-- 기본형 / 고급형 선택 탭 버튼 -->
+    <div class="plan-selector-group">
+      <div class="plan-radio-box" id="tabPlanStandard" onclick="selectPlan('standard')">
+        <div class="plan-radio-name">🟢 기본형 Standard</div>
+        <div class="plan-radio-price">월 89,000원</div>
+      </div>
+      <div class="plan-radio-box active plan-pro" id="tabPlanPro" onclick="selectPlan('pro')">
+        <div class="plan-radio-name">⭐ 고급형 Pro</div>
+        <div class="plan-radio-price">월 139,000원</div>
+      </div>
+    </div>
+
+    <form onsubmit="handleSignup(event)">
+      <div class="form-group">
+        <label class="form-label">아이디 (이메일 주소)</label>
+        <input type="email" id="signupEmail" class="form-input" placeholder="doctor@hospital.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input type="password" id="signupPassword" class="form-input" placeholder="6자리 이상 입력" required minlength="6">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">원장님 성함</label>
+        <input type="text" id="signupDoctorName" class="form-input" placeholder="예: 박준혁 원장" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">병원명</label>
+        <input type="text" id="signupHospitalName" class="form-input" placeholder="예: 연세바른내과의원" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">연락처 (휴대폰 번호)</label>
+        <input type="tel" id="signupPhone" class="form-input" placeholder="010-0000-0000" required>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        가입 완료하고 진료실 프로그램 시작하기
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      이미 계정이 있으신가요?
+      <a href="login.html">로그인하기</a>
+    </div>
+  </div>
+
+  <script>
+    // URL 파라미터에서 선택한 플랜 가져오기 (예: ?plan=standard 또는 ?plan=pro)
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentPlan = urlParams.get('plan') || 'pro';
+
+    function selectPlan(plan) {
+      currentPlan = plan;
+      const stdTab = document.getElementById('tabPlanStandard');
+      const proTab = document.getElementById('tabPlanPro');
+
+      if (plan === 'standard') {
+        stdTab.classList.add('active');
+        proTab.classList.remove('active');
+      } else {
+        proTab.classList.add('active');
+        stdTab.classList.remove('active');
+      }
+    }
+
+    // 초기 로딩 시 플랜 설정
+    selectPlan(currentPlan);
+
+    function handleSignup(e) {
+      e.preventDefault();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const doctorName = document.getElementById('signupDoctorName').value.trim();
+      const hospitalName = document.getElementById('signupHospitalName').value.trim();
+      const phone = document.getElementById('signupPhone').value.trim();
+
+      const userData = {
+        email,
+        password,
+        doctorName,
+        hospitalName,
+        phone,
+        plan: currentPlan === 'standard' ? 'Standard' : 'Pro',
+        joinedAt: new Date().toISOString()
+      };
+
+      // 브라우저 로컬스토리지에 회원 정보 및 로그인 세션 저장
+      localStorage.setItem('todak_user_' + email, JSON.stringify(userData));
+      localStorage.setItem('todak_current_user', JSON.stringify(userData));
+
+      alert(`🎉 환영합니다, ${hospitalName} ${doctorName}님!\n회원가입이 완료되어 진료실 프로그램으로 즉시 입장합니다.`);
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+
+</html>

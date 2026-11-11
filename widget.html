@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>토닥토닥노트 - 진료실 퀵 위젯</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif; }
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 14px;
+      user-select: none;
+      overflow-x: hidden;
+    }
+    /* 상단 미니 헤더 */
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+    .widget-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 15px;
+      color: #0284c7;
+    }
+    .live-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 3px 7px;
+      border-radius: 6px;
+    }
+
+    /* 환자 입력 바 */
+    .patient-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .input-field {
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: #0284c7; }
+
+    /* 메인 녹음 컨트롤 영역 */
+    .rec-box {
+      background: white;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .rec-box.recording {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+    .mic-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: none;
+      background: #0284c7;
+      color: white;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      transition: transform 0.15s;
+    }
+    .mic-btn:active { transform: scale(0.95); }
+    .mic-btn.active {
+      background: #ef4444;
+      animation: pulse 1.3s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .rec-guide {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+    .shortcut-badge {
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* 실시간 전사 박스 (접이식) */
+    .transcript-box {
+      width: 100%;
+      height: 70px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12.5px;
+      color: #475569;
+      line-height: 1.5;
+      overflow-y: auto;
+      text-align: left;
+      margin-top: 4px;
+      white-space: pre-wrap;
+    }
+
+    /* 로딩 인디케이터 */
+    .loading-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: #f0fdf4;
+      border: 1.5px dashed #86efac;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #bbf7d0;
+      border-top: 3px solid #16a34a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* AI 요약 검토 모달 카드 */
+    .summary-card {
+      display: none;
+      background: white;
+      border: 2px solid #0284c7;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      text-align: left;
+    }
+    .summary-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0369a1;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .summary-content {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .btn-action-row {
+      display: flex;
+      gap: 6px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-send { background: #0284c7; color: white; }
+    .btn-send:hover { background: #0369a1; }
+    .btn-edit { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; flex: 0.45; }
+
+    /* 토스트 메시지 */
+    .toast {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: none;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="widget-header">
+    <div class="widget-brand">
+      <span>🩺 토닥토닥노트</span>
+      <span class="live-badge">진료실 위젯</span>
+    </div>
+    <div style="font-size: 11px; color: #64748b;">
+      <span class="shortcut-badge">F9</span> 녹음 On/Off
+    </div>
+  </div>
+
+  <div class="patient-bar">
+    <input type="text" id="patientName" class="input-field" style="flex: 1.2;" value="김영희 님 (만 32세)" placeholder="환자명">
+    <input type="text" id="patientPhone" class="input-field" style="flex: 1.4;" value="010-1234-5678" placeholder="휴대폰 번호">
+  </div>
+
+  <div class="rec-box" id="recBox">
+    <button class="mic-btn" id="micBtn" onclick="toggleRecording()">🎙️</button>
+    <div class="rec-guide" id="recGuide">환자 진료 시작 시 [F9]를 누르세요</div>
+    
+    <div class="transcript-box" id="transcriptBox">진료실 대화가 여기에 실시간으로 기록됩니다...</div>
+    
+    <button class="btn" style="background:#10b981; color:white; width:100%; margin-top:4px;" onclick="triggerAnalyzeDirectly()">
+      ⚡ 기록된 대화로 AI 요약 생성
+    </button>
+  </div>
+
+  <!-- 로딩 인디케이터 -->
+  <div class="loading-box" id="loadingBox">
+    <div class="spinner"></div>
+    <div style="font-size: 12.5px; font-weight: 700; color: #166534;">AI가 대화를 분석하여 요약 중입니다... (3~5초)</div>
+  </div>
+
+  <!-- AI 검토 및 발송 카드 -->
+  <div class="summary-card" id="summaryCard">
+    <div class="summary-title">
+      <span>📋 AI 진료 요약 검토</span>
+      <span style="font-size: 11px; color: #0284c7;" id="analysisTime"></span>
+    </div>
+
+    <div class="summary-content" id="summaryContent"></div>
+
+    <div class="btn-action-row">
+      <button class="btn btn-send" onclick="sendReport()">📲 환자 카톡 발송 (Enter)</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let isRecording = false;
+    let recognition = null;
+    let fullTranscript = '';
+    let parsedResult = null;
+
+    const micBtn = document.getElementById('micBtn');
+    const recBox = document.getElementById('recBox');
+    const recGuide = document.getElementById('recGuide');
+    const transcriptBox = document.getElementById('transcriptBox');
+    const loadingBox = document.getElementById('loadingBox');
+    const summaryCard = document.getElementById('summaryCard');
+    const summaryContent = document.getElementById('summaryContent');
+    const toast = document.getElementById('toast');
+
+    // 음성 인식 초기화
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'ko-KR';
+
+      recognition.onstart = () => {
+        isRecording = true;
+        micBtn.classList.add('active');
+        recBox.classList.add('recording');
+        recGuide.innerHTML = '🔴 <strong>진료 녹음 중...</strong> (완료 시 F9)';
+      };
+
+      recognition.onresult = (e) => {
+        let interimText = '';
+        for (let i = 0; i < e.results.length; i++) {
+          if (e.results[i].isFinal) fullTranscript += e.results[i][0].transcript + ' ';
+          else interimText += e.results[i][0].transcript;
+        }
+        transcriptBox.innerText = (fullTranscript + interimText).trim();
+      };
+
+      recognition.onend = () => {
+        isRecording = false;
+        micBtn.classList.remove('active');
+        recBox.classList.remove('recording');
+      };
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'F9') { e.preventDefault(); toggleRecording(); }
+      else if (e.key === 'Enter' && summaryCard.style.display === 'block') { e.preventDefault(); sendReport(); }
+    });
+
+    function toggleRecording() {
+      if (!isRecording) {
+        transcriptBox.innerText = '';
+        fullTranscript = '';
+        summaryCard.style.display = 'none';
+        try { recognition.start(); } catch(e){}
+      } else {
+        try { recognition.stop(); } catch(e){}
+        recGuide.innerHTML = '녹음 완료! <strong>AI 분석을 시작합니다... ⏳</strong>';
+        setTimeout(triggerAnalyzeDirectly, 300);
+      }
+    }
+
+    async function triggerAnalyzeDirectly() {
+      let text = transcriptBox.innerText.trim();
+      text = text.replace('진료실 대화가 여기에 실시간으로 기록됩니다...', '').trim();
+
+      if (!text || text.length < 5) {
+        alert("기록된 대화 내용이 없습니다! 마이크를 켜고 말씀하시거나 텍스트를 입력해 주세요.");
+        recGuide.innerText = '환자 진료 시작 시 [F9]를 누르세요';
+        return;
+      }
+
+      const apiKey = localStorage.getItem('openai_api_key') || '';
+      if (!apiKey) {
+        const key = prompt("OpenAI API 키를 입력해 주세요:");
+        if (key) localStorage.setItem('openai_api_key', key.trim());
+        else return;
+      }
+
+      loadingBox.style.display = 'flex';
+      recGuide.innerHTML = '⏳ <strong>AI 리포트 생성 중...</strong>';
+      const startTime = Date.now();
+
+      try {
+        const pName = document.getElementById('patientName').value.trim() || '환자';
+        const res = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey, transcript: text, patientInfo: pName })
+        });
+
+        loadingBox.style.display = 'none';
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || '요약 실패');
+
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        document.getElementById('analysisTime').innerText = `${elapsed}초 소요`;
+        parsedResult = data;
+
+        summaryContent.innerHTML = `
+          • <strong>진료 핵심:</strong> ${data.summary}<br>
+          • <strong>처방/복약:</strong> ${data.medication}<br>
+          • <strong>다음 내원:</strong> <span style="color:#0284c7; font-weight:700;">${data.nextDate}</span> (${data.nextNotice})
+        `;
+
+        summaryCard.style.display = 'block';
+        recGuide.innerHTML = '✅ <strong>요약 완료!</strong> [Enter]를 누르면 카톡 발송됩니다.';
+        showToast('✨ AI 요약이 완료되었습니다!');
+      } catch (err) {
+        loadingBox.style.display = 'none';
+        recGuide.innerText = '요약 생성 실패';
+        alert("요약 중 오류 발생: " + err.message);
+      }
+    }
+
+    function sendReport() {
+      if (!parsedResult) return;
+      const pName = document.getElementById('patientName').value;
+      showToast(`📲 ${pName} 카톡으로 발송되었습니다!`);
+      summaryCard.style.display = 'none';
+      recGuide.innerText = '발송 완료! 다음 환자 진료 시 [F9]를 누르세요.';
+    }
+
+    function showToast(msg) {
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2200);
+    }
+  </script>
+</body>
+</html>
+

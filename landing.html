@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - 의사를 위한 AI 진료 요약 및 환자 안심 케어 솔루션</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* 상단 글로벌 내비게이션 */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 14.5px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #38bdf8;
+    }
+
+    .btn-cta-nav {
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(254, 229, 0, 0.25);
+    }
+
+    .btn-cta-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 229, 0, 0.4);
+    }
+
+    /* 히어로 섹션 */
+    .hero-section {
+      position: relative;
+      background: radial-gradient(circle at 50% 15%, rgba(14, 165, 233, 0.15) 0%, rgba(11, 15, 25, 0) 70%), #0b0f19;
+      padding: 90px 24px 70px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .early-bird-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(14, 165, 233, 0.12);
+      color: #38bdf8;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+    }
+
+    .hero-headline {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1.2px;
+      line-height: 1.35;
+      color: #ffffff;
+      margin-bottom: 22px;
+      max-width: 960px;
+    }
+
+    .hero-headline span {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 18.5px;
+      color: #94a3b8;
+      max-width: 720px;
+      margin-bottom: 40px;
+      line-height: 1.65;
+    }
+
+    .hero-btn-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 54px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-hero-primary {
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 16px 36px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(254, 229, 0, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(254, 229, 0, 0.5);
+    }
+
+    .btn-hero-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px 30px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-hero-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 목업 프리뷰 래퍼 (중앙 로고 유지) */
+    .hero-mockup-wrapper {
+      max-width: 1000px;
+      width: 100%;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .mockup-header-bar {
+      background: #1a2234;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .dot-red {
+      background: #ef4444;
+    }
+
+    .dot-yellow {
+      background: #f59e0b;
+    }
+
+    .dot-green {
+      background: #10b981;
+    }
+
+    .mockup-inner {
+      padding: 50px 24px;
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .mockup-inner img {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* 3대 핵심 혜택 섹션 */
+    .features-section {
+      padding: 110px 24px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      text-align: center;
+      color: #38bdf8;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .section-heading {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.8px;
+      margin-bottom: 56px;
+      line-height: 1.35;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .feature-box {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 38px 30px;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 35px -10px rgba(14, 165, 233, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: #172138;
+    }
+
+    .feature-icon {
+      font-size: 34px;
+      width: 62px;
+      height: 62px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .feature-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .feature-desc {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.65;
+    }
+
+    /* 요금제 섹션 */
+    .pricing-section {
+      background: #0d121f;
+      padding: 110px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 36px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: #131b2e;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 44px 38px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      background: #152037;
+      border: 2px solid #0284c7;
+      box-shadow: 0 25px 40px -10px rgba(2, 132, 199, 0.25);
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: -15px;
+      right: 32px;
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+
+    .pricing-plan-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .pricing-plan-desc {
+      font-size: 14.5px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      min-height: 42px;
+    }
+
+    .pricing-price-box {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .origin-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ef4444;
+      text-decoration: line-through;
+      margin-bottom: 6px;
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.12);
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+
+    .discount-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .price-num {
+      font-size: 42px;
+      font-weight: 900;
+      color: #38bdf8;
+      letter-spacing: -1px;
+    }
+
+    .pricing-card.featured .price-num {
+      color: #fee500;
+    }
+
+    .price-period {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-bottom: 34px;
+      flex: 1;
+    }
+
+    .feature-list li {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      color: #38bdf8;
+      font-weight: 900;
+    }
+
+    .pricing-card.featured .feature-list li::before {
+      color: #fee500;
+    }
+
+    /* 원장님 무료 신청 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      max-width: 500px;
+      width: 100%;
+      padding: 40px 36px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #64748b;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #f1f5f9;
+    }
+
+    .modal-title {
+      font-size: 23px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 26px;
+      line-height: 1.55;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15.5px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 229, 0, 0.35);
+    }
+
+    /* 푸터 */
+    footer {
+      background: #070a12;
+      color: #64748b;
+      padding: 56px 24px;
+      font-size: 13px;
+      line-height: 1.85;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    footer strong {
+      color: #cbd5e1;
+    }
+
+    /* 반응형 모바일 최적화 */
+    @media (max-width: 900px) {
+      nav {
+        padding: 14px 20px;
+      }
+
+      .nav-links a {
+        display: none;
+      }
+
+      .hero-headline {
+        font-size: 32px;
+      }
+
+      .hero-sub {
+        font-size: 16px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-mockup-wrapper {
+        border-radius: 14px;
+      }
+
+      .modal-content {
+        padding: 30px 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 상단 내비게이션 -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
+      <span>토닥토닥노트</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">주요 기능</a>
+      <a href="#pricing">얼리버드 요금제</a>
+      <a href="login.html" style="color: #cbd5e1;">🔑 로그인</a>
+      <a href="signup.html" class="btn-cta-nav" style="text-decoration: none; color: #111827 !important; font-weight: 900;">얼리버드 가입</a>
+    </div>
+  </nav>
+
+  <!-- 히어로 섹션 -->
+  <section class="hero-section">
+    <div class="early-bird-tag">
+      ✨ 선착순 50명 한정 · 얼리버드 평생 할인가 혜택 제공
+    </div>
+    <h1 class="hero-headline">
+      환자가 집에 가서도 감동하는 <span>AI 진료 리포트</span>,<br>
+      우리 동네 1등 병원의 재방문율 비결입니다
+    </h1>
+    <p class="hero-sub" style="margin-bottom: 24px;">
+      진료 중 단축키 <strong>[F9]</strong>만 누르면 끝!<br>
+      원장님의 진료 대화를 AI가 알기 쉬운 맞춤 리포트로 요약하여 환자 카카오톡으로 자동 발송합니다.
+    </p>
+
+    <!-- 대시보드 및 프로그램 프리뷰 목업 (중앙 로고 유지 - 배포 후 캡처 이미지로 교체 가능) -->
+    <div class="hero-mockup-wrapper">
+      <div class="mockup-header-bar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span style="font-size: 12px; color: #94a3b8; margin-left: 8px;">todaknote.com - 진료실 프로그램 & 원장님 대시보드</span>
+      </div>
+      <div class="mockup-inner">
+        <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
+        <div style="font-size: 14.5px; color: #cbd5e1; font-weight: 700;">의사와 환자를 잇는 가장 따뜻한 AI 케어 솔루션</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3대 핵심 혜택 섹션 -->
+  <section class="features-section" id="features">
+    <div class="section-eyebrow">WHY TODAKNOTE?</div>
+    <h2 class="section-heading">진료 시간을 뺏지 않고 감동 리포트와 마케팅을 한번에!</h2>
+
+    <div class="feature-grid">
+      <!-- 1 -->
+      <div class="feature-box">
+        <div class="feature-icon">🎙️</div>
+        <h3 class="feature-title">단축키 [F9] 하나로 끝</h3>
+        <p class="feature-desc">
+          진료 시작과 끝에 F9만 누르면 AI가 음성을 받아적고 환자 눈높이로 알기 쉽게 요약/정리합니다.(확인 후 카톡 발송)
+        </p>
+      </div>
+      <!-- 2 -->
+      <div class="feature-box">
+        <div class="feature-icon">📱</div>
+        <h3 class="feature-title">카톡으로 받는 감동 리포트</h3>
+        <p class="feature-desc">
+          환자와 보호자가 스마트폰에서 진료 내용, 처방약 복용법, 재방문 일자를 큰 글씨로 다시 확인할 수 있어 환자 만족도가 매우 높습니다.
+        </p>
+      </div>
+      <!-- 3 -->
+      <div class="feature-box">
+        <div class="feature-icon">⭐</div>
+        <h3 class="feature-title">네이버 영수증 리뷰 폭발</h3>
+        <p class="feature-desc">
+          리포트 하단의 감사 리뷰 유도 버튼을 통해, 위험한 가짜 리뷰가 아닌 실제 우리 병원에서 진료를 받은 환자의 찐 네이버 플레이스 별점 5개 리뷰가 등록됩니다.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 요금제 섹션 -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-eyebrow" style="text-align: center;">PRICING PLAN</div>
+    <h2 class="section-heading" style="margin-bottom: 12px;">합리적인 비용으로 병원 가치를 극대화하세요</h2>
+    <p style="text-align: center; color: #38bdf8; font-size: 19px; font-weight: 800; margin-bottom: 48px; letter-spacing: -0.5px; text-shadow: 0 0 16px rgba(56, 189, 248, 0.4);">
+      🚨 얼리버드 50명 마감 시 정가로 인상되오니, 특가 표기 중 빠른 신청 바랍니다.
+    </p>
+
+    <div class="pricing-grid">
+      <!-- 기본형 -->
+      <div class="pricing-card">
+        <h3 class="pricing-plan-title">기본형 (Standard)</h3>
+        <p class="pricing-plan-desc">꼭 필요한 핵심 기능으로 환자 재방문율을 높이는 실속 플랜</p>
+        <div class="pricing-price-box">
+          <span class="origin-price">정가 월 149,000원</span>
+          <div class="discount-price-row">
+            <span class="price-num">89,000</span>
+            <span class="price-period">원 / 월 (얼리버드 한정)</span>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
+          <li>환자 눈높이 쉬운 맞춤 건강 팁 생성</li>
+          <li>가족에게 리포트 공유 가능 (바이럴 홍보)</li>
+          <li>네이버 영수증 리뷰 원클릭 연동</li>
+        </ul>
+        <a href="signup.html?plan=standard" class="btn-cta-nav" style="text-align: center; text-decoration: none; padding: 13px; color: #111827 !important; font-weight: 800; display: block; border-radius: 10px;">
+          기본형 얼리버드 선택하기
+        </a>
+      </div>
+
+      <!-- 고급형 -->
+      <div class="pricing-card featured">
+        <div class="featured-badge">가장 인기 ⭐</div>
+        <h3 class="pricing-plan-title">고급형 (Pro)</h3>
+        <p class="pricing-plan-desc">우리 병원 전용 CI 로고와 경영 데이터까지 챙기는 프리미엄 플랜</p>
+        <div class="pricing-price-box">
+          <span class="origin-price">정가 월 199,000원</span>
+          <div class="discount-price-row">
+            <span class="price-num">139,000</span>
+            <span class="price-period">원 / 월 (얼리버드 한정)</span>
+          </div>
+        </div>
+        <ul class="feature-list">
+          <li><strong>기본형의 모든 기능 100% 포함</strong></li>
+          <li><strong>우리 병원 전용 CI 로고 탑재 (자체 시스템 브랜딩 효과)</strong></li>
+          <li><strong>원장님 전용 환자 관리 & 재방문 경영 통계 대시보드</strong></li>
+          <li><strong>재방문일 카카오톡 자동 안내 (노쇼 방지)</strong></li>
+        </ul>
+        <a href="signup.html?plan=pro" class="btn-cta-nav" style="text-align: center; text-decoration: none; padding: 13px; background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: white !important; font-weight: 800; display: block; border-radius: 10px;">
+          고급형 Pro 얼리버드 선택하기
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 원장님 체험 신청 모달 -->
+  <div class="modal-overlay" id="applyModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeApplyModal()">✕</button>
+      <h3 class="modal-title">🚀 얼리버드 50명 한정 신청</h3>
+      <p class="modal-sub">별도의 프로그램 설치 없이 브라우저에서 바로 시작하실 수 있습니다. 정보를 입력하시면 즉시 이용 링크를 안내해 드립니다.</p>
+
+      <form onsubmit="handleApplySubmit(event)">
+        <div class="form-group">
+          <label class="form-label">원장님 성함</label>
+          <input type="text" id="applyDoctorName" class="form-input" placeholder="예: 박준혁 원장" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">병원명</label>
+          <input type="text" id="applyHospitalName" class="form-input" placeholder="예: 연세바른내과의원" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처 (휴대폰)</label>
+          <input type="text" id="applyPhone" class="form-input" placeholder="010-0000-0000" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이메일 주소</label>
+          <input type="email" id="applyEmail" class="form-input" placeholder="doctor@hospital.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">신청 플랜</label>
+          <select id="applyPlan" class="form-input">
+            <option value="고급형 Pro (얼리버드 139,000원) - 추천">고급형 Pro (병원 CI 로고 + 대시보드 포함 / 월 139,000원)</option>
+            <option value="기본형 Standard (얼리버드 89,000원)">기본형 Standard (월 89,000원)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-submit">
+          얼리버드 혜택 신청 완료하기
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer>
+    <p>
+      <strong>상호명:</strong> 그래비템 | <strong>서비스명:</strong> 토닥토닥노트 | <strong>대표자:</strong> 이제권<br>
+      <strong>사업자등록번호:</strong> 확인 완료 | <strong>고객지원:</strong> 010-9344-2378 | <strong>이메일:</strong>
+      hayabusak@hotmail.com<br>
+      © 2026 GRAVITEM. All rights reserved.
+    </p>
+  </footer>
+
+  <script>
+    function openApplyModal(plan) {
+      if (plan) document.getElementById('applyPlan').value = plan;
+      document.getElementById('applyModal').style.display = 'flex';
+    }
+    function closeApplyModal() {
+      document.getElementById('applyModal').style.display = 'none';
+    }
+    function handleApplySubmit(e) {
+      e.preventDefault();
+      const doc = document.getElementById('applyDoctorName').value;
+      const hosp = document.getElementById('applyHospitalName').value;
+      const phone = document.getElementById('applyPhone').value;
+      const email = document.getElementById('applyEmail').value;
+      const plan = document.getElementById('applyPlan').value;
+
+      alert(`🎉 [얼리버드 신청 완료]\n${hosp} ${doc}님, 얼리버드 50명 한정 신청이 정상 접수되었습니다!\n입력하신 연락처(${phone}) 및 이메일(${email})로 서비스 이용 링크를 보내드립니다.`);
+      closeApplyModal();
+    }
+  </script>
+</body>
+
+</html>
