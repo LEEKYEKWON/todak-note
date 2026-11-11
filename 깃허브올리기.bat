@@ -13,14 +13,19 @@ echo [Step 2] Remote Setup...
 git remote remove origin 2>nul
 git remote add origin https://github.com/LEEKYEKWON/todak-note.git
 
-echo [Step 3] Adding files (Including images and all html)...
+echo [Step 3] Force Adding all files (HTML, CSS, JS, JPG)...
+git add -f *.html
+git add -f *.jpg
+git add -f *.json
+git add -f *.js
+git add -f api/*
 git add -A
 
 echo [Step 4] Committing...
-git commit -m "Fix routing, auth pages and logo image"
+git commit -m "Deploy 100% static files with working links and logo"
 
 echo [Step 5] Pushing to GitHub...
-git push -u origin main
+git push -u origin main --force
 
 echo.
 echo ==============================================
