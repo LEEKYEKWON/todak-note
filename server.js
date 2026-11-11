@@ -301,7 +301,7 @@ ${reportUrl || 'http://localhost:3000'}`;
   }
 
   // 3. 정적 웹페이지 서빙
-  let reqPath = req.url === '/' ? 'index.html' : req.url.split('?')[0];
+  let reqPath = req.url === '/' ? 'landing.html' : req.url.split('?')[0];
 
   // 로고 이미지 요청 가로채기 (대표님이 미리캔버스에서 사이즈 키워주신 원본 이미지 제공)
   if (reqPath.includes('open_book_heart_clean_1794109984125.jpg') || reqPath.includes('logo.jpg')) {
@@ -319,8 +319,18 @@ ${reportUrl || 'http://localhost:3000'}`;
   }
 
   let filePath = path.join(__dirname, reqPath);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(process.cwd(), reqPath);
+  }
   fs.readFile(filePath, (err, content) => {
     if (err) {
+      // 루트 요청이거나 파일이 없을 경우 기본적으로 landing.html을 제공
+      const fallbackPath = path.join(__dirname, 'landing.html');
+      if (fs.existsSync(fallbackPath)) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        fs.createReadStream(fallbackPath).pipe(res);
+        return;
+      }
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('파일을 찾을 수 없습니다.');
     } else {
