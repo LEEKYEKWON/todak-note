@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { to, text, patientName, reportUrl } = req.body || {};
+    const { to, text, patientName, reportUrl, hospitalName, summary, medication, nextDate } = req.body || {};
     const recipientPhone = (to || '').replace(/[^0-9]/g, '');
 
     if (!recipientPhone) {
@@ -38,13 +38,28 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const host = req.headers.host || 'localhost:3000';
+    const host = req.headers.host || 'todak-note.vercel.app';
     const protocol = req.headers['x-forwarded-proto'] || 'https';
-    const fullReportUrl = reportUrl || `${protocol}://${host}/index.html`;
+    const finalReportUrl = reportUrl || `${protocol}://${host}/report.html`;
 
-    const smsMessageText = text || `[토닥토닥노트] 안녕하세요 ${patientName || '환자'}님, 오늘 진료받으시느라 수고 많으셨습니다.\n\n원장님이 챙겨드리는 맞춤 진료 요약과 복약 안내 리포트가 도착했습니다.\n\n▶ 안심 리포트 보기:\n${fullReportUrl}`;
+    const currentHosp = hospitalName || '연세바른내과의원';
+    const currentPatient = patientName || '환자';
 
-    const isLms = Buffer.byteLength(smsMessageText, 'euc-kr') > 90 || smsMessageText.length > 70;
+    let msgText = text;
+    if (!msgText) {
+      msgText = `[${currentHosp}]
+${currentPatient}님, 안심 진료노트가 도착했습니다.
+
+▶ 진료요약: ${summary ? summary.slice(0, 70) + '...' : '정상 소견'}
+▶ 처방복약: ${medication ? medication.slice(0, 50) : '처방전 참고'}
+▶ 다음내원: ${nextDate || '필요시 내원'}
+
+아래 링크를 누르시면 큰 글씨 리포트와 일상 건강수칙을 확인하실 수 있습니다.
+👉 진료 리포트 보기:
+${finalReportUrl}`;
+    }
+
+    const isLms = Buffer.byteLength(msgText, 'euc-kr') > 90 || msgText.length > 70;
     const msgType = isLms ? 'LMS' : 'SMS';
 
     const payload = JSON.stringify({
@@ -52,9 +67,9 @@ module.exports = async (req, res) => {
         {
           to: recipientPhone,
           from: SENDER_PHONE,
-          text: smsMessageText,
+          text: msgText,
           type: msgType,
-          subject: isLms ? `[토닥토닥노트] ${patientName || '환자'}님 맞춤 진료 리포트` : undefined
+          subject: isLms ? `[${currentHosp}] ${currentPatient}님 안심 진료 리포트` : undefined
         }
       ]
     });
@@ -95,4 +110,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-

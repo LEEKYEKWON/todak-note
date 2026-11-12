@@ -172,7 +172,7 @@
           };
           localStorage.setItem('todak_current_user', JSON.stringify(defaultUser));
           alert(`🎉 환영합니다, ${defaultUser.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
-          window.location.href = 'index.html';
+          window.location.href = 'clinic.html';
           return;
         }
         alert('등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.');
@@ -188,7 +188,7 @@
 
       localStorage.setItem('todak_current_user', JSON.stringify(user));
       alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
-      window.location.href = 'index.html';
+      window.location.href = 'clinic.html';
     }
   </script>
 </body>

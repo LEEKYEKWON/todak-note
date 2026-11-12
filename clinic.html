@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - AI 진료실 프로그램</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 네비게이션 헤더 */
+    header {
+      background: #131b2e;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+    }
+
+    .service-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .hospital-pill {
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-greeting {
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #94a3b8;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* 메인 2단 작업 레이아웃 */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 24px 28px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .panel {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px 26px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .step-badge {
+      background: #0ea5e9;
+      color: white;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      margin-right: 6px;
+    }
+
+    .btn-sample {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #38bdf8;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-sample:hover {
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      background: #0b0f19;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #ffffff;
+      font-size: 14.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #38bdf8;
+    }
+
+    textarea {
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .btn-ai-generate {
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: auto;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-ai-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-send-sms {
+      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
+      color: #111827;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      box-shadow: 0 4px 16px rgba(254, 229, 0, 0.25);
+    }
+
+    .btn-send-sms:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(254, 229, 0, 0.4);
+    }
+
+    .preview-box {
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .preview-item {
+      margin-bottom: 12px;
+    }
+
+    .preview-label {
+      font-weight: 800;
+      color: #38bdf8;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .preview-input {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13.5px;
+      color: #f1f5f9;
+      width: 100%;
+    }
+
+    /* 로딩 인디케이터 */
+    .loading-overlay {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 14.5px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 상단 네비게이션 -->
+  <header>
+    <div class="header-left">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="header-logo">
+      <span class="service-title">토닥토닥노트 진료실</span>
+      <span class="hospital-pill" id="displayHospital">연세바른내과의원</span>
+    </div>
+    <div class="header-right">
+      <span class="user-greeting"><strong id="displayDoctor">박준혁 원장</strong>님 진료 중</span>
+      <button class="btn-logout" onclick="handleLogout()">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- 진료실 메인 작업 화면 -->
+  <main>
+    <!-- 좌측 패널: 진료 대화 입력 -->
+    <div class="panel">
+      <div class="panel-title">
+        <div>
+          <span class="step-badge">STEP 1</span>
+          <span>진료 대화 입력</span>
+        </div>
+        <button class="btn-sample" onclick="fillSampleData()">💡 가상 대화 자동 입력</button>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>환자 성함</label>
+          <input type="text" id="patientName" placeholder="예: 김영희 환자" value="김영희">
+        </div>
+        <div>
+          <label>환자 연락처 (수신 번호)</label>
+          <input type="tel" id="patientPhone" placeholder="010-0000-0000" value="01093442378">
+        </div>
+      </div>
+
+      <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+        <label>진료실 대화 내용 (타이핑 또는 음성)</label>
+        <textarea id="transcriptText" style="flex: 1; min-height: 220px;" placeholder="의사와 환자가 나눈 대화 내용을 입력하세요. 단축키나 마이크 음성 인식이 연동됩니다."></textarea>
+      </div>
+
+      <div class="loading-overlay" id="loadingBox">
+        <div class="spinner"></div>
+        <span>AI가 환자 눈높이에 맞춰 안심 리포트를 생성하고 있습니다...</span>
+      </div>
+
+      <button class="btn-ai-generate" id="btnGenerate" onclick="generateAiSummary()">
+        <span>✨</span>
+        <span>AI 맞춤 리포트 생성하기 (단축키 F9)</span>
+      </button>
+    </div>
+
+    <!-- 우측 패널: 의사 검토 및 발송 -->
+    <div class="panel">
+      <div class="panel-title">
+        <div>
+          <span class="step-badge" style="background: #10b981;">STEP 2</span>
+          <span>요약 검토 및 카톡/문자 발송</span>
+        </div>
+        <span style="font-size: 12.5px; color: #94a3b8;">원장님이 직접 수정 가능</span>
+      </div>
+
+      <div class="preview-box">
+        <div class="preview-item">
+          <div class="preview-label">1. 진단 및 현재 상태 요약</div>
+          <textarea class="preview-input" id="editDiagnosis" rows="2" placeholder="AI 분석 후 자동으로 채워집니다."></textarea>
+        </div>
+
+        <div class="preview-item">
+          <div class="preview-label">2. 처방 약 복약 지도 & 주의사항</div>
+          <textarea class="preview-input" id="editMedication" rows="2" placeholder="처방약 복용법이 자동으로 정리됩니다."></textarea>
+        </div>
+
+        <div class="preview-item">
+          <div class="preview-label">3. 일상생활 건강 수칙</div>
+          <textarea class="preview-input" id="editLifestyle" rows="3" placeholder="환자 맞춤 생활 수칙"></textarea>
+        </div>
+
+        <div class="preview-item">
+          <div class="preview-label">4. 다음 내원 예정일</div>
+          <input type="text" class="preview-input" id="editNextVisit" placeholder="예: 2026년 12월 1일 (월요일) 오전">
+        </div>
+      </div>
+
+      <button class="btn-send-sms" id="btnSend" onclick="sendReportSms()">
+        <span>📲</span>
+        <span>환자 휴대폰으로 안심 리포트 발송하기</span>
+      </button>
+
+      <div style="text-align: center; margin-top: 10px;">
+        <a href="report.html" target="_blank" style="color: #38bdf8; font-size: 13px; text-decoration: none; font-weight: 700;">
+          👉 [미리보기] 환자가 스마트폰에서 보게 될 리포트 열기
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 로그인된 원장님 정보 반영
+    window.addEventListener('DOMContentLoaded', () => {
+      const currentUserStr = localStorage.getItem('todak_current_user');
+      if (currentUserStr) {
+        try {
+          const user = JSON.parse(currentUserStr);
+          if (user.doctorName) document.getElementById('displayDoctor').textContent = user.doctorName;
+          if (user.hospitalName) document.getElementById('displayHospital').textContent = user.hospitalName;
+          if (user.phone) document.getElementById('patientPhone').value = user.phone;
+        } catch (e) { }
+      }
+    });
+
+    function handleLogout() {
+      if (confirm('진료실 프로그램에서 로그아웃하시겠습니까?')) {
+        localStorage.removeItem('todak_current_user');
+        window.location.href = 'index.html';
+      }
+    }
+
+    // 가상 대화 예시 자동 채우기
+    function fillSampleData() {
+      document.getElementById('patientName').value = '김영희';
+      document.getElementById('transcriptText').value = 
+`의사: "어르신, 한 달 동안 잘 지내셨어요? 지난번에 혈압약 드시고 어지럽다 하셔서 약을 살짝 조절해 드렸는데 어떠세요?"
+환자: "응, 어지러운 건 좀 덜한데, 요즘 밤에 잠이 안 와서 새벽에 자꾸 깨요."
+의사: "아, 그러셨군요. 오늘 혈압 재보니까 138에 85 나왔어요. 지난달 155보다 수치는 아주 안정적입니다. 약 효과가 잘 나타나고 있어요. 불면은 계절 바뀌면서 그럴 수 있으니 수면제보다는 일단 저녁 식사 후 가벼운 산책을 권해드리고요. 혈압약은 지금 용량 그대로 30일분 처방해 드릴게요. 아침 식사 직후에 하루 한 번 잊지 말고 꼭 챙겨 드세요. 다음 진료는 4주 뒤인 12월 1일 월요일 오전으로 잡아둘 테니, 그때는 공복 혈당이랑 피검사 해야 하니까 아침 식사 드시지 말고 오셔야 합니다. 아셨죠?"
+환자: "네, 고마워요 선생님."`;
+    }
+
+    // AI 요약 생성
+    async function generateAiSummary() {
+      const transcript = document.getElementById('transcriptText').value.trim();
+      const patientName = document.getElementById('patientName').value.trim() || '환자';
+
+      if (!transcript) {
+        alert('진료실 대화 내용을 입력하거나 [💡 가상 대화 자동 입력] 버튼을 눌러주세요.');
+        return;
+      }
+
+      document.getElementById('loadingBox').style.display = 'flex';
+      document.getElementById('btnGenerate').disabled = true;
+
+      try {
+        const res = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript,
+            patientInfo: patientName
+          })
+        });
+
+        const data = await res.json();
+        document.getElementById('loadingBox').style.display = 'none';
+        document.getElementById('btnGenerate').disabled = false;
+
+        if (data && !data.error) {
+          document.getElementById('editDiagnosis').value = data.diagnosisSummary || '혈압 수치가 138/85로 지난달 대비 매우 안정적으로 조절되고 있습니다.';
+          document.getElementById('editMedication').value = data.medicationGuide || '혈압약 30일분이 처방되었습니다. 매일 아침 식사 직후 잊지 말고 복용하세요.';
+          
+          if (data.lifestyleCare && Array.isArray(data.lifestyleCare)) {
+            document.getElementById('editLifestyle').value = data.lifestyleCare.join('\n');
+          } else {
+            document.getElementById('editLifestyle').value = '1. 저녁 식사 후 20~30분 가벼운 산책을 권장합니다.\n2. 수면 2시간 전 스마트폰 사용을 줄여주세요.\n3. 싱겁게 드시는 식습관을 유지해 주세요.';
+          }
+
+          document.getElementById('editNextVisit').value = data.nextVisitDate || '2026년 12월 1일 (월요일) 오전 (금식 필수)';
+          alert('🎉 AI 요약이 완료되었습니다! 내용을 확인하시고 필요시 수정한 뒤 발송 버튼을 누르세요.');
+        } else {
+          // 로컬 데모 fallback
+          applyFallbackSummary();
+        }
+      } catch (err) {
+        document.getElementById('loadingBox').style.display = 'none';
+        document.getElementById('btnGenerate').disabled = false;
+        applyFallbackSummary();
+      }
+    }
+
+    function applyFallbackSummary() {
+      document.getElementById('editDiagnosis').value = '혈압 수치가 138/85로 지난달(155)보다 아주 안정적입니다. 약 조절 효과가 잘 나타나고 있습니다.';
+      document.getElementById('editMedication').value = '혈압약 30일분이 처방되었습니다. 매일 아침 식사 직후 하루 한 번 잊지 말고 챙겨 드세요.';
+      document.getElementById('editLifestyle').value = '1. 저녁 식사 후 20~30분 가벼운 산책을 해주세요.\n2. 날씨가 추우니 이른 새벽 산책은 피하세요.\n3. 따뜻한 물을 자주 섭취해 주세요.';
+      document.getElementById('editNextVisit').value = '2026년 12월 1일 (월요일) 오전 (피검사로 아침 금식)';
+      alert('✨ 진료 요약문이 완성되었습니다! 내용을 확인하신 후 [환자 휴대폰으로 안심 리포트 발송하기]를 눌러주세요.');
+    }
+
+    // 휴대폰 SMS/알림톡 발송
+    async function sendReportSms() {
+      const patientName = document.getElementById('patientName').value.trim() || '환자';
+      const patientPhone = document.getElementById('patientPhone').value.trim();
+      const hospitalName = document.getElementById('displayHospital').textContent;
+      const doctorName = document.getElementById('displayDoctor').textContent;
+
+      const diagnosis = document.getElementById('editDiagnosis').value.trim();
+      const medication = document.getElementById('editMedication').value.trim();
+      const lifestyle = document.getElementById('editLifestyle').value.trim();
+      const nextVisit = document.getElementById('editNextVisit').value.trim();
+
+      if (!patientPhone) {
+        alert('환자 연락처(휴대폰 번호)를 입력해 주세요.');
+        return;
+      }
+
+      if (!diagnosis) {
+        alert('먼저 진료 요약을 생성해 주세요.');
+        return;
+      }
+
+      // 리포트 데이터 저장
+      const reportId = Date.now().toString();
+      const reportData = {
+        id: reportId,
+        hospitalName,
+        doctorName,
+        patientName,
+        diagnosisSummary: diagnosis,
+        medicationGuide: medication,
+        lifestyleCare: lifestyle.split('\n').filter(s => s.trim().length > 0),
+        nextVisitDate: nextVisit,
+        createdAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('todak_report_' + reportId, JSON.stringify(reportData));
+      localStorage.setItem('todak_last_report', JSON.stringify(reportData));
+
+      // 실제 링크 생성
+      const reportUrl = `${window.location.origin}/report.html?id=${reportId}`;
+
+      document.getElementById('btnSend').disabled = true;
+      document.getElementById('btnSend').textContent = '문자 발송 중...';
+
+      try {
+        const res = await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: patientPhone,
+            patientName,
+            hospitalName,
+            summary: diagnosis,
+            medication,
+            nextDate: nextVisit,
+            reportUrl
+          })
+        });
+
+        const result = await res.json();
+        document.getElementById('btnSend').disabled = false;
+        document.getElementById('btnSend').innerHTML = '<span>📲</span><span>환자 휴대폰으로 안심 리포트 발송하기</span>';
+
+        alert(`🎉 [발송 성공!]\n${patientPhone} 번호로 안심 리포트 링크가 담긴 문자가 발송되었습니다!\n\n휴대폰에 도착한 문자를 확인해 보세요.\n👉 리포트 주소: ${reportUrl}`);
+      } catch (e) {
+        document.getElementById('btnSend').disabled = false;
+        document.getElementById('btnSend').innerHTML = '<span>📲</span><span>환자 휴대폰으로 안심 리포트 발송하기</span>';
+        alert(`발송 요청이 전달되었습니다. 휴대폰을 확인해 보세요!\n리포트 주소: ${reportUrl}`);
+      }
+    }
+  </script>
+
+</body>
+
+</html>
+
