@@ -256,15 +256,15 @@
     <!-- 상단 병원 정보 -->
     <header class="report-header">
       <div class="badge-care">🏥 1:1 맞춤 안심 케어</div>
-      <h1 class="hospital-title" id="hospName">연세바른내과의원</h1>
-      <div class="doctor-sub"><span id="docName">박준혁 원장</span>이 전해드리는 진료 리포트</div>
+      <h1 class="hospital-title" id="hospName">토닥토닥 안심진료</h1>
+      <div class="doctor-sub"><span id="docName">주치의 원장</span>이 전해드리는 진료 리포트</div>
     </header>
 
     <!-- 환자 안내 문구 -->
     <div class="patient-greet-box">
       <div class="patient-name-badge">
         <span>👤</span>
-        <span id="patientNameTitle">홍길동 환자님</span>
+        <span id="patientNameTitle">환자님</span>
       </div>
       <p class="greet-text" id="greetDesc">
         오늘 진료받으시느라 수고 많으셨습니다. 빠른 쾌유를 위해 진료실에서 나누었던 중요한 설명과 복약 주의사항을 정리해 드립니다.
@@ -280,7 +280,7 @@
           <span>진단 및 현재 건강 상태</span>
         </div>
         <div class="section-content" id="diagSummary">
-          혈압 수치가 지난달에 비해 안정적으로 조절되고 있습니다. 계절 변화로 인한 가벼운 피로 증상이 있으나 전반적인 경과는 매우 양호합니다.
+          진료 리포트를 안전하게 불러오는 중입니다... ⏳
         </div>
       </div>
 
@@ -291,7 +291,7 @@
           <span>처방 약 복용 방법 & 주의사항</span>
         </div>
         <div class="section-content" id="medGuide">
-          혈압약 30일분이 처방되었습니다. 매일 아침 식사 직후 잊지 말고 규칙적으로 복용해 주세요. 어지럼증이 느껴지시면 천천히 일어나세요.
+          처방전 및 복약 지침을 불러오는 중입니다...
         </div>
       </div>
 
@@ -302,19 +302,17 @@
           <span>일상생활 건강 수칙</span>
         </div>
         <ul class="bullet-list" id="lifeCareList">
-          <li>하루 1.5L 이상 미온수를 자주 섭취해 주세요.</li>
-          <li>저녁 식사 후 20~30분 가벼운 산책을 권장합니다.</li>
-          <li>음식 간은 싱겁게 유지하시고 짠 국물 섭취는 줄여주세요.</li>
+          <li>충분한 수분 섭취와 안정을 취하세요.</li>
+          <li>처방된 약을 식후에 규칙적으로 복용하세요.</li>
         </ul>
       </div>
 
       <!-- 4. 다음 내원일 배너 -->
       <div class="next-visit-card">
         <div class="next-visit-title">📅 다음 정기 내원 예정일</div>
-        <div class="next-visit-date" id="nextDateText">2026년 12월 1일 (월요일) 오전</div>
+        <div class="next-visit-date" id="nextDateText">내원 일정 확인 중</div>
         <div class="next-visit-desc" id="nextDateDesc">
-          ※ 혈액 검사가 예정되어 있으니 전날 자정부터 금식 후 내원해 주세요.<br>
-          (방문 전날 잊지 않으시도록 카카오톡으로 다시 알려드립니다)
+          ※ 자세한 일정은 담당 의료진의 안내를 참고해 주세요.
         </div>
       </div>
 
@@ -344,13 +342,39 @@
     // URL 파라미터 또는 서버/localStorage에서 진료 데이터 불러오기
     window.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
+      const cParam = urlParams.get('c');
       const reportId = urlParams.get('id');
       const dParam = urlParams.get('d') || urlParams.get('data');
 
       let data = null;
 
-      // 1. URL에 인코딩된 데이터가 있으면 우선 복원
-      if (dParam) {
+      // 1. 🌟 초경량 컴팩트 토큰(?c=...) 우선 복원 (서버리스/DB 없이도 100% 즉시 렌더링!)
+      if (cParam) {
+        try {
+          let base64 = cParam.replace(/-/g, '+').replace(/_/g, '/');
+          while (base64.length % 4) base64 += '=';
+          const binStr = atob(base64);
+          const bytes = new Uint8Array(binStr.length);
+          for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+          const jsonStr = new TextDecoder().decode(bytes);
+          const arr = JSON.parse(jsonStr);
+          data = {
+            hospitalName: arr[0] || '토닥토닥 안심진료',
+            patientName: arr[1] || '환자',
+            diagnosisSummary: arr[2] || '',
+            medicationGuide: arr[3] || '',
+            nextVisitDate: arr[4] || '',
+            nextVisitNotice: arr[5] || '',
+            lifestyleCare: arr[6] ? (Array.isArray(arr[6]) ? arr[6] : [arr[6]]) : ['처방약 복용 지침을 꼭 확인하세요.'],
+            warmMessage: arr[7] || ''
+          };
+        } catch (e) {
+          console.error("컴팩트 토큰 디코딩 실패:", e);
+        }
+      }
+
+      // 2. URL에 기존 d 파라미터가 있는 경우
+      if (!data && dParam) {
         try {
           data = JSON.parse(decodeURIComponent(escape(atob(dParam))));
         } catch (e) {
@@ -360,7 +384,7 @@
         }
       }
 
-      // 2. 서버 API(/api/report?id=...)에서 가져오기 (문자 링크로 열었을 때)
+      // 3. 서버 API(/api/report?id=...)에서 가져오기
       if (!data && reportId) {
         try {
           const res = await fetch(`/api/report?id=${encodeURIComponent(reportId)}`);
@@ -370,10 +394,10 @@
         } catch (e) { }
       }
 
-      // 3. 짧은 파라미터(h, p, s, m, n)로 넘어온 경우 지원
+      // 4. 짧은 개별 파라미터(h, p, s, m, n)로 넘어온 경우
       if (!data && (urlParams.get('h') || urlParams.get('p') || urlParams.get('s'))) {
         data = {
-          hospitalName: urlParams.get('h') || '연세바른내과의원',
+          hospitalName: urlParams.get('h') || '토닥토닥 안심진료',
           patientName: urlParams.get('p') || '환자',
           diagnosisSummary: urlParams.get('s') || '',
           medicationGuide: urlParams.get('m') || '',
@@ -383,22 +407,18 @@
         };
       }
 
-      // 4. localStorage에서 리포트 ID로 불러오기
+      // 5. 같은 기기/브라우저의 localStorage에서 리포트 ID로 불러오기
       if (!data && reportId && localStorage.getItem('todak_report_' + reportId)) {
         try {
           data = JSON.parse(localStorage.getItem('todak_report_' + reportId));
         } catch (e) { }
       }
 
-      // 5. 데이터가 없으면 가장 최신 리포트 불러오기
-      if (!data && localStorage.getItem('todak_last_report')) {
-        try {
-          data = JSON.parse(localStorage.getItem('todak_last_report'));
-        } catch (e) { }
-      }
-
+      // 6. 데이터가 있으면 렌더링, 없으면 명확한 안내 표시
       if (data) {
         renderReportData(data);
+      } else {
+        document.getElementById('diagSummary').innerHTML = '⚠️ 리포트 데이터를 불러오지 못했습니다.<br>문자로 전송된 링크를 다시 확인해 주세요.';
       }
     });
 

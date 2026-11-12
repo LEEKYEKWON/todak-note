@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const finalReportUrl = reportUrl || `${protocol}://${host}/report.html`;
 
-    const currentHosp = hospitalName || '연세바른내과의원';
+    const currentHosp = hospitalName || '길동이의원';
     const currentPatient = patientName || '환자';
 
     let msgText = text;

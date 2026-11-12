@@ -1267,7 +1267,7 @@
       emptyState.style.display = 'none';
       reportCard.style.display = 'block';
 
-      // 1. 환자 스마트폰 열람용 리포트 데이터 및 단축 URL 생성
+      // 1. 환자 스마트폰 열람용 리포트 데이터 및 초경량 컴팩트 토큰 생성
       const reportId = Date.now().toString();
       const reportData = {
         hospitalName: hospTitle,
@@ -1282,7 +1282,29 @@
       localStorage.setItem('todak_report_' + reportId, JSON.stringify(reportData));
       localStorage.setItem('todak_last_report', JSON.stringify(reportData));
 
-      // 서버(/api/report)에 리포트 저장 -> 문자에 긴 Base64 대신 짧은 단축 URL 전송 가능!
+      // 🌟 서버리스/DB 제한을 100% 극복하는 초경량 URL 토큰 (스마트폰에서 문자 링크 터치 즉시 정확한 내용 렌더링!)
+      function toBase64Url(obj) {
+        const jsonStr = JSON.stringify(obj);
+        const bytes = new TextEncoder().encode(jsonStr);
+        let binStr = '';
+        for (let i = 0; i < bytes.length; i++) binStr += String.fromCharCode(bytes[i]);
+        return btoa(binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      const compactPayload = [
+        hospTitle,
+        pDisplayName,
+        parsedResult.summary,
+        parsedResult.medication,
+        parsedResult.nextDate,
+        parsedResult.nextNotice || '',
+        parsedResult.lifestyleTips || '',
+        parsedResult.warmMessage || ''
+      ];
+      const compactToken = toBase64Url(compactPayload);
+      const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;
+
+      // 서버(/api/report)에도 백업 저장
       try {
         await fetch('/api/report', {
           method: 'POST',
@@ -1292,8 +1314,6 @@
       } catch (cacheErr) {
         console.warn("리포트 서버 캐싱 실패:", cacheErr);
       }
-
-      const reportUrl = `${window.location.origin}/report.html?id=${reportId}`;
 
       // 2. 🌟 솔라피(Solapi) 실제 스마트폰 발송 API 호출
       try {
@@ -1315,8 +1335,8 @@
         const sendRes = await res.json();
         console.log("발송 응답:", sendRes);
 
-        // 팝업 띄우기 전 발송 중 토스트 즉시 숨김
-        toast.style.display = 'none';
+        // 팝업 띄우기 전 발송 중 토스트 즉시 완전 숨김
+        hideToast();
 
         if (!res.ok || sendRes.error) {
           throw new Error(sendRes.error || '문자 발송 실패');
@@ -1332,15 +1352,23 @@
         alert(`🎉 [발송 성공!]\n${pPhone} 번호로 안심 리포트 문자가 발송되었습니다!\n스마트폰을 확인해 보세요.`);
       } catch (e) {
         console.error("발송 실패:", e);
-        toast.style.display = 'none';
+        hideToast();
         alert(`⚠️ 문자 발송 오류 안내\n사유: ${e.message}\n(솔라피 발신번호 등록 여부 및 잔액을 확인해 주세요)`);
       }
     }
 
+    let toastTimeout = null;
     function showToast(msg) {
+      if (toastTimeout) clearTimeout(toastTimeout);
       toast.innerText = msg;
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    function hideToast() {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toast.style.display = 'none';
+      toast.innerText = '';
     }
 
     // 🎨 실시간 컬러 테마 전환 함수
