@@ -196,6 +196,14 @@
     body.theme-black .patient-side .section-title span {
       color: #ffffff !important;
     }
+    .shortcut-guide-text {
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    body.theme-black .shortcut-guide-text {
+      color: #ffffff !important;
+    }
 
     /* 상단 대시보드 링크 버튼 */
     .dashboard-nav-link {
@@ -717,15 +725,16 @@
     <div class="logo-area">
       <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고" class="logo-img">
       <h1 class="logo-title">토닥토닥노트 진료실 프로그램</h1>
+      <div id="headerHospBadgeArea" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;"></div>
     </div>
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
     <div style="display: flex; align-items: center; gap: 10px;">
       <a href="admin.html" id="btnAdminNav" class="dashboard-nav-link" title="원장님 경영 대시보드 열기">
-        📊 병원 경영 대시보드
+        병원 경영 대시보드
       </a>
       <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
-        🚪 로그아웃
+        로그아웃
       </a>
 
       <!-- 세련된 미니멀 컬러 칩 팔레트 (글자 없이 동그란 색상만) -->
@@ -748,7 +757,7 @@
         <div class="section-title">
           <span>🩺 진료 대화 자동 타이핑 및 요약</span>
         </div>
-        <span style="font-size: 13px; color: #64748b;">단축키: <strong>[F9]</strong> 녹음 시작/종료</span>
+        <span class="shortcut-guide-text">단축키: <strong>[F9]</strong> 녹음 시작/종료</span>
       </div>
 
       <div class="card">
@@ -851,7 +860,7 @@
         <div class="phone-screen" id="phoneScreen">
           <div class="report-empty-state" id="emptyState">
             <span style="font-size: 40px;">💬</span>
-            <p><strong>아직 발송된 리포트가 없습니다.</strong><br>좌측에서 AI 요약 후 [카톡 발송]을 누르면 여기에 리포트가 도착합니다.</p>
+            <p><strong>아직 생성된 리포트가 없습니다.</strong><br>좌측에서 AI 요약 후 자동으로 리포트가 생성됩니다.</p>
           </div>
 
           <div class="report-card" id="reportCard">
@@ -905,8 +914,8 @@
               <strong>실제 처방약 복용은 약국 약 봉투의 안내를 절대적으로 우선</strong>해 주시기 바랍니다.
             </div>
 
-            <button class="share-btn" onclick="showToast('👨‍👩‍👧 가족 단톡방으로 공유되었습니다!')">
-              👨‍👩‍👧 자녀/가족에게 이 리포트 공유하기
+            <button class="share-btn" onclick="showToast('가족 단톡방으로 공유되었습니다!')">
+              가족에게 이 리포트 공유하기
             </button>
 
             <!-- 전략 1: 원장님께 감사/응원 남기기 박스 -->
@@ -947,33 +956,76 @@
     const now = new Date();
     document.getElementById('reportTodayDate').innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
 
-    // 로그인 회원 정보 및 플랜에 따른 메뉴 분기 (기본형: 대시보드 숨김, 고급형: 대시보드 표시)
+    // 로그인 회원 정보 및 플랜에 따른 메뉴/헤더 렌더링
     window.addEventListener('DOMContentLoaded', () => {
+      renderHospitalHeader();
+    });
+
+    function renderHospitalHeader() {
       const userStr = localStorage.getItem('todak_current_user');
       const adminBtn = document.getElementById('btnAdminNav');
+      const badgeArea = document.getElementById('headerHospBadgeArea');
 
+      let user = { hospitalName: '길동이의원', doctorName: '홍길동', plan: 'standard' };
       if (userStr) {
         try {
-          const user = JSON.parse(userStr);
-          if (user.hospitalName) {
-            const hospTag = document.querySelector('.hospital-tag');
-            if (hospTag) hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
-          }
-          if (user.phone) {
-            document.getElementById('patientPhone').value = user.phone;
-          }
-
-          // 기본형(Standard) 플랜은 병원 경영 대시보드 숨김, 고급형(Pro)만 노출!
-          if (adminBtn) {
-            if (user.plan && user.plan.toLowerCase() === 'standard') {
-              adminBtn.style.display = 'none';
-            } else {
-              adminBtn.style.display = 'flex';
-            }
-          }
+          const parsed = JSON.parse(userStr);
+          user = Object.assign(user, parsed);
         } catch (e) { }
       }
-    });
+
+      if (user.phone) {
+        const phoneInput = document.getElementById('patientPhone');
+        if (phoneInput && !phoneInput.value) phoneInput.value = user.phone;
+      }
+
+      const hospTag = document.querySelector('.hospital-tag');
+      if (hospTag) {
+        hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+      }
+
+      const isPro = user.plan && user.plan.toLowerCase() === 'pro';
+
+      // 고급형(Pro) 전용 대시보드 버튼 분기
+      if (adminBtn) {
+        adminBtn.style.display = isPro ? 'flex' : 'none';
+      }
+
+      // 좌측 상단 병원명 표시 및 기본형 사용자 업그레이드 버튼
+      if (badgeArea) {
+        if (isPro) {
+          badgeArea.innerHTML = `
+            <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 4px;">
+              🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>
+            </span>
+          `;
+        } else {
+          badgeArea.innerHTML = `
+            <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700;">
+              🏥 ${user.hospitalName} (기본형)
+            </span>
+            <button onclick="handleUpgradePlan()" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1e293b; border: none; padding: 4px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(245,158,11,0.3); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+              ⭐ 고급형으로 업그레이드
+            </button>
+          `;
+        }
+      }
+    }
+
+    function handleUpgradePlan() {
+      const ok = confirm("⭐ [토닥토닥노트 고급형(Pro) 플랜 업그레이드]\n\n고급형으로 업그레이드하시면 제공되는 혜택:\n1. 📊 병원 경영 대시보드 (환자 통계 및 재방문 추이 분석)\n2. 🗓️ 다음 내원일 알림 자동 발송 (노쇼 방지)\n3. ⭐ 네이버 영수증 리뷰 연동 무제한\n\n지금 바로 [고급형 Pro]로 업그레이드하시겠습니까?");
+      if (ok) {
+        let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
+        const userStr = localStorage.getItem('todak_current_user');
+        if (userStr) {
+          try { user = JSON.parse(userStr); } catch (e) { }
+        }
+        user.plan = 'pro';
+        localStorage.setItem('todak_current_user', JSON.stringify(user));
+        renderHospitalHeader();
+        alert("🎉 축하합니다! [고급형 Pro]로 성공적으로 업그레이드되었습니다.\n상단에 '병원 경영 대시보드' 버튼이 활성화되었습니다!");
+      }
+    }
 
     function promptApiKey() {
       const current = localStorage.getItem('openai_api_key') || localStorage.getItem('todak_openai_key') || '';
@@ -1215,7 +1267,7 @@
       emptyState.style.display = 'none';
       reportCard.style.display = 'block';
 
-      // 1. 환자 스마트폰 열람용 리포트 데이터 및 URL 생성
+      // 1. 환자 스마트폰 열람용 리포트 데이터 및 단축 URL 생성
       const reportId = Date.now().toString();
       const reportData = {
         hospitalName: hospTitle,
@@ -1224,19 +1276,24 @@
         medicationGuide: parsedResult.medication,
         nextVisitDate: parsedResult.nextDate,
         nextVisitNotice: parsedResult.nextNotice,
-        lifestyleCare: [parsedResult.lifestyleTips]
+        lifestyleCare: [parsedResult.lifestyleTips],
+        warmMessage: parsedResult.warmMessage
       };
       localStorage.setItem('todak_report_' + reportId, JSON.stringify(reportData));
       localStorage.setItem('todak_last_report', JSON.stringify(reportData));
 
-      let encodedData = '';
+      // 서버(/api/report)에 리포트 저장 -> 문자에 긴 Base64 대신 짧은 단축 URL 전송 가능!
       try {
-        encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(reportData))));
-      } catch (e) { }
+        await fetch('/api/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: reportId, reportData })
+        });
+      } catch (cacheErr) {
+        console.warn("리포트 서버 캐싱 실패:", cacheErr);
+      }
 
-      const reportUrl = encodedData
-        ? `${window.location.origin}/report.html?id=${reportId}&d=${encodedData}`
-        : `${window.location.origin}/report.html?id=${reportId}`;
+      const reportUrl = `${window.location.origin}/report.html?id=${reportId}`;
 
       // 2. 🌟 솔라피(Solapi) 실제 스마트폰 발송 API 호출
       try {
@@ -1258,6 +1315,9 @@
         const sendRes = await res.json();
         console.log("발송 응답:", sendRes);
 
+        // 팝업 띄우기 전 발송 중 토스트 즉시 숨김
+        toast.style.display = 'none';
+
         if (!res.ok || sendRes.error) {
           throw new Error(sendRes.error || '문자 발송 실패');
         }
@@ -1269,11 +1329,10 @@
           return;
         }
 
-        showToast(`🎉 대표님 스마트폰(${pPhone})으로 진짜 메시지가 발송되었습니다!`);
-        alert(`🎉 [발송 성공!]\n${pPhone} 번호로 진짜 안심 리포트 문자가 발송되었습니다!\n스마트폰을 확인해 보세요.\n👉 링크: ${reportUrl}`);
+        alert(`🎉 [발송 성공!]\n${pPhone} 번호로 안심 리포트 문자가 발송되었습니다!\n스마트폰을 확인해 보세요.`);
       } catch (e) {
         console.error("발송 실패:", e);
-        showToast(`발송 중 오류: ${e.message}`);
+        toast.style.display = 'none';
         alert(`⚠️ 문자 발송 오류 안내\n사유: ${e.message}\n(솔라피 발신번호 등록 여부 및 잔액을 확인해 주세요)`);
       }
     }
