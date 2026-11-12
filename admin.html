@@ -367,10 +367,7 @@
 
     <div class="header-nav">
       <span style="font-size: 13px; opacity: 0.85;">⭐ Pro 플랜 사용 중</span>
-      <a href="landing.html" target="_blank" class="nav-btn" style="background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.35);">
-        🌐 서비스 소개(랜딩)
-      </a>
-      <a href="index.html" class="nav-btn">
+      <a href="clinic.html" class="nav-btn">
         🩺 진료실 프로그램으로 이동
       </a>
     </div>
@@ -564,6 +561,21 @@
 
   </div>
 
+  <script>
+    // 로그인된 원장님 병원 정보 연동
+    window.addEventListener('DOMContentLoaded', () => {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          const badge = document.querySelector('.hospital-badge');
+          if (badge && user.hospitalName) {
+            badge.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+          }
+        } catch (e) { }
+      }
+    });
+  </script>
 </body>
 
 </html>
