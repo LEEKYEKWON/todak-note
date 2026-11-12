@@ -19,20 +19,23 @@
     }
 
     body {
-      background-color: #0b0f19;
-      color: #f1f5f9;
+      background-color: #f0f7ff;
+      color: #0f172a;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.25s, color 0.25s;
     }
 
+    /* 상단 헤더 */
     header {
-      background: #131b2e;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 16px 32px;
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      color: white;
+      padding: 14px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background 0.25s, border-color 0.25s;
     }
 
     .logo-area {
@@ -41,33 +44,220 @@
       gap: 12px;
     }
 
-    .logo-badge {
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 800;
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .logo-title {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    /* 테마별 스타일 정의 */
+    /* 1안: 소프트 스카이 */
+    body.theme-sky {
+      background-color: #f0f7ff;
+    }
+
+    body.theme-sky header {
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      border-bottom: 1px solid #0284c7;
+    }
+
+    body.theme-sky .logo-title {
       color: #ffffff;
     }
 
+    /* 2안: 힐링 민트 */
+    body.theme-green {
+      background-color: #f0fdf4;
+    }
+
+    body.theme-green header {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      border-bottom: 1px solid #047857;
+    }
+
+    body.theme-green .logo-title {
+      color: #ffffff;
+    }
+
+    /* 3안: 웜 라벤더 */
+    body.theme-lavender {
+      background-color: #f5f3ff;
+    }
+
+    body.theme-lavender header {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      border-bottom: 1px solid #4338ca;
+    }
+
+    body.theme-lavender .logo-title {
+      color: #ffffff;
+    }
+
+    /* 4안: 웜 옐로우 */
+    body.theme-yellow {
+      background-color: #fffbeb;
+    }
+
+    body.theme-yellow header {
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+      border-bottom: 1px solid #b45309;
+    }
+
+    body.theme-yellow .logo-title {
+      color: #ffffff;
+    }
+
+    /* 5안: 선셋 오렌지 */
+    body.theme-orange {
+      background-color: #fff7ed;
+    }
+
+    body.theme-orange header {
+      background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+      border-bottom: 1px solid #c2410c;
+    }
+
+    body.theme-orange .logo-title {
+      color: #ffffff;
+    }
+
+    /* 6안: 모던 화이트 */
+    body.theme-white {
+      background-color: #f1f5f9;
+    }
+
+    body.theme-white header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    body.theme-white .logo-title {
+      color: #0f172a;
+    }
+
+    /* 7안: 프리미엄 다크 블랙 */
+    body.theme-black {
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+
+    body.theme-black header {
+      background: #020617;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    body.theme-black .logo-title {
+      color: #ffffff;
+    }
+
+    body.theme-black .section-title {
+      color: #f1f5f9;
+    }
+
+    body.theme-black .card {
+      background: #1e293b;
+      border-color: #334155;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    body.theme-black .input-box-wrapper {
+      background: #0f172a;
+      border-color: #334155;
+    }
+
+    body.theme-black .input-label {
+      color: #94a3b8;
+    }
+
+    body.theme-black .input-unit {
+      color: #64748b;
+    }
+
+    body.theme-black .input-field-clean {
+      color: #f8fafc;
+    }
+
+    body.theme-black .mic-control-box {
+      background: #0f172a;
+      border-color: #334155;
+    }
+
+    body.theme-black .record-status-text {
+      color: #e2e8f0;
+    }
+
+    body.theme-black .realtime-live-transcript {
+      background: #020617;
+      border-color: #334155;
+      color: #f1f5f9;
+    }
+
+    /* 미니멀 컬러 칩 팔레트 */
+    .theme-palette-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.22);
+      padding: 6px 14px;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    body.theme-white .theme-palette-wrapper {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    body.theme-black .theme-palette-wrapper {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    .color-chip-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-chip-btn:hover {
+      transform: scale(1.18);
+    }
+
+    .color-chip-btn.active {
+      transform: scale(1.22);
+      box-shadow: 0 0 0 2px #ffffff, 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 메인 컨테이너 */
     .main-container {
       flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 440px;
-      gap: 24px;
-      padding: 24px 32px;
+      display: flex;
+      gap: 28px;
+      padding: 24px 28px;
       max-width: 1440px;
       margin: 0 auto;
       width: 100%;
     }
 
+    /* 좌측: 의사용 화면 */
     .doctor-side {
+      flex: 1.15;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -80,306 +270,318 @@
     }
 
     .section-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 8px;
+      color: #1e293b;
     }
 
     .card {
-      background: #131b2e;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      transition: background 0.25s, border-color 0.25s;
     }
 
     .patient-input-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
-    .input-field {
-      background: #0b0f19;
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 12px 16px;
-      color: #ffffff;
-      font-size: 15px;
+    .input-box-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 12px;
+      transition: all 0.2s;
+    }
+
+    .input-box-wrapper:focus-within {
+      border-color: #0284c7;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+    }
+
+    .input-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      white-space: nowrap;
+      margin-right: 6px;
+      user-select: none;
+    }
+
+    .input-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
+      margin-left: 4px;
+      user-select: none;
+    }
+
+    .input-field-clean {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 4px;
+      font-size: 14px;
       outline: none;
-    }
-
-    .input-field:focus {
-      border-color: #38bdf8;
+      color: #0f172a;
+      width: 100%;
     }
 
     .mic-control-box {
-      background: #0b0f19;
-      border: 2px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 30px 20px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 20px 16px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      transition: all 0.2s;
+      gap: 12px;
+      background: #f8fafc;
+      transition: all 0.25s;
     }
 
     .mic-control-box.recording {
-      border-color: #f43f5e;
-      background: rgba(244, 63, 94, 0.05);
+      border-color: #ef4444;
+      background: #fef2f2;
     }
 
+    /* 카카오톡 공식 옐로우 마이크 버튼 */
     .mic-btn {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
       border: none;
-      font-size: 36px;
-      cursor: pointer;
+      background: #fee500;
+      color: #191919;
+      font-size: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(254, 229, 0, 0.45);
       transition: all 0.2s;
     }
 
+    .mic-btn:hover {
+      background: #fedc00;
+      transform: translateY(-1px);
+    }
+
     .mic-btn.active {
-      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
-      animation: pulse 1.5s infinite;
+      background: #ef4444;
+      color: white;
+      animation: pulse 1.4s infinite;
     }
 
     @keyframes pulse {
       0% {
-        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6);
+        transform: scale(1);
       }
 
-      70% {
-        box-shadow: 0 0 0 20px rgba(244, 63, 94, 0);
+      50% {
+        transform: scale(1.06);
       }
 
       100% {
-        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+        transform: scale(1);
       }
     }
 
     .record-status-text {
       font-size: 15px;
       font-weight: 700;
-      color: #cbd5e1;
+      color: #334155;
     }
 
     .realtime-live-transcript {
       width: 100%;
-      min-height: 90px;
+      min-height: 95px;
       max-height: 140px;
-      background: rgba(255, 255, 255, 0.03);
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
-      padding: 12px;
-      font-size: 14.5px;
-      color: #e2e8f0;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #0f172a;
       line-height: 1.6;
       text-align: left;
-      overflow-y: auto;
+      white-space: pre-wrap;
     }
 
+    /* 직접 실행 트리거 버튼 (카카오톡 노란색 + 번개 제거) */
     .trigger-btn-group {
       display: flex;
       gap: 10px;
       width: 100%;
-      margin-top: 6px;
+      margin-top: 10px;
     }
 
     .btn-analyze-now {
-      flex: 1;
-      background: #0ea5e9;
-      color: white;
-      border: none;
+      background: #fee500;
+      color: #191919;
+      border: 1px solid #fada0a;
       padding: 13px;
       border-radius: 10px;
-      font-size: 15px;
       font-weight: 800;
+      font-size: 14.5px;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(254, 229, 0, 0.3);
+    }
+
+    .btn-analyze-now:hover {
+      background: #fedc00;
+      transform: translateY(-1px);
+    }
+
+    /* AI 분석 완료 검토 카드 */
+    .summary-review-card {
+      display: none;
+      border: 2px solid #0284c7;
+      background: #f0f9ff;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    .summary-review-title {
+      font-weight: 700;
+      color: #0369a1;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-view-mode {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid #bae6fd;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #0f172a;
+    }
+
+    .summary-edit-mode {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary-edit-mode textarea,
+    .summary-edit-mode input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #0284c7;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .review-action-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-send-final {
+      flex: 1;
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .btn-sample {
-      background: rgba(255, 255, 255, 0.08);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 13px 18px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .loading-spinner-box {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-    }
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(56, 189, 248, 0.2);
-      border-top-color: #38bdf8;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* AI 분석 결과 검토 카드 */
-    .summary-review-card {
-      display: none;
-      background: #1e293b;
-      border: 1.5px solid #0ea5e9;
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 16px;
-    }
-
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .review-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #38bdf8;
+    .btn-send-final:hover {
+      background: #0369a1;
     }
 
     .btn-edit-toggle {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #cbd5e1;
-      padding: 4px 10px;
+      background: white;
+      color: #0284c7;
+      border: 1px solid #0284c7;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 12.5px;
-      cursor: pointer;
-    }
-
-    .review-item {
-      margin-bottom: 12px;
-    }
-
-    .review-label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: #94a3b8;
-      margin-bottom: 4px;
-    }
-
-    .review-val {
-      font-size: 14.5px;
-      color: #ffffff;
-      line-height: 1.5;
-    }
-
-    .edit-input {
-      width: 100%;
-      background: #0b0f19;
-      border: 1px solid #38bdf8;
-      border-radius: 8px;
-      padding: 8px 10px;
-      color: #ffffff;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .btn-send-main {
-      width: 100%;
-      background: linear-gradient(135deg, #fee500 0%, #facc15 100%);
-      color: #111827;
-      border: none;
-      padding: 15px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 900;
       cursor: pointer;
-      margin-top: 14px;
-      box-shadow: 0 4px 16px rgba(254, 229, 0, 0.25);
     }
 
     /* 우측: 스마트폰 목업 */
     .patient-side {
+      flex: 0.85;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .phone-mockup {
-      width: 100%;
-      max-width: 380px;
+      width: 340px;
+      height: 670px;
       background: #ffffff;
-      color: #0f172a;
-      border-radius: 36px;
-      border: 8px solid #1e293b;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border-radius: 40px;
+      border: 10px solid #1e293b;
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      min-height: 640px;
+      position: sticky;
+      top: 24px;
     }
 
     .phone-notch {
+      width: 130px;
+      height: 20px;
       background: #1e293b;
-      height: 22px;
-      width: 140px;
       margin: 0 auto;
-      border-bottom-left-radius: 14px;
-      border-bottom-right-radius: 14px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
     }
 
     .phone-header {
-      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      background: #0284c7;
       color: white;
-      padding: 16px 20px 14px;
+      padding: 14px 16px 12px;
       text-align: center;
     }
 
     .phone-body {
-      padding: 18px 16px;
+      flex: 1;
+      padding: 16px;
+      background: #f8fafc;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      flex: 1;
-      background: #f8fafc;
-      overflow-y: auto;
     }
 
     .phone-card {
-      background: #ffffff;
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 13.5px;
+      font-size: 12.5px;
       line-height: 1.5;
-    }
-
-    .phone-card-title {
-      font-weight: 800;
-      color: #0284c7;
-      font-size: 13px;
-      margin-bottom: 4px;
     }
 
     .empty-mockup-state {
@@ -391,7 +593,7 @@
       color: #94a3b8;
       text-align: center;
       padding: 20px;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.6;
     }
 
@@ -412,16 +614,23 @@
   </style>
 </head>
 
-<body>
+<body class="theme-sky">
 
   <header>
     <div class="logo-area">
-      <span class="logo-badge">TodakNote PC</span>
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고" class="logo-img">
       <h1 class="logo-title">토닥토닥노트 진료실 프로그램</h1>
     </div>
-    <div style="display: flex; align-items: center; gap: 14px;">
-      <span id="hospitalBadge" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700;">연세바른내과의원</span>
-      <button onclick="handleLogout()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #94a3b8; padding: 5px 12px; border-radius: 8px; font-size: 12.5px; cursor: pointer;">로그아웃</button>
+
+    <!-- 세련된 미니멀 컬러 칩 팔레트 (글자 없이 동그란 색상만) -->
+    <div class="theme-palette-wrapper" title="진료실 테마 색상 변경">
+      <button class="color-chip-btn active" id="btnThemeSky" style="background: linear-gradient(135deg, #0284c7, #38bdf8);" onclick="setTheme('theme-sky')" title="소프트 스카이"></button>
+      <button class="color-chip-btn" id="btnThemeGreen" style="background: linear-gradient(135deg, #059669, #34d399);" onclick="setTheme('theme-green')" title="힐링 민트"></button>
+      <button class="color-chip-btn" id="btnThemeLavender" style="background: linear-gradient(135deg, #6366f1, #a5b4fc);" onclick="setTheme('theme-lavender')" title="웜 라벤더"></button>
+      <button class="color-chip-btn" id="btnThemeYellow" style="background: linear-gradient(135deg, #f59e0b, #fde047);" onclick="setTheme('theme-yellow')" title="웜 옐로우"></button>
+      <button class="color-chip-btn" id="btnThemeOrange" style="background: linear-gradient(135deg, #ea580c, #fb923c);" onclick="setTheme('theme-orange')" title="선셋 오렌지"></button>
+      <button class="color-chip-btn" id="btnThemeWhite" style="background: #ffffff; border: 2px solid #cbd5e1;" onclick="setTheme('theme-white')" title="모던 화이트"></button>
+      <button class="color-chip-btn" id="btnThemeBlack" style="background: #0f172a; border: 2px solid #475569;" onclick="setTheme('theme-black')" title="프리미엄 다크 블랙"></button>
     </div>
   </header>
 
@@ -430,15 +639,27 @@
     <div class="doctor-side">
       <div class="section-header">
         <div class="section-title">
-          <span>🩺 진료 대화 녹음 및 자동 요약</span>
+          <span>🩺 진료 대화 자동 타이핑 및 요약</span>
         </div>
-        <span style="font-size: 13px; color: #94a3b8;">단축키: <strong>[F9]</strong> 녹음 시작/종료 | <strong>[Enter]</strong> 발송</span>
+        <span style="font-size: 13px; color: #64748b;">단축키: <strong>[F9]</strong> 녹음 시작/종료</span>
       </div>
 
       <div class="card">
         <div class="patient-input-group">
-          <input type="text" id="patientName" class="input-field" value="김영희 님 (만 82세)" placeholder="환자 성함">
-          <input type="text" id="patientPhone" class="input-field" value="01093442378" placeholder="휴대폰 번호">
+          <!-- 환자 이름 & 나이 입력 양식 -->
+          <div class="input-box-wrapper" style="flex: 1.3;">
+            <span class="input-label">이름 :</span>
+            <input type="text" id="patientName" class="input-field-clean" value="김영희" placeholder="성함 입력">
+            <span class="input-label" style="margin-left: 10px;">나이 :</span>
+            <input type="text" id="patientAge" class="input-field-clean" style="max-width: 48px; text-align: center;" value="32" placeholder="선택">
+            <span class="input-unit">세</span>
+          </div>
+
+          <!-- 전화번호 입력 양식 -->
+          <div class="input-box-wrapper" style="flex: 1.1;">
+            <span class="input-label">전화번호 :</span>
+            <input type="text" id="patientPhone" class="input-field-clean" value="01093442378" placeholder="010-0000-0000">
+          </div>
         </div>
 
         <div class="mic-control-box" id="micBox">
@@ -448,127 +669,95 @@
           </div>
 
           <div class="realtime-live-transcript" id="liveTranscript">
-            <span style="color:#64748b;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>
+            <span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>
           </div>
 
           <div class="trigger-btn-group">
             <button class="btn-analyze-now" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()">
-              ⚡ 기록된 대화로 AI 요약 생성하기
+              기록된 대화로 AI 요약 생성하기
             </button>
-            <button class="btn-sample" onclick="fillSampleConversation()">
-              💡 샘플 대화 채우기
-            </button>
-          </div>
-
-          <div class="loading-spinner-box" id="loadingSpinnerBox">
-            <div class="spinner"></div>
-            <div style="font-size: 14px; color: #38bdf8; font-weight: 700;">
-              AI가 진료 대화를 꼼꼼하게 분석하고 있습니다...
-            </div>
           </div>
         </div>
 
         <!-- AI 분석 완료 검토 카드 -->
         <div class="summary-review-card" id="summaryReviewCard">
-          <div class="review-header">
-            <span class="review-title">📋 AI 안심 요약 검토 (원장님 확인)</span>
-            <div>
-              <button class="btn-edit-toggle" id="editToggleBtn" onclick="enableEditMode()">✏️ 내용 수정</button>
-              <button class="btn-edit-toggle" id="saveEditBtn" onclick="saveEditMode()" style="display:none; background:#0ea5e9; color:white;">💾 수정 완료</button>
-            </div>
+          <div class="summary-review-title">
+            <span>📋 AI 요약 검토</span>
+            <button class="btn-edit-toggle" id="editToggleBtn" onclick="toggleEditMode()">✏️ 내용 수정</button>
+            <button class="btn-edit-toggle" id="saveEditBtn" onclick="saveEditMode()" style="display:none; background:#0284c7; color:white;">💾 수정 완료</button>
           </div>
 
-          <div id="summaryViewMode">
-            <div class="review-item">
-              <div class="review-label">1. 진단 및 상태 요약</div>
-              <div class="review-val" id="viewSummaryText"></div>
-            </div>
-            <div class="review-item">
-              <div class="review-label">2. 처방약 및 복용법</div>
-              <div class="review-val" id="viewMedText"></div>
-            </div>
-            <div class="review-item">
-              <div class="review-label">3. 다음 내원일</div>
-              <div class="review-val" id="viewNextDateText" style="color: #4ade80; font-weight: 800;"></div>
-            </div>
-            <div class="review-item">
-              <div class="review-label">4. 환자 주의사항</div>
-              <div class="review-val" id="viewNextNoticeText"></div>
-            </div>
+          <!-- 보기 모드 -->
+          <div class="summary-view-mode" id="summaryViewMode">
+            <div style="margin-bottom: 6px;"><strong>[요약]</strong> <span id="viewSummaryText"></span></div>
+            <div style="margin-bottom: 6px;"><strong>[처방/관리]</strong> <span id="viewMedText"></span></div>
+            <div style="margin-bottom: 6px;"><strong>[다음내원]</strong> <span id="viewNextDateText" style="color: #0284c7; font-weight: 700;"></span></div>
+            <div><strong>[주의사항]</strong> <span id="viewNextNoticeText"></span></div>
           </div>
 
-          <div id="summaryEditMode" style="display:none; flex-direction:column; gap:10px;">
-            <div>
-              <div class="review-label">1. 진단 및 상태 요약</div>
-              <textarea class="edit-input" id="editSummaryInput" rows="2"></textarea>
-            </div>
-            <div>
-              <div class="review-label">2. 처방약 및 복용법</div>
-              <textarea class="edit-input" id="editMedInput" rows="2"></textarea>
-            </div>
-            <div>
-              <div class="review-label">3. 다음 내원일</div>
-              <input type="text" class="edit-input" id="editNextDateInput">
-            </div>
-            <div>
-              <div class="review-label">4. 환자 주의사항</div>
-              <input type="text" class="edit-input" id="editNextNoticeInput">
-            </div>
+          <!-- 수정 모드 -->
+          <div class="summary-edit-mode" id="summaryEditMode">
+            <textarea id="editSummaryInput" rows="2" placeholder="요약 내용"></textarea>
+            <textarea id="editMedInput" rows="2" placeholder="처방 및 관리"></textarea>
+            <input type="text" id="editNextDateInput" placeholder="다음 내원일">
+            <input type="text" id="editNextNoticeInput" placeholder="안내사항">
           </div>
 
-          <button class="btn-send-main" onclick="sendReport()">
-            📲 확인 및 환자 카톡/문자 발송 (Enter)
-          </button>
+          <div class="review-action-btns">
+            <button class="btn-send-final" onclick="sendReport()">
+              📲 확인 및 환자 카톡 발송
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 우측: 환자 카톡 화면 실시간 목업 -->
     <div class="patient-side">
-      <div style="font-size: 15px; font-weight: 800; color: #cbd5e1; margin-bottom: 12px; align-self: flex-start;">
-        📱 환자 스마트폰 수신 화면 (실시간 미리보기)
+      <div style="font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 12px; align-self: flex-start;">
+        📱 환자 수신 화면 (실시간 미리보기)
       </div>
 
       <div class="phone-mockup">
         <div class="phone-notch"></div>
         <div class="phone-header">
-          <div style="font-size: 11px; opacity: 0.85;">토닥토닥 안심케어</div>
-          <div style="font-size: 16px; font-weight: 900;" id="reportHospTitle">연세바른내과의원</div>
+          <div style="font-size: 11px; opacity: 0.9;">토닥토닥 안심케어</div>
+          <div style="font-size: 15px; font-weight: 800;" id="reportHospTitle">연세바른내과의원</div>
         </div>
 
         <div class="phone-body">
           <div class="empty-mockup-state" id="emptyState">
-            <span style="font-size: 32px; margin-bottom: 10px;">💬</span>
+            <span style="font-size: 28px; margin-bottom: 8px;">💬</span>
             <span>진료 녹음 후 AI 요약을 생성하시면,<br>환자의 스마트폰 화면에 어떻게 표시되는지 실시간으로 보여집니다.</span>
           </div>
 
           <div id="reportCard" style="display:none; flex-direction:column; gap:10px;">
-            <div style="font-size: 15px; font-weight: 800; color: #0f172a;" id="reportPatientName">
+            <div style="font-size: 14px; font-weight: 800; color: #0f172a;" id="reportPatientName">
               김영희 님의 안심 진료노트
             </div>
 
             <div class="phone-card">
-              <div class="phone-card-title">🩺 진단 및 상태 요약</div>
+              <div style="font-weight: 700; color: #0284c7; margin-bottom: 4px;">🩺 진료 요약</div>
               <div id="reportSummaryText" style="color: #334155;"></div>
             </div>
 
             <div class="phone-card">
-              <div class="phone-card-title">💊 처방약 복약 안내</div>
+              <div style="font-weight: 700; color: #0284c7; margin-bottom: 4px;">💊 처방 약 복약 지도</div>
               <div id="reportMedText" style="color: #334155;"></div>
             </div>
 
-            <div class="phone-card" style="background: #f0fdf4; border-color: #86efac;">
-              <div class="phone-card-title" style="color: #166534;">📅 다음 정기 내원일</div>
-              <div id="reportNextDate" style="font-weight: 800; color: #15803d; font-size: 14px;"></div>
-              <div id="reportNextNotice" style="font-size: 12px; color: #166534; margin-top: 2px;"></div>
+            <div class="phone-card" style="background: #f0fdf4; border-color: #bbf7d0;">
+              <div style="font-weight: 700; color: #166534; margin-bottom: 4px;">📅 다음 내원일</div>
+              <div id="reportNextDate" style="font-weight: 800; color: #15803d;"></div>
+              <div id="reportNextNotice" style="font-size: 11.5px; color: #166534; margin-top: 2px;"></div>
             </div>
 
             <div class="phone-card">
-              <div class="phone-card-title">🥗 맞춤 건강 생활수칙</div>
-              <div id="reportLifestyleTips" style="color: #334155; font-size: 12.5px;"></div>
+              <div style="font-weight: 700; color: #0284c7; margin-bottom: 4px;">🥗 생활 가이드</div>
+              <div id="reportLifestyleTips" style="color: #334155; font-size: 12px;"></div>
             </div>
 
-            <div style="background: #fee500; border-radius: 10px; padding: 10px; text-align: center; font-weight: 800; font-size: 13px; color: #111827;">
+            <div style="background: #fee500; border-radius: 8px; padding: 10px; text-align: center; font-weight: 800; font-size: 12.5px; color: #111827;">
               👨‍👩‍👧 가족에게 이 리포트 공유하기
             </div>
           </div>
@@ -601,7 +790,6 @@
         try {
           const user = JSON.parse(userStr);
           if (user.hospitalName) {
-            document.getElementById('hospitalBadge').textContent = user.hospitalName;
             document.getElementById('reportHospTitle').textContent = user.hospitalName;
           }
           if (user.phone) {
@@ -611,14 +799,10 @@
       }
 
       initSpeechRecognition();
-    });
 
-    function handleLogout() {
-      if (confirm('진료실 프로그램에서 로그아웃하시겠습니까?')) {
-        localStorage.removeItem('todak_current_user');
-        window.location.href = 'index.html';
-      }
-    }
+      const savedTheme = localStorage.getItem('todak_theme') || 'theme-sky';
+      setTheme(savedTheme);
+    });
 
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -659,15 +843,12 @@
       if (e.key === 'F9') {
         e.preventDefault();
         toggleRecording();
-      } else if (e.key === 'Enter' && summaryReviewCard.style.display === 'block' && !isEditing) {
-        e.preventDefault();
-        sendReport();
       }
     });
 
     function toggleRecording() {
       if (!recognition) {
-        showToast('이 브라우저는 음성 인식을 지원하지 않습니다. 텍스트를 입력해 주세요.');
+        showToast('이 브라우저는 음성 인식을 지원하지 않습니다. 텍스트를 직접 입력해 주세요.');
         return;
       }
 
@@ -683,47 +864,39 @@
       }
     }
 
-    function fillSampleConversation() {
-      const sample = `의사: "김영희 님, 지난번 감기 증상은 많이 좋아지셨네요. 오늘 목 안쪽을 보니 붓기가 가라앉았습니다. 혈압 수치는 135에 85로 매우 안정적입니다."
-환자: "네, 원장님. 기침은 많이 줄었는데 아침에 일어날 때 목이 조금 칼칼해요."
-의사: "건조해서 그럴 수 있으니 목 가글액이랑 3일치 약 드릴 테니 식후에 잘 챙겨 드세요. 따뜻한 물을 자주 드시고요, 다음 내원은 2주 뒤인 11월 26일 목요일에 오셔서 경과를 보겠습니다."`;
-      liveTranscript.innerText = sample;
-      showToast('💡 샘플 대화가 입력되었습니다. AI 요약 생성을 눌러보세요!');
-    }
-
     async function triggerAnalyzeDirectly() {
       const text = liveTranscript.innerText.trim();
       if (!text || text.includes('기록됩니다')) {
-        showToast('대화 내용이 없습니다. [💡 샘플 대화 채우기]를 누르거나 녹음해 주세요.');
+        showToast('대화 내용이 없습니다. 마이크를 켜고 말씀하시거나 텍스트를 입력해 주세요.');
         return;
       }
 
       const pName = document.getElementById('patientName').value.trim();
-      document.getElementById('loadingSpinnerBox').style.display = 'flex';
+      const pAge = document.getElementById('patientAge').value.trim();
+      const patientInfo = `${pName} 님 (만 ${pAge}세)`;
+
       recordStatus.innerText = 'AI 요약 중...';
 
       try {
         const res = await fetch('/api/summarize', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transcript: text, patientInfo: pName })
+          body: JSON.stringify({ transcript: text, patientInfo: patientInfo })
         });
         const data = await res.json();
-        document.getElementById('loadingSpinnerBox').style.display = 'none';
 
         if (data && !data.error) {
           parsedResult = {
-            summary: data.diagnosisSummary || '혈압 및 목 상태가 지난번 대비 매우 안정적으로 호전되었습니다.',
-            medication: data.medicationGuide || '목 가글액 및 처방약 3일분을 매일 식후 복용하세요.',
+            summary: data.diagnosisSummary || '혈압 및 전반적인 건강 상태가 매우 안정적입니다.',
+            medication: data.medicationGuide || '처방약을 매일 아침 식후 규칙적으로 복용하세요.',
             nextDate: data.nextVisitDate || '2026년 11월 26일 (목요일) 오전',
-            nextNotice: data.nextVisitNotice || '목 칼칼함 지속 시 내원',
-            lifestyleTips: Array.isArray(data.lifestyleCare) ? data.lifestyleCare.join(', ') : '따뜻한 미온수를 수시로 드시고 실내 습도를 50% 이상 유지해 주세요.'
+            nextNotice: data.nextVisitNotice || '불편한 증상 지속 시 내원',
+            lifestyleTips: Array.isArray(data.lifestyleCare) ? data.lifestyleCare.join(', ') : '따뜻한 물을 자주 섭취해 주세요.'
           };
         } else {
           applyFallbackData();
         }
       } catch (err) {
-        document.getElementById('loadingSpinnerBox').style.display = 'none';
         applyFallbackData();
       }
 
@@ -736,7 +909,7 @@
         medication: '목 가글액 및 처방약 3일분 (식후 30분 복용, 따뜻한 물 권장)',
         nextDate: '2026년 11월 26일 (목요일) 오전',
         nextNotice: '증상 호전 여부 최종 확인',
-        lifestyleTips: '따뜻한 물을 자주 섭취하시고, 아침저녁 쌀쌀할 때는 목을 따뜻하게 감싸주세요.'
+        lifestyleTips: '따뜻한 물을 자주 섭취하시고 실내 습도를 50% 이상 유지해 주세요.'
       };
     }
 
@@ -747,13 +920,12 @@
       document.getElementById('viewNextNoticeText').innerText = parsedResult.nextNotice;
 
       summaryReviewCard.style.display = 'block';
-      recordStatus.innerText = 'AI 요약 완성! 확인 후 [발송(Enter)]을 누르세요.';
+      recordStatus.innerText = 'AI 요약 완성! 확인 후 [발송]을 누르세요.';
 
-      // 우측 스마트폰 목업에도 실시간 반영!
       updatePhoneMockup();
     }
 
-    function enableEditMode() {
+    function toggleEditMode() {
       isEditing = true;
       document.getElementById('editSummaryInput').value = parsedResult.summary;
       document.getElementById('editMedInput').value = parsedResult.medication;
@@ -763,7 +935,7 @@
       document.getElementById('summaryViewMode').style.display = 'none';
       document.getElementById('summaryEditMode').style.display = 'flex';
       document.getElementById('editToggleBtn').style.display = 'none';
-      document.getElementById('saveEditBtn').style.display = 'block';
+      document.getElementById('saveEditBtn').style.display = 'inline-block';
       showToast('✏️ 원하시는 내용으로 직접 수정하세요!');
     }
 
@@ -782,15 +954,15 @@
       document.getElementById('summaryEditMode').style.display = 'none';
       document.getElementById('summaryViewMode').style.display = 'block';
       document.getElementById('saveEditBtn').style.display = 'none';
-      document.getElementById('editToggleBtn').style.display = 'block';
+      document.getElementById('editToggleBtn').style.display = 'inline-block';
 
       updatePhoneMockup();
-      showToast('💾 수정 내용이 저장되고 우측 화면에 반영되었습니다!');
+      showToast('💾 수정 내용이 저장되었습니다!');
     }
 
     function updatePhoneMockup() {
       const pName = document.getElementById('patientName').value.trim();
-      document.getElementById('reportPatientName').innerText = `${pName}의 안심 진료노트`;
+      document.getElementById('reportPatientName').innerText = `${pName} 님의 안심 진료노트`;
       document.getElementById('reportSummaryText').innerText = parsedResult.summary;
       document.getElementById('reportMedText').innerText = parsedResult.medication;
       document.getElementById('reportNextDate').innerText = parsedResult.nextDate;
@@ -805,13 +977,13 @@
       if (!parsedResult) return;
       const pName = document.getElementById('patientName').value.trim();
       const pPhone = document.getElementById('patientPhone').value.trim();
-      const hospName = document.getElementById('hospitalBadge').textContent;
+      const hospTitle = document.getElementById('reportHospTitle').textContent;
 
       showToast(`📲 ${pName} 휴대폰으로 메시지 발송 중...`);
 
       const reportId = Date.now().toString();
       const reportData = {
-        hospitalName: hospName,
+        hospitalName: hospTitle,
         patientName: pName,
         diagnosisSummary: parsedResult.summary,
         medicationGuide: parsedResult.medication,
@@ -831,7 +1003,7 @@
           body: JSON.stringify({
             to: pPhone,
             patientName: pName,
-            hospitalName: hospName,
+            hospitalName: hospTitle,
             summary: parsedResult.summary,
             medication: parsedResult.medication,
             nextDate: parsedResult.nextDate,
@@ -853,6 +1025,22 @@
       toast.innerText = msg;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 2800);
+    }
+
+    // 🎨 실시간 컬러 테마 전환 함수
+    function setTheme(themeName) {
+      document.body.className = themeName;
+      document.querySelectorAll('.color-chip-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (themeName === 'theme-sky') document.getElementById('btnThemeSky').classList.add('active');
+      else if (themeName === 'theme-green') document.getElementById('btnThemeGreen').classList.add('active');
+      else if (themeName === 'theme-lavender') document.getElementById('btnThemeLavender').classList.add('active');
+      else if (themeName === 'theme-yellow') document.getElementById('btnThemeYellow').classList.add('active');
+      else if (themeName === 'theme-orange') document.getElementById('btnThemeOrange').classList.add('active');
+      else if (themeName === 'theme-white') document.getElementById('btnThemeWhite').classList.add('active');
+      else if (themeName === 'theme-black') document.getElementById('btnThemeBlack').classList.add('active');
+
+      localStorage.setItem('todak_theme', themeName);
     }
   </script>
 
