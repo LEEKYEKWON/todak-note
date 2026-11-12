@@ -1,23 +1,21 @@
 @echo off
 cd /d "%~dp0"
 
-echo [Step 1] Git status check...
-git status
+echo [Step 0] Completely removing package.json...
+if exist "package.json" del /f /q "package.json"
+git rm -f package.json 2>nul
 
-echo.
-echo [Step 2] Staging all files...
+echo [Step 1] Staging all files...
 git add -A
 
-echo.
-echo [Step 3] Committing...
-git commit -m "Switch to static deployment with direct html navigation"
+echo [Step 2] Committing...
+git commit -m "Completely remove package.json for pure static web deployment"
 
-echo.
-echo [Step 4] Pushing to GitHub...
+echo [Step 3] Pushing to GitHub...
 git push origin main
 
 echo.
 echo ==============================================
-echo [SUCCESS] Git push completed!
+echo [SUCCESS] Push complete!
 echo ==============================================
 pause
