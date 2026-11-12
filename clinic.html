@@ -721,10 +721,7 @@
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
     <div style="display: flex; align-items: center; gap: 10px;">
-      <a href="landing.html" target="_blank" class="dashboard-nav-link" title="토닥토닥노트 서비스 소개 페이지 열기">
-        🌐 서비스 소개
-      </a>
-      <a href="admin.html" class="dashboard-nav-link" title="원장님 경영 대시보드 열기">
+      <a href="admin.html" id="btnAdminNav" class="dashboard-nav-link" title="원장님 경영 대시보드 열기">
         📊 병원 경영 대시보드
       </a>
       <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
@@ -846,7 +843,7 @@
     <!-- 우측: 스마트폰 목업 -->
     <div class="patient-side" style="display:flex; flex-direction:column; align-items:center;">
       <div class="section-title" style="margin-bottom: 12px; width: 340px; text-align: center; justify-content: center;">
-        <span>📱 환자 수신 화면 (실시간 미리보기)</span>
+        <span>📱 환자 수신 화면 미리보기</span>
       </div>
 
       <div class="phone-mockup">
@@ -949,6 +946,34 @@
 
     const now = new Date();
     document.getElementById('reportTodayDate').innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
+
+    // 로그인 회원 정보 및 플랜에 따른 메뉴 분기 (기본형: 대시보드 숨김, 고급형: 대시보드 표시)
+    window.addEventListener('DOMContentLoaded', () => {
+      const userStr = localStorage.getItem('todak_current_user');
+      const adminBtn = document.getElementById('btnAdminNav');
+
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user.hospitalName) {
+            const hospTag = document.querySelector('.hospital-tag');
+            if (hospTag) hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+          }
+          if (user.phone) {
+            document.getElementById('patientPhone').value = user.phone;
+          }
+
+          // 기본형(Standard) 플랜은 병원 경영 대시보드 숨김, 고급형(Pro)만 노출!
+          if (adminBtn) {
+            if (user.plan && user.plan.toLowerCase() === 'standard') {
+              adminBtn.style.display = 'none';
+            } else {
+              adminBtn.style.display = 'flex';
+            }
+          }
+        } catch (e) { }
+      }
+    });
 
     function promptApiKey() {
       const current = localStorage.getItem('openai_api_key') || localStorage.getItem('todak_openai_key') || '';
@@ -1169,7 +1194,10 @@
       const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
       const pAge = document.getElementById('patientAge').value.trim();
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
-      const pPhone = document.getElementById('patientPhone').value;
+      const pPhone = document.getElementById('patientPhone').value.trim();
+
+      const hospTagEl = document.querySelector('.hospital-tag');
+      const hospTitle = hospTagEl ? hospTagEl.textContent.replace('🏥', '').trim() : '연세바른내과의원';
 
       showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
       summaryReviewCard.style.display = 'none';
@@ -1187,25 +1215,66 @@
       emptyState.style.display = 'none';
       reportCard.style.display = 'block';
 
-      // 🌟 솔라피(Solapi) 실제 스마트폰 발송 API 호출
+      // 1. 환자 스마트폰 열람용 리포트 데이터 및 URL 생성
+      const reportId = Date.now().toString();
+      const reportData = {
+        hospitalName: hospTitle,
+        patientName: pDisplayName,
+        diagnosisSummary: parsedResult.summary,
+        medicationGuide: parsedResult.medication,
+        nextVisitDate: parsedResult.nextDate,
+        nextVisitNotice: parsedResult.nextNotice,
+        lifestyleCare: [parsedResult.lifestyleTips]
+      };
+      localStorage.setItem('todak_report_' + reportId, JSON.stringify(reportData));
+      localStorage.setItem('todak_last_report', JSON.stringify(reportData));
+
+      let encodedData = '';
+      try {
+        encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(reportData))));
+      } catch (e) { }
+
+      const reportUrl = encodedData
+        ? `${window.location.origin}/report.html?id=${reportId}&d=${encodedData}`
+        : `${window.location.origin}/report.html?id=${reportId}`;
+
+      // 2. 🌟 솔라피(Solapi) 실제 스마트폰 발송 API 호출
       try {
         const res = await fetch('/api/send-sms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            to: pPhone,
             receiverPhone: pPhone,
             patientName: pDisplayName,
+            hospitalName: hospTitle,
             summary: parsedResult.summary,
             medication: parsedResult.medication,
-            nextDate: parsedResult.nextDate
+            nextDate: parsedResult.nextDate,
+            reportUrl: reportUrl
           })
         });
+
         const sendRes = await res.json();
         console.log("발송 응답:", sendRes);
+
+        if (!res.ok || sendRes.error) {
+          throw new Error(sendRes.error || '문자 발송 실패');
+        }
+
+        // 솔라피 오류 반환 체크
+        if (sendRes.solapi && sendRes.solapi.failedMessageList && sendRes.solapi.failedMessageList.length > 0) {
+          const failItem = sendRes.solapi.failedMessageList[0];
+          alert(`⚠️ 문자 발송 실패\n사유: ${failItem.reason || '발송 오류'}\n(솔라피 발신번호 사전 등록 여부 및 잔액을 확인해 주세요)`);
+          return;
+        }
+
         showToast(`🎉 대표님 스마트폰(${pPhone})으로 진짜 메시지가 발송되었습니다!`);
+        alert(`🎉 [발송 성공!]\n${pPhone} 번호로 진짜 안심 리포트 문자가 발송되었습니다!\n스마트폰을 확인해 보세요.\n👉 링크: ${reportUrl}`);
       } catch (e) {
         console.error("발송 실패:", e);
         showToast(`발송 중 오류: ${e.message}`);
+        alert(`⚠️ 문자 발송 오류 안내\n사유: ${e.message}\n(솔라피 발신번호 등록 여부 및 잔액을 확인해 주세요)`);
       }
     }
 

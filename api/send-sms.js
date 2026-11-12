@@ -30,8 +30,8 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { to, text, patientName, reportUrl, hospitalName, summary, medication, nextDate } = req.body || {};
-    const recipientPhone = (to || '').replace(/[^0-9]/g, '');
+    const { to, receiverPhone, text, patientName, reportUrl, hospitalName, summary, medication, nextDate } = req.body || {};
+    const recipientPhone = (to || receiverPhone || '').replace(/[^0-9]/g, '');
 
     if (!recipientPhone) {
       res.status(400).json({ error: '수신자 전화번호가 올바르지 않습니다.' });
@@ -92,6 +92,13 @@ ${finalReportUrl}`;
       solapiRes.on('end', () => {
         try {
           const parsed = JSON.parse(solapiData);
+          if (solapiRes.statusCode >= 400 || parsed.errorCode || parsed.errorMessage) {
+            res.status(400).json({
+              error: parsed.errorMessage || parsed.message || `솔라피 오류 (${solapiRes.statusCode})`,
+              details: parsed
+            });
+            return;
+          }
           res.status(200).json({ success: true, type: msgType, solapi: parsed });
         } catch (e) {
           res.status(200).json({ success: true, raw: solapiData });
