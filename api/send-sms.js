@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const SOLAPI_API_KEY = process.env.SOLAPI_API_KEY || 'NCSK8Y3GEABTX0B0KKZJU8';
 const SOLAPI_API_SECRET = process.env.SOLAPI_API_SECRET || 'ANWFHRCJW1UD3OTT9TBJTO2XEQ1N3GED';
 const SENDER_PHONE = process.env.SENDER_PHONE || '01093442378';
+const KAKAO_TEMPLATE_ID = process.env.KAKAO_TEMPLATE_ID || 'KA01TP261113053545740Y0kVMg3uuuG';
+const KAKAO_CHANNEL_ID = process.env.KAKAO_CHANNEL_ID || '@todaknote';
 
 function getSolapiAuthHeader() {
   const date = new Date().toISOString();
@@ -30,7 +32,19 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { to, receiverPhone, text, patientName, reportUrl, hospitalName, summary, medication, nextDate } = req.body || {};
+    const {
+      to,
+      receiverPhone,
+      text,
+      patientName,
+      reportUrl,
+      hospitalName,
+      doctorName,
+      summary,
+      medication,
+      nextDate
+    } = req.body || {};
+
     const recipientPhone = (to || receiverPhone || '').replace(/[^0-9]/g, '');
 
     if (!recipientPhone) {
@@ -44,34 +58,49 @@ module.exports = async (req, res) => {
 
     const currentHosp = hospitalName || '길동이의원';
     const currentPatient = patientName || '환자';
+    const currentDoctor = doctorName || '원장';
 
-    let msgText = text;
-    if (!msgText) {
-      msgText = `[${currentHosp}]
-${currentPatient}님, 안심 진료노트가 도착했습니다.
+    // 1) 알림톡 변수 매핑
+    // 템플릿 등록 변수: #{병원명}, #{환자명}, #{원장명}, #{리포트링크}
+    // 링크 변수의 경우 프로토콜(https://)을 제외한 도메인/경로 형태 지원
+    const cleanUrl = finalReportUrl.replace(/^https?:\/\//i, '');
 
-▶ 진료요약: ${summary ? summary.slice(0, 70) + '...' : '정상 소견'}
-▶ 처방복약: ${medication ? medication.slice(0, 50) : '처방전 참고'}
-▶ 다음내원: ${nextDate || '필요시 내원'}
+    const kakaoVariables = {
+      '#{병원명}': currentHosp,
+      '#{환자명}': currentPatient,
+      '#{원장명}': currentDoctor,
+      '#{리포트링크}': cleanUrl
+    };
 
-아래 링크를 누르시면 큰 글씨 리포트와 일상 건강수칙을 확인하실 수 있습니다.
-👉 진료 리포트 보기:
-${finalReportUrl}`;
-    }
+    // 대체발송 문자 본문 (알림톡 미수신 시 전달)
+    const fallbackText = `[${currentHosp}]
+안녕하세요, ${currentPatient}님.
+${currentDoctor} 원장님이 전해드리는 안심 진료노트가 도착했습니다.
 
-    const isLms = Buffer.byteLength(msgText, 'euc-kr') > 90 || msgText.length > 70;
-    const msgType = isLms ? 'LMS' : 'SMS';
+오늘 진료받으시느라 수고 많으셨습니다.
+진료 요약 및 복약 지도, 다음 내원일과 맞춤 건강 팁을 아래 링크를 눌러 확인해 주세요.
+
+👉 진료 리포트 확인하기:
+${finalReportUrl}
+
+※ 본 안내는 환자분의 안전한 복약과 빠른 쾌유를 위해 발송되었습니다.`;
+
+    // 2) 솔라피 ATA (알림톡) 메시지 규격
+    const messagePayload = {
+      to: recipientPhone,
+      from: SENDER_PHONE,
+      type: 'ATA',
+      kakaoOptions: {
+        pfId: KAKAO_CHANNEL_ID,
+        templateId: KAKAO_TEMPLATE_ID,
+        variables: kakaoVariables,
+        disableSms: false // 실패 시 대체발송 허용
+      },
+      text: fallbackText
+    };
 
     const payload = JSON.stringify({
-      messages: [
-        {
-          to: recipientPhone,
-          from: SENDER_PHONE,
-          text: msgText,
-          type: msgType,
-          subject: isLms ? `[${currentHosp}] ${currentPatient}님 안심 진료 리포트` : undefined
-        }
-      ]
+      messages: [messagePayload]
     });
 
     const options = {
@@ -99,7 +128,7 @@ ${finalReportUrl}`;
             });
             return;
           }
-          res.status(200).json({ success: true, type: msgType, solapi: parsed });
+          res.status(200).json({ success: true, type: 'ATA(알림톡)', solapi: parsed });
         } catch (e) {
           res.status(200).json({ success: true, raw: solapiData });
         }
