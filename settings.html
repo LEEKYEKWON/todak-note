@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - 병원 설정 및 구독 관리</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+    }
+
+    .header-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: #0284c7;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    .nav-btn.secondary:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 860px;
+      width: 100%;
+      margin: 36px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .page-header {
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .page-desc {
+      font-size: 14.5px;
+      color: #64748b;
+    }
+
+    /* 카드 섹션 */
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-icon {
+      font-size: 22px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .card-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    .badge-pro {
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-std {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* 폼 그리드 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group.full {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14.5px;
+      color: #0f172a;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      background: white;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+      outline: none;
+    }
+
+    .input-readonly {
+      background: #f1f5f9;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .form-helper {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 5px;
+    }
+
+    /* 플랜 요금제 박스 */
+    .plan-info-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .plan-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .plan-name {
+      font-size: 20px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .plan-price-text {
+      font-size: 15px;
+      color: #64748b;
+    }
+
+    .plan-price-bold {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0284c7;
+    }
+
+    .plan-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 13.5px;
+      color: #475569;
+    }
+
+    .plan-features-list li::before {
+      content: "✓ ";
+      color: #0284c7;
+      font-weight: 900;
+    }
+
+    /* 업그레이드 배너 (기본형 원장님용) */
+    .upgrade-banner {
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      color: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.2);
+    }
+
+    .upgrade-btn {
+      background: #fee500;
+      color: #191919;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14.5px;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .upgrade-btn:hover {
+      background: #fedc00;
+      transform: translateY(-1px);
+    }
+
+    /* 저장 버튼 */
+    .save-btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-btn:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+
+    /* 토스트 알림 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 14px;
+      display: none;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 680px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group.full {
+        grid-column: span 1;
+      }
+      .plan-info-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+      .upgrade-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="logo-img">
+      <h1 class="header-title">토닥토닥노트</h1>
+    </div>
+    <div class="header-nav">
+      <a href="clinic.html" class="nav-btn">
+        🩺 진료실 프로그램으로 돌아가기
+      </a>
+      <a href="login.html" class="nav-btn secondary">
+        로그아웃
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h2 class="page-title">병원 설정 및 구독 관리</h2>
+      <p class="page-desc">가입 시 등록된 정보는 환자 알림톡 및 진료 리포트에 자동 반영됩니다.</p>
+    </div>
+
+    <!-- 1. 병원 및 원장님 기본 정보 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-box">
+          <span class="card-icon">🏥</span>
+          <h3 class="card-title">병원 및 원장님 프로필</h3>
+        </div>
+        <span id="planBadge" class="card-badge badge-pro">고급형 Pro 이용중</span>
+      </div>
+
+      <form id="profileForm" onsubmit="handleSaveProfile(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">병원명 (환자 수신 리포트에 표기)</label>
+            <input type="text" id="inputHospitalName" class="form-input" required placeholder="예: 연세바른내과의원">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">원장님 성함</label>
+            <input type="text" id="inputDoctorName" class="form-input" required placeholder="예: 홍길동 원장">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">원장님 연락처 (휴대폰)</label>
+            <input type="tel" id="inputPhone" class="form-input" required placeholder="010-0000-0000">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">로그인 아이디 (이메일)</label>
+            <input type="email" id="inputEmail" class="form-input input-readonly" readonly title="아이디는 변경할 수 없습니다.">
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label">네이버 플레이스 링크 (선택 사항)</label>
+            <input type="url" id="inputNaverReviewUrl" class="form-input" placeholder="https://m.place.naver.com/hospital/...">
+            <p class="form-helper">입력하시면 환자 진료 리포트 하단의 [네이버 영수증 리뷰 남기기] 버튼 클릭 시 우리 병원 플레이스로 즉시 이동합니다.</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+          <button type="submit" class="save-btn">수정사항 저장하기</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 2. 이용 중인 요금제 및 결제 관리 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-box">
+          <span class="card-icon">💳</span>
+          <h3 class="card-title">이용 요금제 및 결제 관리</h3>
+        </div>
+      </div>
+
+      <!-- 플랜 상세 정보 박스 -->
+      <div class="plan-info-box">
+        <div>
+          <div class="plan-title-row">
+            <div id="displayPlanName" class="plan-name">고급형 (Pro)</div>
+            <span class="card-badge" style="background: #dcfce7; color: #15803d; font-weight: 800;">이용 중 (정상)</span>
+          </div>
+          <div class="plan-price-text">
+            구독 금액: <span id="displayPlanPrice" class="plan-price-bold">월 139,000원</span> (얼리버드 특가 적용)
+          </div>
+          <ul id="displayPlanFeatures" class="plan-features-list">
+            <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
+            <li>우리 병원 전용 CI 로고 탑재 (자체 브랜딩)</li>
+            <li>원장님 전용 환자 재방문 경영 통계 대시보드 제공</li>
+            <li>네이버 영수증 리뷰 원클릭 연동</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 기본형 사용자에게만 보이는 고급형 업그레이드 배너 -->
+      <div id="upgradeBanner" class="upgrade-banner" style="display: none;">
+        <div>
+          <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">⭐ 고급형(Pro)으로 업그레이드하고 병원 경영 통계를 확인하세요!</h4>
+          <p style="font-size: 13.5px; opacity: 0.95;">월 50,000원 추가로 재방문율 통계 대시보드와 병원 전용 로고 브랜딩 혜택을 누리실 수 있습니다.</p>
+        </div>
+        <button type="button" class="upgrade-btn" onclick="upgradeToPro()">
+          월 50,000원 추가하고 Pro 업그레이드
+        </button>
+      </div>
+
+      <!-- 결제 카드 등록 / 관리 영역 (포트원/토스 연동 준비) -->
+      <div style="margin-top: 20px; padding: 18px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 3px;">정기 결제 수단</div>
+          <div style="font-size: 13px; color: #64748b;">현재 무료 얼리버드 체험 중입니다. 정식 결제 시작 전 알림을 드립니다.</div>
+        </div>
+        <button type="button" class="nav-btn secondary" style="font-size: 13px;" onclick="alert('현재 50명 한정 얼리버드 무료 체험 기간입니다.\n정식 유료 결제 전환 시 카카오톡으로 안내해 드립니다.')">
+          결제 수단 관리
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">저장되었습니다.</div>
+
+  <script>
+    // 현재 로그인된 유저 데이터 불러오기
+    let currentUser = null;
+
+    function loadUserData() {
+      try {
+        const stored = localStorage.getItem('todak_current_user');
+        if (stored) {
+          currentUser = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (!currentUser) {
+        // 기본 샘플 데이터 (비로그인 상태 대비)
+        currentUser = {
+          email: 'doctor@hospital.com',
+          doctorName: '홍길동 원장',
+          hospitalName: '연세바른내과의원',
+          phone: '010-9344-2378',
+          plan: 'Pro',
+          naverReviewUrl: ''
+        };
+      }
+
+      renderProfile();
+      renderPlanInfo();
+    }
+
+    function renderProfile() {
+      document.getElementById('inputHospitalName').value = currentUser.hospitalName || '';
+      document.getElementById('inputDoctorName').value = currentUser.doctorName || '';
+      document.getElementById('inputPhone').value = currentUser.phone || '';
+      document.getElementById('inputEmail').value = currentUser.email || '';
+      document.getElementById('inputNaverReviewUrl').value = currentUser.naverReviewUrl || '';
+    }
+
+    function renderPlanInfo() {
+      const isPro = (currentUser.plan || 'Pro').toLowerCase() === 'pro';
+      const badge = document.getElementById('planBadge');
+      const planNameEl = document.getElementById('displayPlanName');
+      const planPriceEl = document.getElementById('displayPlanPrice');
+      const upgradeBanner = document.getElementById('upgradeBanner');
+      const featuresEl = document.getElementById('displayPlanFeatures');
+
+      if (isPro) {
+        badge.className = 'card-badge badge-pro';
+        badge.textContent = '⭐ 고급형 Pro 이용중';
+        planNameEl.textContent = '고급형 (Pro)';
+        planPriceEl.textContent = '월 139,000원';
+        upgradeBanner.style.display = 'none';
+
+        featuresEl.innerHTML = `
+          <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
+          <li>우리 병원 전용 CI 로고 탑재 (자체 브랜딩)</li>
+          <li>원장님 전용 환자 재방문 경영 통계 대시보드 제공</li>
+          <li>네이버 영수증 리뷰 원클릭 연동</li>
+        `;
+      } else {
+        badge.className = 'card-badge badge-std';
+        badge.textContent = '🟢 기본형 Standard 이용중';
+        planNameEl.textContent = '기본형 (Standard)';
+        planPriceEl.textContent = '월 89,000원';
+        upgradeBanner.style.display = 'flex';
+
+        featuresEl.innerHTML = `
+          <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
+          <li>환자 눈높이 쉬운 맞춤 건강 팁 생성</li>
+          <li>가족에게 리포트 공유 가능 (바이럴 홍보)</li>
+          <li>네이버 영수증 리뷰 원클릭 연동</li>
+        `;
+      }
+    }
+
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      currentUser.hospitalName = document.getElementById('inputHospitalName').value.trim();
+      currentUser.doctorName = document.getElementById('inputDoctorName').value.trim();
+      currentUser.phone = document.getElementById('inputPhone').value.trim();
+      currentUser.naverReviewUrl = document.getElementById('inputNaverReviewUrl').value.trim();
+
+      // 로컬스토리지 갱신
+      localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+      if (currentUser.email) {
+        localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
+      }
+
+      showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
+    }
+
+    function upgradeToPro() {
+      if (confirm('고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n월 50,000원 추가 (월 89,000원 ➔ 월 139,000원)\n- 원장님 환자 재방문 통계 대시보드 즉시 활성화\n- 병원 전용 CI 로고 브랜딩 기능 제공')) {
+        currentUser.plan = 'Pro';
+        localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+        if (currentUser.email) {
+          localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
+        }
+        renderPlanInfo();
+        showToast('🎉 고급형(Pro)으로 업그레이드 완료! 대시보드가 활성화되었습니다.');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    // 초기 실행
+    loadUserData();
+  </script>
+</body>
+
+</html>
+

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - 마스터 최고관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: #111827;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .master-badge {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title {
+      font-size: 19px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .header-info {
+      font-size: 13.5px;
+      color: #94a3b8;
+    }
+
+    /* 메인 컨테이너 */
+    main {
+      flex: 1;
+      max-width: 1320px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* 통계 카드 4종 */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .metric-card {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .metric-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .metric-icon {
+      font-size: 20px;
+    }
+
+    .metric-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .metric-val {
+      font-size: 30px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: -1px;
+    }
+
+    .metric-unit {
+      font-size: 14px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* 섹션 공통 */
+    .section-card {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 26px 30px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 테이블 스타일 */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: #94a3b8;
+      font-weight: 700;
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    td {
+      padding: 15px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge-plan {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+
+    .badge-plan.pro {
+      background: rgba(254, 229, 0, 0.15);
+      color: #fee500;
+      border: 1px solid rgba(254, 229, 0, 0.3);
+    }
+
+    .badge-plan.std {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .status-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #4ade80;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .status-active::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* 솔라피 & 시스템 잔액 카드 */
+    .system-status-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .api-card {
+      background: #0b0f19;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .api-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .api-card-val {
+      font-size: 24px;
+      font-weight: 900;
+      color: #38bdf8;
+      margin-bottom: 6px;
+    }
+
+    .api-card-desc {
+      font-size: 12.5px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1024px) {
+      .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .system-status-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">
+      <span class="master-badge">SUPER ADMIN</span>
+      <h1 class="header-title">👑 토닥토닥노트 마스터 관리자</h1>
+    </div>
+    <div class="header-info">
+      대표: <strong>이계권 (그래비템)</strong> · 서비스 총괄 대시보드
+    </div>
+  </header>
+
+  <main>
+    <!-- 상단 핵심 지표 4개 -->
+    <div class="metric-grid">
+      <!-- 1. 총 가입 병원 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">총 가입 병원수</span>
+          <span class="metric-icon">🏥</span>
+        </div>
+        <div class="metric-value-row">
+          <span id="statHospitalCount" class="metric-val">1</span>
+          <span class="metric-unit">곳</span>
+        </div>
+        <div class="metric-sub">얼리버드 50명 목표 중 2% 달성</div>
+      </div>
+
+      <!-- 2. 월 예상 구독 매출 (MRR) -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">월 예상 구독 매출 (MRR)</span>
+          <span class="metric-icon">💰</span>
+        </div>
+        <div class="metric-value-row">
+          <span id="statMonthlyRevenue" class="metric-val">139,000</span>
+          <span class="metric-unit">원 / 월</span>
+        </div>
+        <div class="metric-sub">기본형 8.9만 / 고급형 13.9만 기준</div>
+      </div>
+
+      <!-- 3. 오늘 알림톡 발송량 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">누적 환자 발송 건수</span>
+          <span class="metric-icon">💬</span>
+        </div>
+        <div class="metric-value-row">
+          <span id="statTotalMessages" class="metric-val">3</span>
+          <span class="metric-unit">건</span>
+        </div>
+        <div class="metric-sub">카카오 알림톡 정상 승인 완료</div>
+      </div>
+
+      <!-- 4. 솔라피 발송 잔액 -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">솔라피 발송 잔액</span>
+          <span class="metric-icon">📱</span>
+        </div>
+        <div class="metric-value-row">
+          <span class="metric-val">165</span>
+          <span class="metric-unit">원</span>
+        </div>
+        <div class="metric-sub">알림톡 건당 약 8.5원 (~19건 가능)</div>
+      </div>
+    </div>
+
+    <!-- 전체 병원 고객 목록 -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">🏥 가입 병원 및 구독 관리 현황</h2>
+        <span style="font-size: 13px; color: #94a3b8;">실시간 로컬/서버 동기화</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>병원명</th>
+              <th>원장님</th>
+              <th>이메일(ID)</th>
+              <th>연락처</th>
+              <th>가입 플랜</th>
+              <th>월 구독료</th>
+              <th>상태</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="hospitalTableBody">
+            <!-- 자바스크립트로 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 하단 시스템 및 인프라 현황 -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">⚙️ 서비스 인프라 및 API 현황</h2>
+      </div>
+
+      <div class="system-status-box">
+        <div class="api-card">
+          <div class="api-card-title">카카오 비즈메시지 (솔라피 연동)</div>
+          <div class="api-card-val">정상 연동 (승인 완료)</div>
+          <div class="api-card-desc">
+            • 카카오 발신 채널: <strong>@todaknote</strong> (비즈니스 인증 완료)<br>
+            • 알림톡 템플릿 ID: <strong>KA01TP261113053545740Y0kVMg3uuuG</strong><br>
+            • 발송 타입: ATA (알림톡 우선 발송, 실패 시 LMS 자동 대체)
+          </div>
+        </div>
+
+        <div class="api-card">
+          <div class="api-card-title">전자결제 (PG) 연동 준비</div>
+          <div class="api-card-val">포트원 + 토스페이먼츠 심사 대기</div>
+          <div class="api-card-desc">
+            • 지원 결제: 월 정기결제 (빌링키 자동 결제)<br>
+            • 기본형: 89,000원 / 월 (얼리버드)<br>
+            • 고급형 Pro: 139,000원 / 월 (얼리버드)
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 가입된 병원 목록 불러오기 (localStorage의 회원 데이터 기반)
+    function loadHospitals() {
+      const hospitals = [];
+
+      // 1. 현재 로그인 사용자 확인
+      try {
+        const current = localStorage.getItem('todak_current_user');
+        if (current) {
+          const parsed = JSON.parse(current);
+          if (parsed && parsed.email) {
+            hospitals.push(parsed);
+          }
+        }
+      } catch (e) {}
+
+      // 2. 전체 todak_user_ 키 조회
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('todak_user_')) {
+          try {
+            const user = JSON.parse(localStorage.getItem(key));
+            if (user && !hospitals.some(h => h.email === user.email)) {
+              hospitals.push(user);
+            }
+          } catch (e) {}
+        }
+      }
+
+      // 등록된 병원이 없으면 기본 예시 등록
+      if (hospitals.length === 0) {
+        hospitals.push({
+          hospitalName: '연세바른내과의원',
+          doctorName: '박준혁 원장',
+          email: 'doctor@hospital.com',
+          phone: '010-9344-2378',
+          plan: 'Pro',
+          joinedAt: new Date().toISOString()
+        });
+      }
+
+      renderHospitalTable(hospitals);
+      updateSummaryMetrics(hospitals);
+    }
+
+    function renderHospitalTable(hospitals) {
+      const tbody = document.getElementById('hospitalTableBody');
+      tbody.innerHTML = '';
+
+      hospitals.forEach((h, idx) => {
+        const isPro = (h.plan || 'Pro').toLowerCase() === 'pro';
+        const planPrice = isPro ? 139000 : 89000;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${h.hospitalName || '병원명 미입력'}</strong></td>
+          <td>${h.doctorName || '원장님'}</td>
+          <td style="color: #94a3b8;">${h.email || '-'}</td>
+          <td>${h.phone || '-'}</td>
+          <td>
+            <span class="badge-plan ${isPro ? 'pro' : 'std'}">
+              ${isPro ? '⭐ 고급형 Pro' : '🟢 기본형 Standard'}
+            </span>
+          </td>
+          <td><strong>${planPrice.toLocaleString()}원</strong></td>
+          <td><span class="status-active">정상 이용중</span></td>
+          <td>
+            <button class="btn-action" onclick="togglePlan('${h.email}')">
+              플랜전환
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateSummaryMetrics(hospitals) {
+      document.getElementById('statHospitalCount').textContent = hospitals.length;
+
+      let totalRevenue = 0;
+      hospitals.forEach(h => {
+        const isPro = (h.plan || 'Pro').toLowerCase() === 'pro';
+        totalRevenue += isPro ? 139000 : 89000;
+      });
+
+      document.getElementById('statMonthlyRevenue').textContent = totalRevenue.toLocaleString();
+    }
+
+    function togglePlan(email) {
+      try {
+        const current = JSON.parse(localStorage.getItem('todak_current_user') || '{}');
+        if (current.email === email || !email) {
+          current.plan = (current.plan || 'Pro').toLowerCase() === 'pro' ? 'Standard' : 'Pro';
+          localStorage.setItem('todak_current_user', JSON.stringify(current));
+          if (email) localStorage.setItem('todak_user_' + email, JSON.stringify(current));
+        }
+        loadHospitals();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // 초기 로딩
+    loadHospitals();
+  </script>
+</body>
+
+</html>
+
