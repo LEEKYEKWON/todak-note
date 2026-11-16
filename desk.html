@@ -70,13 +70,18 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
     }
 
     main {
       flex: 1;
-      max-width: 1080px;
+      max-width: 980px;
       width: 100%;
-      margin: 32px auto;
+      margin: 36px auto;
       padding: 0 20px;
       display: flex;
       flex-direction: column;
@@ -108,26 +113,98 @@
       background: #f8fafc;
       color: #64748b;
       font-weight: 700;
-      padding: 12px 14px;
+      padding: 14px 16px;
       border-bottom: 2px solid #e2e8f0;
     }
 
     td {
-      padding: 14px;
+      padding: 16px;
       border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
     }
 
-    .btn-send-now {
-      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .btn-open-setting {
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
       color: white;
       border: none;
-      padding: 8px 14px;
+      padding: 9px 16px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 800;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+      transition: all 0.15s;
+    }
+    .btn-open-setting:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35);
+    }
+
+    /* 📱 데스크 발송 검토 모달 (진료실 화면과 100% 동일한 스마트폰 목업 탑재) */
+    .desk-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .desk-modal-card {
+      background: #ffffff;
+      border-radius: 24px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      position: relative;
+      display: flex;
+      gap: 28px;
+    }
+
+    .modal-left {
+      flex: 1.1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-right {
+      flex: 0.9;
+      display: flex;
+      justify-content: center;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* 스마트폰 목업 */
+    .phone-mockup {
+      width: 320px;
+      height: 620px;
+      background: white;
+      border-radius: 36px;
+      border: 6px solid #0f172a;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.15);
+      overflow-y: auto;
+      padding: 16px;
+      font-size: 13px;
     }
 
     .quick-chip-group {
@@ -141,15 +218,48 @@
       background: #f1f5f9;
       color: #334155;
       border: 1px solid #cbd5e1;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11.5px;
+      padding: 5px 10px;
+      border-radius: 14px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
     }
 
     .quick-chip-btn:hover {
       background: #e2e8f0;
+    }
+
+    .quick-chip-btn.active {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13.5px;
+    }
+
+    .btn-send-final {
+      background: #fee500;
+      color: #191919;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15.5px;
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      box-shadow: 0 4px 12px rgba(254, 229, 0, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-send-final:hover {
+      background: #fedc00;
+      transform: translateY(-1px);
     }
   </style>
 </head>
@@ -163,28 +273,29 @@
     </div>
     <div class="header-nav">
       <a href="clinic.html" class="nav-btn">
-        🩺 진료실 프로그램으로 전환
+        🩺 진료실 프로그램으로 이동
       </a>
     </div>
   </header>
 
   <main>
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <h2 style="font-size: 20px; font-weight: 800; color: #0f172a;">수납 대기 환자 리포트 목록</h2>
-        <span style="font-size: 13px; color: #64748b;">진료실에서 요약 완료 후 넘어온 환자입니다.</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 대기 환자 리포트 목록</h2>
+          <p style="font-size: 13.5px; color: #64748b;">진료실에서 요약 완료 후 넘어온 환자입니다. 수납 시 복약 및 다음 예약을 확인하고 발송하세요.</p>
+        </div>
+        <button class="quick-chip-btn" onclick="loadDeskQueue()">🔄 새로고침</button>
       </div>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>접수시각</th>
-              <th>환자명</th>
-              <th>전화번호</th>
-              <th>진료 핵심 요약</th>
-              <th>복약 / 다음 예약 설정</th>
-              <th>발송</th>
+              <th style="width: 15%;">접수시각</th>
+              <th style="width: 25%;">환자명</th>
+              <th style="width: 30%;">전화번호</th>
+              <th style="width: 30%; text-align: center;">작업</th>
             </tr>
           </thead>
           <tbody id="deskTableBody">
@@ -195,7 +306,88 @@
     </div>
   </main>
 
+  <!-- 📱 2안: 데스크 전용 설정 & 실시간 폰 화면 발송 모달 -->
+  <div class="desk-modal-overlay" id="deskModalOverlay" onclick="closeDeskModal(event)">
+    <div class="desk-modal-card" onclick="event.stopPropagation()">
+      <!-- 좌측: 복약 및 내원일 설정 폼 -->
+      <div class="modal-left">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+          <h3 style="font-size: 18px; font-weight: 800;" id="modalPatientTitle">환자 리포트 검토 및 발송</h3>
+          <button style="border: none; background: none; font-size: 20px; cursor: pointer;" onclick="closeDeskModal()">✕</button>
+        </div>
+
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.5; color: #0369a1;">
+          <strong>📢 원장님 진료 핵심:</strong><br>
+          <span id="modalSummaryPreview" style="color: #1e293b;"></span>
+        </div>
+
+        <!-- 1. 처방약 복용법 설정 -->
+        <div>
+          <span style="font-size: 13px; font-weight: 800; color: #334155;">💊 처방약 복용법 설정:</span>
+          <div class="quick-chip-group">
+            <button type="button" class="quick-chip-btn" onclick="setModalMed('식후 30분(3일분)', this)">식후 30분(3일분)</button>
+            <button type="button" class="quick-chip-btn" onclick="setModalMed('식후 30분(5일분)', this)">식후 30분(5일분)</button>
+            <button type="button" class="quick-chip-btn" onclick="setModalMed('식후 30분(7일분)', this)">식후 30분(7일분)</button>
+            <button type="button" class="quick-chip-btn" onclick="setModalMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
+          </div>
+          <div style="margin-top: 6px;">
+            <input type="text" id="modalMedInput" class="form-input" placeholder="직접 입력: 예) 아침·저녁 1포씩 복용 (14일분)" oninput="updateModalPhoneView()">
+          </div>
+        </div>
+
+        <!-- 2. 다음 내원일 달력 / 시각 설정 -->
+        <div style="border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+          <span style="font-size: 13px; font-weight: 800; color: #334155;">🗓️ 다음 내원일 (달력/시각 선택):</span>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <input type="date" id="modalDatePicker" class="form-input" style="flex: 1;" onchange="updateModalDateFromPicker()">
+            <input type="time" id="modalTimePicker" class="form-input" style="flex: 0.8;" onchange="updateModalDateFromPicker()">
+          </div>
+          <div class="quick-chip-group">
+            <button type="button" class="quick-chip-btn" onclick="setModalDatePreset(3)">3일 뒤</button>
+            <button type="button" class="quick-chip-btn" onclick="setModalDatePreset(7)">1주일 뒤</button>
+            <button type="button" class="quick-chip-btn" onclick="setModalDatePreset(14)">2주일 뒤</button>
+          </div>
+          <div style="margin-top: 6px;">
+            <input type="text" id="modalNoticeInput" class="form-input" placeholder="안내 메모: 예) 수납 데스크 예약 확인" oninput="updateModalPhoneView()">
+          </div>
+        </div>
+
+        <button type="button" class="btn-send-final" onclick="submitDeskSend()">
+          📲 확인 완료 & 환자 카카오 알림톡 발송
+        </button>
+      </div>
+
+      <!-- 우측: 스마트폰 실시간 미리보기 목업 -->
+      <div class="modal-right">
+        <div class="phone-mockup">
+          <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 10px;">
+            <span style="font-size: 11px; color: #0284c7; font-weight: 800;">🏥 안심 진료노트</span>
+            <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;" id="phonePatientName">김영희 님</div>
+          </div>
+
+          <div style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">📢 원장님 말씀 요약</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #334155;" id="phoneSummary"></div>
+          </div>
+
+          <div style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">💊 처방된 약 & 복용법</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #059669; font-weight: 700;" id="phoneMed"></div>
+          </div>
+
+          <div style="background: #eff6ff; border-left: 3px solid #0284c7; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 4px;">🗓️ 다음 병원 오시는 날</div>
+            <div style="font-size: 13px; font-weight: 800; color: #0284c7;" id="phoneNextDate"></div>
+            <div style="font-size: 11px; color: #1e3a8a; margin-top: 2px;" id="phoneNextNotice"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let activeQueueIndex = -1;
+
     function loadDeskQueue() {
       const tbody = document.getElementById('deskTableBody');
       const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
@@ -203,9 +395,10 @@
       if (queue.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
-              현재 데스크로 전달된 대기 환자가 없습니다.<br>
-              진료실에서 [📋 데스크로 전달] 버튼을 누르면 여기에 즉시 나타납니다.
+            <td colspan="4" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+              <span style="font-size: 32px; display: block; margin-bottom: 8px;">📭</span>
+              현재 대기 중인 환자가 없습니다.<br>
+              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 여기에 즉시 나타납니다.
             </td>
           </tr>
         `;
@@ -216,26 +409,12 @@
       queue.forEach((item, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="color: #64748b; font-size: 12.5px;">${item.createdAt || '방금'}</td>
+          <td style="color: #64748b; font-size: 13px; font-weight: 600;">${item.createdAt || '방금'}</td>
           <td><strong>${item.patientName}</strong></td>
-          <td>${item.phone}</td>
-          <td style="max-width: 280px; font-size: 13px; line-height: 1.4; color: #334155;">
-            ${item.summary ? item.summary.slice(0, 60) + '...' : '정상 소견'}
-          </td>
-          <td>
-            <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin-bottom: 4px;">
-              • 복약: ${item.medication || '약국 안내 참고'}<br>
-              • 내원: ${item.nextDate || '데스크 확인'}
-            </div>
-            <div class="quick-chip-group">
-              <button class="quick-chip-btn" onclick="updateItemMed(${idx}, '하루 3번 식후 30분 (3일분)')">3일분</button>
-              <button class="quick-chip-btn" onclick="updateItemMed(${idx}, '아침·저녁 식후 (5일분)')">5일분</button>
-              <button class="quick-chip-btn" onclick="updateItemNext(${idx}, 7)">1주일 뒤</button>
-            </div>
-          </td>
-          <td>
-            <button class="btn-send-now" onclick="sendDeskReport(${idx})">
-              📲 카톡 발송
+          <td style="color: #334155;">${item.phone}</td>
+          <td style="text-align: center;">
+            <button class="btn-open-setting" onclick="openDeskModal(${idx})">
+              ⚙️ 복약/다음 예약 설정 및 발송
             </button>
           </td>
         `;
@@ -243,34 +422,91 @@
       });
     }
 
-    function updateItemMed(idx, text) {
-      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
-      if (queue[idx]) {
-        queue[idx].medication = text;
-        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
-        loadDeskQueue();
-      }
-    }
-
-    function updateItemNext(idx, daysAfter) {
-      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
-      if (queue[idx]) {
-        const d = new Date();
-        d.setDate(d.getDate() + daysAfter);
-        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-        queue[idx].nextDate = `${d.getMonth() + 1}월 ${d.getDate()}일(${dayNames[d.getDay()]})`;
-        queue[idx].nextNotice = `${daysAfter}일 뒤 경과 관찰을 위해 내원`;
-        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
-        loadDeskQueue();
-      }
-    }
-
-    async function sendDeskReport(idx) {
+    function openDeskModal(idx) {
+      activeQueueIndex = idx;
       const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
       const item = queue[idx];
       if (!item) return;
 
-      if (!confirm(`${item.patientName} 환자분께 리포트 알림톡을 발송하시겠습니까?\n\n• 복약: ${item.medication}\n• 내원: ${item.nextDate}`)) return;
+      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 및 발송`;
+      document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
+      document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
+      document.getElementById('modalNoticeInput').value = item.nextNotice || '데스크 예약 일정';
+
+      // 폰 목업 초기 렌더링
+      document.getElementById('phonePatientName').innerText = item.patientName;
+      document.getElementById('phoneSummary').innerText = item.summary || '정상 소견';
+      
+      updateModalPhoneView();
+      document.getElementById('deskModalOverlay').style.display = 'flex';
+    }
+
+    function closeDeskModal(e) {
+      if (e && e.target && e.target.id !== 'deskModalOverlay' && !e.target.classList.contains('desk-modal-overlay')) {
+        return;
+      }
+      document.getElementById('deskModalOverlay').style.display = 'none';
+      activeQueueIndex = -1;
+    }
+
+    function setModalMed(medText, btnEl) {
+      document.getElementById('modalMedInput').value = medText;
+      document.querySelectorAll('#deskModalOverlay .quick-chip-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      updateModalPhoneView();
+    }
+
+    function setModalDatePreset(daysAfter) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysAfter);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      document.getElementById('modalDatePicker').value = `${yyyy}-${mm}-${dd}`;
+      updateModalDateFromPicker();
+    }
+
+    function updateModalDateFromPicker() {
+      const dateVal = document.getElementById('modalDatePicker').value;
+      const timeVal = document.getElementById('modalTimePicker').value;
+      if (!dateVal) return;
+
+      const d = new Date(dateVal);
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      let formatted = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일(${dayNames[d.getDay()]})`;
+      if (timeVal) formatted += ` ${timeVal}`;
+
+      document.getElementById('phoneNextDate').innerText = formatted;
+      updateModalPhoneView();
+    }
+
+    function updateModalPhoneView() {
+      const medText = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
+      const noticeText = document.getElementById('modalNoticeInput').value.trim() || '데스크 예약 확인';
+      const dateVal = document.getElementById('modalDatePicker').value;
+      const timeVal = document.getElementById('modalTimePicker').value;
+
+      document.getElementById('phoneMed').innerText = medText;
+      document.getElementById('phoneNextNotice').innerText = noticeText;
+
+      if (!dateVal) {
+        document.getElementById('phoneNextDate').innerText = '수납 데스크 예약 확인';
+      }
+    }
+
+    async function submitDeskSend() {
+      if (activeQueueIndex < 0) return;
+      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      const item = queue[activeQueueIndex];
+      if (!item) return;
+
+      const finalMed = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
+      const finalNextDate = document.getElementById('phoneNextDate').innerText;
+      const finalNotice = document.getElementById('modalNoticeInput').value.trim();
+
+      if (!confirm(`${item.patientName} 환자분께 알림톡을 발송하시겠습니까?\n\n• 복약: ${finalMed}\n• 내원: ${finalNextDate}`)) {
+        return;
+      }
 
       try {
         const res = await fetch('/api/send-sms', {
@@ -281,14 +517,15 @@
             patientName: item.patientName,
             hospitalName: '연세바른내과의원',
             summary: item.summary,
-            medication: item.medication,
-            nextDate: item.nextDate
+            medication: finalMed,
+            nextDate: finalNextDate
           })
         });
 
         alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
-        queue.splice(idx, 1);
+        queue.splice(activeQueueIndex, 1);
         localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
+        document.getElementById('deskModalOverlay').style.display = 'none';
         loadDeskQueue();
       } catch (e) {
         alert("발송 오류: " + e.message);
@@ -300,4 +537,3 @@
 </body>
 
 </html>
-
