@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
 
 [최우선 필수 판별]
 입력된 스크립트가 실제 의사-환자 간의 진료 대화(환자의 질환, 증상, 진단, 처방약, 치료 지침 등)인지 확인하세요.
-만약 원장님과 직원/간호사 간의 잡담/업무지시(예: "김 간호사 주문한 거 언제 들어온대"), 인사, 일상 잡담, 의미 없는 파편일 경우 반드시 아래와 같이 응답하세요:
+만약 원장님과 직원/간호사 간의 잡담/업무지시(예: "김 간호사 주문한 거 언제 들어온대"), 안부 인사, 일상 잡담, 의미 없는 파편일 경우 반드시 아래와 같이 isMedicalDialogue: false 로 응답하세요:
 {
   "isMedicalDialogue": false,
   "reason": "원장님/직원 간의 업무 대화 또는 진료와 무관한 일상 대화로 감지되었습니다."
@@ -44,14 +44,10 @@ module.exports = async (req, res) => {
   "isMedicalDialogue": true,
   "greeting": "${patientNameClean}, 오늘 진료받으시느라 수고 많으셨습니다.",
   "diagnosisSummary": "대화에 언급된 실제 진단과 상태 요약",
-  "medicationGuide": "처방된 약 복용 안내",
+  "medicationGuide": "처방된 약 복용 안내 (언급 없으면 처방전 참고 안내)",
   "lifestyleCare": ["생활 관리 수칙 1", "생활 관리 수칙 2"],
   "nextVisitDate": "재방문 안내",
   "cheeringMessage": "환자를 위한 따뜻한 응원 문장"
-}`;
-  ],
-  "nextVisitDate": "재방문 권장 일자 (예: ${currentMonth}월 12일(목) 또는 증상 지속 시 내원)",
-  "cheeringMessage": "환자의 빠른 쾌유를 진심으로 응원하는 따뜻한 마무리 문장 (1~2문장)"
 }`;
 
     const payload = JSON.stringify({
@@ -96,7 +92,7 @@ module.exports = async (req, res) => {
             res.status(500).json({ error: 'AI 응답 파싱 실패', raw: parsed });
           }
         } catch (e) {
-          res.status(500).json({ error: e.message });
+          res.status(500).json({ error: e.message, raw: gptData });
         }
       });
     });
@@ -112,4 +108,3 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
