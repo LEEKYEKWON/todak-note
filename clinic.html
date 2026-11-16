@@ -717,6 +717,147 @@
       display: none;
       z-index: 9999;
     }
+    /* 모던 업그레이드 모달 팝업 */
+    .pro-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeInModal 0.2s ease-out;
+    }
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .pro-modal-card {
+      background: #ffffff;
+      border-radius: 24px;
+      max-width: 460px;
+      width: 100%;
+      padding: 34px 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      position: relative;
+      text-align: center;
+      animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUpModal {
+      from { transform: translateY(20px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .pro-modal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 12.5px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+    .pro-modal-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .pro-modal-desc {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+    .pro-benefit-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px 20px;
+      text-align: left;
+      margin-bottom: 22px;
+    }
+    .pro-benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 11px;
+    }
+    .pro-benefit-item:last-child {
+      margin-bottom: 0;
+    }
+    .pro-benefit-icon {
+      width: 22px;
+      height: 22px;
+      background: #e0f2fe;
+      color: #0284c7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .pro-price-notice {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 24px;
+      font-size: 13.5px;
+      color: #92400e;
+      font-weight: 700;
+    }
+    .pro-modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-modal-cancel {
+      flex: 1;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 13px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-modal-cancel:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .btn-modal-upgrade {
+      flex: 1.6;
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+      color: white;
+      border: none;
+      padding: 13px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-modal-upgrade:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body class="theme-sky">
@@ -941,6 +1082,45 @@
 
   <div class="toast" id="toast">메시지</div>
 
+  <!-- 고급형(Pro) 업그레이드 전용 모던 모달 -->
+  <div class="pro-modal-overlay" id="proModalOverlay" onclick="closeProModal(event)">
+    <div class="pro-modal-card" onclick="event.stopPropagation()">
+      <div class="pro-modal-badge">⭐ 고급형 Pro 전용 혜택</div>
+      <h3 class="pro-modal-title">병원 경영 대시보드 안내</h3>
+      <p class="pro-modal-desc">
+        경영 대시보드는 <strong>고급형(Pro) 플랜</strong>에서 제공되는 프리미엄 기능입니다.
+      </p>
+
+      <div class="pro-benefit-box">
+        <div class="pro-benefit-item">
+          <div class="pro-benefit-icon">✓</div>
+          <span>기본형의 모든 기능 포함</span>
+        </div>
+        <div class="pro-benefit-item">
+          <div class="pro-benefit-icon">✓</div>
+          <span>병원 경영 통계 대시보드</span>
+        </div>
+        <div class="pro-benefit-item">
+          <div class="pro-benefit-icon">✓</div>
+          <span>재방문일 카카오톡 자동 안내 (노쇼 방지)</span>
+        </div>
+        <div class="pro-benefit-item">
+          <div class="pro-benefit-icon">✓</div>
+          <span>환자 수신 리포트 내 우리 병원 전용 로고 탑재</span>
+        </div>
+      </div>
+
+      <div class="pro-price-notice">
+        월 50,000원 추가로 지금 바로 업그레이드하시겠습니까?
+      </div>
+
+      <div class="pro-modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeProModal()">취소</button>
+        <button type="button" class="btn-modal-upgrade" onclick="confirmProUpgrade()">고급형 Pro로 업그레이드</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let isRecording = false;
     let recognition = null;
@@ -1021,34 +1201,40 @@
       const isPro = user.plan && user.plan.toLowerCase() === 'pro';
 
       if (!isPro) {
-        e.preventDefault(); // 기본 이동 차단
-        const ok = confirm("🔒 [고급형 Pro 전용 기능 안내]\n\n'병원 경영 대시보드'는 고급형(Pro) 플랜 이용 시 제공되는 기능입니다.\n\n📊 주요 제공 혜택:\n- 환자 재방문율 및 진료 요약 통계\n- 네이버 영수증 리뷰 연동 현황 분석\n- 병원 전용 CI 로고 브랜딩\n\n월 50,000원 추가로 지금 바로 [고급형 Pro]로 업그레이드하시겠습니까?");
-        if (ok) {
-          user.plan = 'pro';
-          localStorage.setItem('todak_current_user', JSON.stringify(user));
-          if (user.email) {
-            localStorage.setItem('todak_user_' + user.email, JSON.stringify(user));
-          }
-          renderHospitalHeader();
-          alert("🎉 축하합니다! [고급형 Pro]로 업그레이드되었습니다.\n경영 대시보드로 이동합니다.");
-          window.location.href = 'admin.html';
-        }
+        e.preventDefault(); // 기본 이동 차단하고 세련된 모달 열기
+        openProModal();
       }
     }
 
-    function handleUpgradePlan() {
-      const ok = confirm("⭐ [토닥토닥노트 고급형(Pro) 플랜 업그레이드]\n\n고급형으로 업그레이드하시면 제공되는 혜택:\n1. 📊 병원 경영 대시보드 (환자 통계 및 재방문 추이 분석)\n2. 🗓️ 다음 내원일 알림 자동 발송 (노쇼 방지)\n3. ⭐ 네이버 영수증 리뷰 연동 무제한\n\n지금 바로 [고급형 Pro]로 업그레이드하시겠습니까?");
-      if (ok) {
-        let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
-        const userStr = localStorage.getItem('todak_current_user');
-        if (userStr) {
-          try { user = JSON.parse(userStr); } catch (e) { }
-        }
-        user.plan = 'pro';
-        localStorage.setItem('todak_current_user', JSON.stringify(user));
-        renderHospitalHeader();
-        alert("🎉 축하합니다! [고급형 Pro]로 성공적으로 업그레이드되었습니다.\n상단에 '병원 경영 대시보드' 버튼이 활성화되었습니다!");
+    function openProModal() {
+      const modal = document.getElementById('proModalOverlay');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeProModal() {
+      const modal = document.getElementById('proModalOverlay');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function confirmProUpgrade() {
+      let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try { user = JSON.parse(userStr); } catch (e) { }
       }
+      user.plan = 'pro';
+      localStorage.setItem('todak_current_user', JSON.stringify(user));
+      if (user.email) {
+        localStorage.setItem('todak_user_' + user.email, JSON.stringify(user));
+      }
+      closeProModal();
+      renderHospitalHeader();
+      alert("🎉 축하합니다! [고급형 Pro]로 업그레이드되었습니다.\n경영 대시보드로 이동합니다.");
+      window.location.href = 'admin.html';
+    }
+
+    function handleUpgradePlan() {
+      openProModal();
     }
 
     function promptApiKey() {
