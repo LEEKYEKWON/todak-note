@@ -1327,8 +1327,8 @@
       let text = liveTranscript.innerText.trim();
       text = text.replace('진료실 대화가 여기에 실시간으로 기록됩니다...', '').trim();
 
-      if (!text || text.length < 5) {
-        alert("기록된 대화 내용이 없습니다! 마이크를 켜고 말씀하시거나 텍스트를 입력해 주세요.");
+      if (!text || text.length < 10) {
+        alert("기록된 대화 내용이 너무 짧습니다!\n진료실 대화가 충분히 녹음되었는지 확인해 주세요. (최소 10자 이상)");
         recordStatus.innerText = '대화 내용이 부족합니다.';
         return;
       }
@@ -1361,6 +1361,13 @@
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error?.message || data.error || `서버 에러 (${res.status})`);
+
+        // 🧠 AI의 진료 대화 유효성 검증 실패 처리
+        if (data.isMedicalDialogue === false) {
+          recordStatus.innerHTML = '<span style="color:#e11d48; font-weight:bold;">⚠️ 유효한 진료 대화가 확인되지 않았습니다.</span>';
+          alert("📢 [진료 내용 확인 불가]\n\n" + (data.reason || "녹음된 내용에서 유효한 진료 내용을 확인할 수 없습니다.") + "\n\n실수로 녹음되었거나 단순 일상 대화일 수 있으니, 마이크를 켜고 실제 진료 내용을 다시 녹음해 주세요.");
+          return;
+        }
 
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
         document.getElementById('analysisTime').innerText = `GPT-4o-mini 생성 완료: ${elapsed}초 ✨`;
