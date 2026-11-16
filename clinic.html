@@ -1362,22 +1362,19 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error?.message || data.error || `서버 에러 (${res.status})`);
 
-        // 🧠 AI의 진료 대화 유효성 검증 실패 처리
-        if (data.isMedicalDialogue === false) {
+        const normSummary = (data.summary || data.diagnosisSummary || '').trim();
+        const normMed = (data.medication || data.medicationGuide || '').trim();
+        const normNextDate = (data.nextDate || data.nextVisitDate || '').trim();
+        const normNextNotice = (data.nextNotice || data.nextVisitNotice || '').trim();
+        const normTips = (data.lifestyleTips || (Array.isArray(data.lifestyleCare) ? data.lifestyleCare.join('\n') : data.lifestyleCare) || '').trim();
+        const normWarm = (data.warmMessage || data.cheeringMessage || '').trim();
+
+        // 🧠 AI의 진료 대화 유효성 검증 실패 처리 (플래그가 false이거나, 주요 요약 내용이 완전히 공란인 경우 차단)
+        if (data.isMedicalDialogue === false || (!normSummary && !normMed)) {
           recordStatus.innerHTML = '<span style="color:#e11d48; font-weight:bold;">⚠️ 유효한 진료 대화가 확인되지 않았습니다.</span>';
-          alert("📢 [진료 내용 확인 불가]\n\n" + (data.reason || "녹음된 내용에서 유효한 진료 내용을 확인할 수 없습니다.") + "\n\n실수로 녹음되었거나 단순 일상 대화일 수 있으니, 마이크를 켜고 실제 진료 내용을 다시 녹음해 주세요.");
+          alert("📢 [진료 내용 확인 불가]\n\n" + (data.reason || "녹음된 대화에서 환자의 증상이나 진료 내용을 확인할 수 없습니다.") + "\n\n직원 간의 업무 대화나 단순 일상 대화가 아닌, 실제 환자 진료 내용을 녹음해 주세요.");
           return;
         }
-
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        document.getElementById('analysisTime').innerText = `GPT-4o-mini 생성 완료: ${elapsed}초 ✨`;
-
-        const normSummary = data.summary || data.diagnosisSummary || '';
-        const normMed = data.medication || data.medicationGuide || '';
-        const normNextDate = data.nextDate || data.nextVisitDate || '';
-        const normNextNotice = data.nextNotice || data.nextVisitNotice || '';
-        const normTips = data.lifestyleTips || (Array.isArray(data.lifestyleCare) ? data.lifestyleCare.join('\n') : data.lifestyleCare) || '';
-        const normWarm = data.warmMessage || data.cheeringMessage || '';
 
         parsedResult = {
           summary: normSummary,
