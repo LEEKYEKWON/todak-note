@@ -489,6 +489,42 @@
       margin-bottom: 14px;
     }
 
+    /* 퀵 칩 버튼 스타일 (1초 세팅) */
+    .quick-chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .quick-chip-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .quick-chip-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: translateY(-1px);
+    }
+    .quick-chip-btn.active {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+    .quick-chip-btn.med-chip.active {
+      background: #059669;
+      border-color: #059669;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+    }
+
     .action-buttons {
       display: flex;
       gap: 10px;
@@ -872,6 +908,9 @@
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
     <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="desk.html" class="dashboard-nav-link" style="background: rgba(2, 132, 199, 0.1); border-color: #38bdf8;" title="수납 데스크 대기열 및 발송 모드">
+        📋 데스크 모드
+      </a>
       <a href="settings.html" class="dashboard-nav-link" title="병원 프로필 및 구독 요금제 관리">
         마이페이지
       </a>
@@ -963,6 +1002,37 @@
             • <strong>다음 내원:</strong> <span id="viewNextDateText" style="color:#0284c7; font-weight:700;"></span> (<span id="viewNextNoticeText"></span>)
           </div>
 
+          <!-- ⚡ 1초 원클릭 퀵 템플릿 바 (현장 편의성 극대화) -->
+          <div style="background: white; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="font-size: 12.5px; font-weight: 800; color: #0284c7; display: flex; align-items: center; gap: 5px;">
+              ⚡ <span>1초 빠른 세팅 (클릭 시 리포트에 즉시 반영)</span>
+            </div>
+
+            <!-- 약 복용법 퀵 칩 -->
+            <div style="margin-top: 8px;">
+              <span style="font-size: 11.5px; font-weight: 700; color: #64748b;">💊 약 복용법:</span>
+              <div class="quick-chip-group">
+                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('하루 3번 식후 30분 복용 (3일분)', this)">식후 30분 (3일분)</button>
+                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('아침·저녁 하루 2번 식후 복용 (5일분)', this)">아침·저녁 (5일분)</button>
+                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('하루 3번 식후 30분 복용 (7일분)', this)">식후 30분 (7일분)</button>
+                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('필요 시(통증/열 발생 시) 1포씩 복용', this)">필요 시 복용</button>
+                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
+              </div>
+            </div>
+
+            <!-- 다음 내원일 퀵 칩 -->
+            <div style="margin-top: 4px;">
+              <span style="font-size: 11.5px; font-weight: 700; color: #64748b;">🗓️ 다음 내원일:</span>
+              <div class="quick-chip-group">
+                <button type="button" class="quick-chip-btn" onclick="applyQuickNextDate(3, '3일 뒤 경과 관찰을 위해 내원', this)">3일 뒤</button>
+                <button type="button" class="quick-chip-btn" onclick="applyQuickNextDate(5, '5일 뒤 내원', this)">5일 뒤</button>
+                <button type="button" class="quick-chip-btn" onclick="applyQuickNextDate(7, '1주일 뒤 정기 검진을 위해 내원', this)">1주일 뒤</button>
+                <button type="button" class="quick-chip-btn" onclick="applyQuickNextDate(14, '2주일 뒤 내원', this)">2주일 뒤</button>
+                <button type="button" class="quick-chip-btn" onclick="applyQuickNextDate(0, '수납 데스크에서 예약 일정을 안내해 드립니다.', this)">데스크 예약 안내</button>
+              </div>
+            </div>
+          </div>
+
           <!-- 편집 모드 (내용 수정 클릭 시 열림) -->
           <div class="summary-edit-mode" id="summaryEditMode" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 14px;">
             <div>
@@ -988,7 +1058,8 @@
           <div class="action-buttons">
             <button class="btn" id="editToggleBtn" style="background: white; border: 1px solid #cbd5e1; color: #475569;" onclick="toggleEditMode()">✏️ 내용 수정</button>
             <button class="btn" id="saveEditBtn" style="background: #059669; color: white; display: none;" onclick="saveEditMode()">💾 수정 완료</button>
-            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 확인 및 환자 카톡 발송 (Enter)</button>
+            <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" onclick="sendToDeskQueue()">📋 데스크로 전달</button>
+            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송 (Enter)</button>
           </div>
         </div>
       </div>
@@ -1425,6 +1496,50 @@
       }
     }
 
+    // ⚡ 1초 퀵 칩 적용 함수 (약 복용법 & 내원일)
+    function applyQuickMed(medText, btnEl) {
+      if (!parsedResult) return;
+      parsedResult.medication = medText;
+      document.getElementById('viewMedText').innerText = medText;
+      document.getElementById('editMedInput').value = medText;
+      document.getElementById('reportMedText').innerText = medText;
+
+      // 활성화 버튼 하이라이트
+      document.querySelectorAll('.med-chip').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      showToast(`💊 복약 안내가 '${medText}'(으)로 설정되었습니다.`);
+    }
+
+    function applyQuickNextDate(daysAfter, noticeText, btnEl) {
+      if (!parsedResult) return;
+
+      let dateString = '';
+      if (daysAfter === 0) {
+        dateString = '데스크 예약 확인';
+      } else {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + daysAfter);
+        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        dateString = `${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일(${dayNames[targetDate.getDay()]})`;
+      }
+
+      parsedResult.nextDate = dateString;
+      parsedResult.nextNotice = noticeText;
+
+      document.getElementById('viewNextDateText').innerText = dateString;
+      document.getElementById('viewNextNoticeText').innerText = noticeText;
+      document.getElementById('editNextDateInput').value = dateString;
+      document.getElementById('editNextNoticeInput').value = noticeText;
+
+      document.getElementById('reportNextDate').innerText = dateString;
+      document.getElementById('reportNextNotice').innerText = noticeText;
+
+      // 활성화 버튼 하이라이트
+      document.querySelectorAll('.quick-chip-btn:not(.med-chip)').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      showToast(`🗓️ 다음 내원일이 '${dateString}'(으)로 설정되었습니다.`);
+    }
+
     function toggleEditMode() {
       if (!parsedResult) return;
       isEditing = true;
@@ -1463,6 +1578,36 @@
       document.getElementById('saveEditBtn').style.display = 'none';
       document.getElementById('editToggleBtn').style.display = 'block';
       showToast('💾 수정 내용이 저장되었습니다!');
+    }
+
+    function sendToDeskQueue() {
+      if (!parsedResult) return;
+      const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
+      const pAge = document.getElementById('patientAge').value.trim();
+      const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
+      const pPhone = document.getElementById('patientPhone').value.trim();
+
+      const queueItem = {
+        id: 'desk_' + Date.now(),
+        patientName: pDisplayName,
+        phone: pPhone,
+        summary: parsedResult.summary,
+        medication: parsedResult.medication,
+        nextDate: parsedResult.nextDate,
+        nextNotice: parsedResult.nextNotice,
+        lifestyleTips: parsedResult.lifestyleTips,
+        warmMessage: parsedResult.warmMessage,
+        createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      try {
+        const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+        queue.unshift(queueItem);
+        localStorage.setItem('todak_desk_queue', JSON.stringify(queue.slice(0, 20))); // 최근 20건 보관
+      } catch (e) {}
+
+      alert(`📋 [수납 데스크 전달 완료]\n\n${pDisplayName}의 리포트가 수납 데스크로 안전하게 전달되었습니다.\n수납 및 다음 예약 시 데스크에서 최종 발송할 수 있습니다.`);
+      showToast('📋 수납 데스크 대기열로 전달되었습니다.');
     }
 
     async function sendReport() {

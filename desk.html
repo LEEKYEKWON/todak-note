@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>토닥토닥노트 - 수납 데스크 환자 리포트 발송</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      word-break: keep-all;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+    }
+
+    .header-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: #0284c7;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1080px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 26px 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #64748b;
+      font-weight: 700;
+      padding: 12px 14px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .btn-send-now {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+    }
+
+    .quick-chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .quick-chip-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .quick-chip-btn:hover {
+      background: #e2e8f0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="logo-img">
+      <h1 class="header-title">📋 토닥토닥노트 수납 데스크 발송 모드</h1>
+    </div>
+    <div class="header-nav">
+      <a href="clinic.html" class="nav-btn">
+        🩺 진료실 프로그램으로 전환
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h2 style="font-size: 20px; font-weight: 800; color: #0f172a;">수납 대기 환자 리포트 목록</h2>
+        <span style="font-size: 13px; color: #64748b;">진료실에서 요약 완료 후 넘어온 환자입니다.</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>접수시각</th>
+              <th>환자명</th>
+              <th>전화번호</th>
+              <th>진료 핵심 요약</th>
+              <th>복약 / 다음 예약 설정</th>
+              <th>발송</th>
+            </tr>
+          </thead>
+          <tbody id="deskTableBody">
+            <!-- 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function loadDeskQueue() {
+      const tbody = document.getElementById('deskTableBody');
+      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+
+      if (queue.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
+              현재 데스크로 전달된 대기 환자가 없습니다.<br>
+              진료실에서 [📋 데스크로 전달] 버튼을 누르면 여기에 즉시 나타납니다.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      queue.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color: #64748b; font-size: 12.5px;">${item.createdAt || '방금'}</td>
+          <td><strong>${item.patientName}</strong></td>
+          <td>${item.phone}</td>
+          <td style="max-width: 280px; font-size: 13px; line-height: 1.4; color: #334155;">
+            ${item.summary ? item.summary.slice(0, 60) + '...' : '정상 소견'}
+          </td>
+          <td>
+            <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin-bottom: 4px;">
+              • 복약: ${item.medication || '약국 안내 참고'}<br>
+              • 내원: ${item.nextDate || '데스크 확인'}
+            </div>
+            <div class="quick-chip-group">
+              <button class="quick-chip-btn" onclick="updateItemMed(${idx}, '하루 3번 식후 30분 (3일분)')">3일분</button>
+              <button class="quick-chip-btn" onclick="updateItemMed(${idx}, '아침·저녁 식후 (5일분)')">5일분</button>
+              <button class="quick-chip-btn" onclick="updateItemNext(${idx}, 7)">1주일 뒤</button>
+            </div>
+          </td>
+          <td>
+            <button class="btn-send-now" onclick="sendDeskReport(${idx})">
+              📲 카톡 발송
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateItemMed(idx, text) {
+      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      if (queue[idx]) {
+        queue[idx].medication = text;
+        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
+        loadDeskQueue();
+      }
+    }
+
+    function updateItemNext(idx, daysAfter) {
+      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      if (queue[idx]) {
+        const d = new Date();
+        d.setDate(d.getDate() + daysAfter);
+        const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        queue[idx].nextDate = `${d.getMonth() + 1}월 ${d.getDate()}일(${dayNames[d.getDay()]})`;
+        queue[idx].nextNotice = `${daysAfter}일 뒤 경과 관찰을 위해 내원`;
+        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
+        loadDeskQueue();
+      }
+    }
+
+    async function sendDeskReport(idx) {
+      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      const item = queue[idx];
+      if (!item) return;
+
+      if (!confirm(`${item.patientName} 환자분께 리포트 알림톡을 발송하시겠습니까?\n\n• 복약: ${item.medication}\n• 내원: ${item.nextDate}`)) return;
+
+      try {
+        const res = await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: item.phone,
+            patientName: item.patientName,
+            hospitalName: '연세바른내과의원',
+            summary: item.summary,
+            medication: item.medication,
+            nextDate: item.nextDate
+          })
+        });
+
+        alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
+        queue.splice(idx, 1);
+        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
+        loadDeskQueue();
+      } catch (e) {
+        alert("발송 오류: " + e.message);
+      }
+    }
+
+    loadDeskQueue();
+  </script>
+</body>
+
+</html>
+
