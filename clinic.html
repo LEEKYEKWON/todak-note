@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토닥토닥노트 - 의사용 진료실 PC 프로그램 (실전 AI)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,6 +16,7 @@
       padding: 0;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
+
     body {
       background-color: #f1f5f9;
       color: #1e293b;
@@ -21,6 +24,7 @@
       display: flex;
       flex-direction: column;
     }
+
     header {
       background: white;
       border-bottom: 1px solid #e2e8f0;
@@ -29,11 +33,13 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .logo-area {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .logo-img {
       width: 40px;
       height: 40px;
@@ -42,23 +48,28 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       border: 1px solid #e2e8f0;
     }
+
     .logo-title {
       font-size: 19px;
       font-weight: 800;
       color: #0f172a;
     }
+
     /* 테마별 스타일 정의 */
     /* 1안: 소프트 스카이 블루 */
     body.theme-sky {
       background-color: #f0f7ff;
     }
+
     body.theme-sky header {
       background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
       border-bottom: 1px solid #0284c7;
     }
+
     body.theme-sky .logo-title {
       color: #ffffff;
     }
+
     body.theme-sky .theme-selector-label {
       color: rgba(255, 255, 255, 0.9);
     }
@@ -67,13 +78,16 @@
     body.theme-green {
       background-color: #f0fdf4;
     }
+
     body.theme-green header {
       background: linear-gradient(135deg, #059669 0%, #10b981 100%);
       border-bottom: 1px solid #047857;
     }
+
     body.theme-green .logo-title {
       color: #ffffff;
     }
+
     body.theme-green .theme-selector-label {
       color: rgba(255, 255, 255, 0.9);
     }
@@ -82,13 +96,16 @@
     body.theme-lavender {
       background-color: #f5f3ff;
     }
+
     body.theme-lavender header {
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       border-bottom: 1px solid #4338ca;
     }
+
     body.theme-lavender .logo-title {
       color: #ffffff;
     }
+
     body.theme-lavender .theme-selector-label {
       color: rgba(255, 255, 255, 0.9);
     }
@@ -97,13 +114,16 @@
     body.theme-yellow {
       background-color: #fffbeb;
     }
+
     body.theme-yellow header {
       background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
       border-bottom: 1px solid #b45309;
     }
+
     body.theme-yellow .logo-title {
       color: #ffffff;
     }
+
     body.theme-yellow .theme-selector-label {
       color: rgba(255, 255, 255, 0.95);
     }
@@ -112,13 +132,16 @@
     body.theme-orange {
       background-color: #fff7ed;
     }
+
     body.theme-orange header {
       background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
       border-bottom: 1px solid #c2410c;
     }
+
     body.theme-orange .logo-title {
       color: #ffffff;
     }
+
     body.theme-orange .theme-selector-label {
       color: rgba(255, 255, 255, 0.95);
     }
@@ -127,13 +150,16 @@
     body.theme-white {
       background-color: #f1f5f9;
     }
+
     body.theme-white header {
       background: #ffffff;
       border-bottom: 1px solid #e2e8f0;
     }
+
     body.theme-white .logo-title {
       color: #0f172a;
     }
+
     body.theme-white .theme-selector-label {
       color: #475569;
     }
@@ -143,64 +169,81 @@
       background-color: #0f172a;
       color: #f8fafc;
     }
+
     body.theme-black header {
       background: #020617;
       border-bottom: 1px solid #1e293b;
     }
+
     body.theme-black .logo-title {
       color: #ffffff;
     }
+
     body.theme-black .theme-selector-label {
       color: rgba(255, 255, 255, 0.9);
     }
+
     body.theme-black .section-title {
       color: #f1f5f9;
     }
+
     body.theme-black .card {
       background: #1e293b;
       border-color: #334155;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
     }
+
     body.theme-black .input-box-wrapper {
       background: #0f172a;
       border-color: #334155;
     }
+
     body.theme-black .input-label {
       color: #94a3b8;
     }
+
     body.theme-black .input-unit {
       color: #64748b;
     }
+
     body.theme-black .input-field-clean {
       color: #f8fafc;
     }
+
     body.theme-black .mic-control-box {
       background: #0f172a;
       border-color: #334155;
     }
+
     body.theme-black .record-status-text {
       color: #e2e8f0;
     }
+
     body.theme-black .realtime-live-transcript {
       background: #020617;
       border-color: #334155;
       color: #f1f5f9;
     }
+
     body.theme-black .section-header span {
       color: #f8fafc !important;
     }
+
     body.theme-black .section-title,
     body.theme-black .section-title span {
       color: #ffffff !important;
     }
+
     body.theme-black .patient-side .section-title span {
       color: #ffffff !important;
     }
+
     .shortcut-guide-text {
       font-size: 13px;
       color: #64748b;
       font-weight: 500;
     }
+
     body.theme-black .shortcut-guide-text {
       color: #ffffff !important;
     }
@@ -221,18 +264,22 @@
       backdrop-filter: blur(8px);
       transition: all 0.2s;
     }
+
     .dashboard-nav-link:hover {
       background: rgba(255, 255, 255, 0.35);
       transform: translateY(-1px);
     }
+
     body.theme-white .dashboard-nav-link {
       background: #f1f5f9;
       color: #0f172a;
       border: 1px solid #cbd5e1;
     }
+
     body.theme-white .dashboard-nav-link:hover {
       background: #e2e8f0;
     }
+
     .theme-palette-wrapper {
       display: flex;
       align-items: center;
@@ -244,15 +291,18 @@
       border: 1px solid rgba(255, 255, 255, 0.35);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
+
     body.theme-white .theme-palette-wrapper,
     body.theme-black .theme-palette-wrapper {
       background: #1e293b;
       border: 1px solid #334155;
     }
+
     body.theme-white .theme-palette-wrapper {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
     }
+
     .color-chip-btn {
       width: 22px;
       height: 22px;
@@ -263,13 +313,16 @@
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
       position: relative;
     }
+
     .color-chip-btn:hover {
       transform: scale(1.22);
     }
+
     .color-chip-btn.active {
       transform: scale(1.3);
       box-shadow: 0 0 0 2px #ffffff, 0 3px 8px rgba(0, 0, 0, 0.3);
     }
+
     .engine-status-badge {
       display: flex;
       align-items: center;
@@ -282,6 +335,7 @@
       font-weight: 700;
       border: 1px solid #a7f3d0;
     }
+
     .engine-status-badge::before {
       content: "●";
       color: #10b981;
@@ -305,11 +359,13 @@
       flex-direction: column;
       gap: 16px;
     }
+
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     .section-title {
       font-size: 17px;
       font-weight: 700;
@@ -318,6 +374,7 @@
       gap: 8px;
       color: #1e293b;
     }
+
     .card {
       background: white;
       border-radius: 16px;
@@ -331,6 +388,7 @@
       gap: 12px;
       margin-bottom: 16px;
     }
+
     .input-box-wrapper {
       flex: 1;
       display: flex;
@@ -341,11 +399,13 @@
       padding: 0 12px;
       transition: all 0.2s;
     }
+
     .input-box-wrapper:focus-within {
       border-color: #0284c7;
       background: #ffffff;
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
     }
+
     .input-label {
       font-size: 13px;
       font-weight: 700;
@@ -354,6 +414,7 @@
       margin-right: 6px;
       user-select: none;
     }
+
     .input-unit {
       font-size: 13px;
       font-weight: 600;
@@ -362,6 +423,7 @@
       margin-left: 4px;
       user-select: none;
     }
+
     .input-field-clean {
       flex: 1;
       border: none;
@@ -385,10 +447,12 @@
       background: #f8fafc;
       transition: all 0.25s;
     }
+
     .mic-control-box.recording {
       border-color: #ef4444;
       background: #fef2f2;
     }
+
     .mic-btn {
       width: 70px;
       height: 70px;
@@ -404,19 +468,30 @@
       box-shadow: 0 4px 14px rgba(254, 229, 0, 0.45);
       transition: all 0.2s;
     }
+
     .mic-btn:hover {
       background: #fedc00;
       transform: translateY(-1px);
     }
+
     .mic-btn.active {
       background: #ef4444;
       color: white;
       animation: pulse 1.4s infinite;
     }
+
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.06);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     .realtime-live-transcript {
@@ -443,6 +518,7 @@
       width: 100%;
       margin-top: 10px;
     }
+
     .btn-analyze-now {
       background: #fee500;
       color: #191919;
@@ -456,6 +532,7 @@
       transition: all 0.2s;
       box-shadow: 0 2px 6px rgba(254, 229, 0, 0.3);
     }
+
     .btn-analyze-now:hover {
       background: #fedc00;
       transform: translateY(-1px);
@@ -470,6 +547,7 @@
       padding: 18px;
       margin-top: 16px;
     }
+
     .summary-review-title {
       font-weight: 700;
       color: #0369a1;
@@ -478,6 +556,7 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .summary-view-mode {
       background: white;
       padding: 14px 16px;
@@ -497,6 +576,7 @@
       margin-top: 6px;
       margin-bottom: 12px;
     }
+
     .quick-chip-btn {
       background: #f1f5f9;
       color: #334155;
@@ -508,17 +588,20 @@
       cursor: pointer;
       transition: all 0.15s;
     }
+
     .quick-chip-btn:hover {
       background: #e2e8f0;
       color: #0f172a;
       transform: translateY(-1px);
     }
+
     .quick-chip-btn.active {
       background: #0284c7;
       color: white;
       border-color: #0284c7;
       box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
     }
+
     .quick-chip-btn.med-chip.active {
       background: #059669;
       border-color: #059669;
@@ -529,6 +612,7 @@
       display: flex;
       gap: 10px;
     }
+
     .btn {
       padding: 12px 18px;
       border-radius: 8px;
@@ -537,6 +621,7 @@
       border: none;
       cursor: pointer;
     }
+
     .btn-primary {
       background: #0284c7;
       color: white;
@@ -550,6 +635,7 @@
       flex-direction: column;
       align-items: center;
     }
+
     .phone-mockup {
       width: 375px;
       height: 740px;
@@ -562,6 +648,7 @@
       flex-direction: column;
       position: relative;
     }
+
     .phone-notch {
       width: 130px;
       height: 22px;
@@ -570,6 +657,7 @@
       border-bottom-left-radius: 12px;
       border-bottom-right-radius: 12px;
     }
+
     .phone-screen {
       flex: 1;
       overflow-y: auto;
@@ -588,19 +676,23 @@
       gap: 12px;
       padding: 24px;
     }
+
     .report-card {
       display: none;
     }
+
     .report-header {
       border-bottom: 2px solid #e2e8f0;
       padding-bottom: 12px;
       margin-bottom: 14px;
     }
+
     .hospital-tag {
       font-size: 13px;
       color: #0284c7;
       font-weight: 700;
     }
+
     .patient-greet {
       font-size: 19px;
       font-weight: 800;
@@ -631,8 +723,9 @@
       padding: 16px;
       margin-bottom: 12px;
       border: 1px solid #f1f5f9;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
+
     .info-section-title {
       font-size: 14px;
       font-weight: 700;
@@ -647,6 +740,7 @@
       background: #eff6ff;
       border-left: 4px solid #0284c7;
     }
+
     .date-badge {
       font-size: 16px;
       font-weight: 800;
@@ -705,6 +799,7 @@
       border-radius: 12px;
       margin-top: 14px;
     }
+
     .spinner {
       width: 44px;
       height: 44px;
@@ -713,10 +808,17 @@
       border-radius: 50%;
       animation: spin 0.9s linear infinite;
     }
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
+
     .loading-text {
       font-weight: 700;
       font-size: 15px;
@@ -754,6 +856,7 @@
       display: none;
       z-index: 9999;
     }
+
     /* 모던 업그레이드 모달 팝업 */
     .pro-modal-overlay {
       display: none;
@@ -770,10 +873,17 @@
       padding: 20px;
       animation: fadeInModal 0.2s ease-out;
     }
+
     @keyframes fadeInModal {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
+
     .pro-modal-card {
       background: #ffffff;
       border-radius: 24px;
@@ -785,10 +895,19 @@
       text-align: center;
       animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     @keyframes slideUpModal {
-      from { transform: translateY(20px) scale(0.96); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
+      from {
+        transform: translateY(20px) scale(0.96);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
     }
+
     .pro-modal-badge {
       display: inline-flex;
       align-items: center;
@@ -802,6 +921,7 @@
       margin-bottom: 14px;
       box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
+
     .pro-modal-title {
       font-size: 22px;
       font-weight: 900;
@@ -809,12 +929,14 @@
       letter-spacing: -0.5px;
       margin-bottom: 8px;
     }
+
     .pro-modal-desc {
       font-size: 14px;
       color: #64748b;
       line-height: 1.5;
       margin-bottom: 22px;
     }
+
     .pro-benefit-box {
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -823,6 +945,7 @@
       text-align: left;
       margin-bottom: 22px;
     }
+
     .pro-benefit-item {
       display: flex;
       align-items: center;
@@ -832,9 +955,11 @@
       color: #1e293b;
       margin-bottom: 11px;
     }
+
     .pro-benefit-item:last-child {
       margin-bottom: 0;
     }
+
     .pro-benefit-icon {
       width: 22px;
       height: 22px;
@@ -848,6 +973,7 @@
       font-weight: 900;
       flex-shrink: 0;
     }
+
     .pro-price-notice {
       background: #fffbeb;
       border: 1px solid #fef3c7;
@@ -858,10 +984,12 @@
       color: #92400e;
       font-weight: 700;
     }
+
     .pro-modal-actions {
       display: flex;
       gap: 10px;
     }
+
     .btn-modal-cancel {
       flex: 1;
       background: #f1f5f9;
@@ -874,10 +1002,12 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .btn-modal-cancel:hover {
       background: #e2e8f0;
       color: #0f172a;
     }
+
     .btn-modal-upgrade {
       flex: 1.6;
       background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
@@ -891,12 +1021,14 @@
       box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
       transition: all 0.2s;
     }
+
     .btn-modal-upgrade:hover {
       background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
       transform: translateY(-1px);
     }
   </style>
 </head>
+
 <body class="theme-sky">
 
   <header>
@@ -908,13 +1040,15 @@
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
     <div style="display: flex; align-items: center; gap: 10px;">
-      <a href="desk.html" class="dashboard-nav-link" style="background: rgba(2, 132, 199, 0.1); border-color: #38bdf8;" title="수납 데스크 대기열 및 발송 모드">
+      <a href="desk.html" class="dashboard-nav-link" style="background: rgba(2, 132, 199, 0.1); border-color: #38bdf8;"
+        title="수납 데스크 대기열 및 발송 모드">
         📋 데스크 모드
       </a>
       <a href="settings.html" class="dashboard-nav-link" title="병원 프로필 및 구독 요금제 관리">
         마이페이지
       </a>
-      <a href="admin.html" id="btnAdminNav" class="dashboard-nav-link" onclick="handleDashboardClick(event)" title="원장님 경영 대시보드 열기">
+      <a href="admin.html" id="btnAdminNav" class="dashboard-nav-link" onclick="handleDashboardClick(event)"
+        title="원장님 경영 대시보드 열기">
         병원 경영 대시보드
       </a>
       <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
@@ -923,13 +1057,24 @@
 
       <!-- 세련된 미니멀 컬러 칩 팔레트 (글자 없이 동그란 색상만) -->
       <div class="theme-palette-wrapper" title="진료실 테마 색상 변경">
-        <button class="color-chip-btn active" id="btnThemeSky" style="background: linear-gradient(135deg, #0284c7, #38bdf8);" onclick="setTheme('theme-sky')" title="소프트 스카이"></button>
-        <button class="color-chip-btn" id="btnThemeGreen" style="background: linear-gradient(135deg, #059669, #34d399);" onclick="setTheme('theme-green')" title="힐링 민트"></button>
-        <button class="color-chip-btn" id="btnThemeLavender" style="background: linear-gradient(135deg, #6366f1, #a5b4fc);" onclick="setTheme('theme-lavender')" title="웜 라벤더"></button>
-        <button class="color-chip-btn" id="btnThemeYellow" style="background: linear-gradient(135deg, #f59e0b, #fde047);" onclick="setTheme('theme-yellow')" title="웜 옐로우"></button>
-        <button class="color-chip-btn" id="btnThemeOrange" style="background: linear-gradient(135deg, #ea580c, #fb923c);" onclick="setTheme('theme-orange')" title="선셋 오렌지"></button>
-        <button class="color-chip-btn" id="btnThemeWhite" style="background: #ffffff; border: 2px solid #cbd5e1;" onclick="setTheme('theme-white')" title="모던 화이트"></button>
-        <button class="color-chip-btn" id="btnThemeBlack" style="background: #0f172a; border: 2px solid #475569;" onclick="setTheme('theme-black')" title="프리미엄 다크 블랙"></button>
+        <button class="color-chip-btn active" id="btnThemeSky"
+          style="background: linear-gradient(135deg, #0284c7, #38bdf8);" onclick="setTheme('theme-sky')"
+          title="소프트 스카이"></button>
+        <button class="color-chip-btn" id="btnThemeGreen" style="background: linear-gradient(135deg, #059669, #34d399);"
+          onclick="setTheme('theme-green')" title="힐링 민트"></button>
+        <button class="color-chip-btn" id="btnThemeLavender"
+          style="background: linear-gradient(135deg, #6366f1, #a5b4fc);" onclick="setTheme('theme-lavender')"
+          title="웜 라벤더"></button>
+        <button class="color-chip-btn" id="btnThemeYellow"
+          style="background: linear-gradient(135deg, #f59e0b, #fde047);" onclick="setTheme('theme-yellow')"
+          title="웜 옐로우"></button>
+        <button class="color-chip-btn" id="btnThemeOrange"
+          style="background: linear-gradient(135deg, #ea580c, #fb923c);" onclick="setTheme('theme-orange')"
+          title="선셋 오렌지"></button>
+        <button class="color-chip-btn" id="btnThemeWhite" style="background: #ffffff; border: 2px solid #cbd5e1;"
+          onclick="setTheme('theme-white')" title="모던 화이트"></button>
+        <button class="color-chip-btn" id="btnThemeBlack" style="background: #0f172a; border: 2px solid #475569;"
+          onclick="setTheme('theme-black')" title="프리미엄 다크 블랙"></button>
       </div>
     </div>
   </header>
@@ -951,14 +1096,16 @@
             <span class="input-label">이름 :</span>
             <input type="text" id="patientName" class="input-field-clean" value="김영희" placeholder="성함 입력">
             <span class="input-label" style="margin-left: 10px;">나이 :</span>
-            <input type="text" id="patientAge" class="input-field-clean" style="max-width: 48px; text-align: center;" value="32" placeholder="선택">
+            <input type="text" id="patientAge" class="input-field-clean" style="max-width: 48px; text-align: center;"
+              value="32" placeholder="선택">
             <span class="input-unit">세</span>
           </div>
 
           <!-- 전화번호 입력 양식 -->
           <div class="input-box-wrapper" style="flex: 1.1;">
             <span class="input-label">전화번호 :</span>
-            <input type="text" id="patientPhone" class="input-field-clean" value="01093442378" placeholder="010-0000-0000">
+            <input type="text" id="patientPhone" class="input-field-clean" value="01093442378"
+              placeholder="010-0000-0000">
           </div>
         </div>
 
@@ -974,7 +1121,10 @@
 
           <!-- 미니 수동 재분석 버튼 (평소에는 조용히 우측 하단에 위치) -->
           <div style="display: flex; justify-content: flex-end; width: 100%; margin-top: 6px;">
-            <button type="button" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()" style="background: none; border: 1px dashed #cbd5e1; color: #64748b; font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#0284c7'; this.style.color='#0284c7';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#64748b';">
+            <button type="button" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()"
+              style="background: none; border: 1px dashed #cbd5e1; color: #64748b; font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
+              onmouseover="this.style.borderColor='#0284c7'; this.style.color='#0284c7';"
+              onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#64748b';">
               🔄 텍스트 직접 입력 시 수동 요약
             </button>
           </div>
@@ -995,7 +1145,9 @@
             <span>✨ AI 진료 요약 완료 (원장님 최종 검토)</span>
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 12px; color: #0284c7; display: none;" id="analysisTime"></span>
-              <button type="button" class="quick-chip-btn" style="background: white; border: 1px solid #cbd5e1; color: #64748b; font-size: 11px; padding: 3px 8px;" onclick="resetClinicForm()" title="현재 입력 및 리포트 내용 전체 비우기">
+              <button type="button" class="quick-chip-btn"
+                style="background: white; border: 1px solid #cbd5e1; color: #64748b; font-size: 11px; padding: 3px 8px;"
+                onclick="resetClinicForm()" title="현재 입력 및 리포트 내용 전체 비우기">
                 🗑️ 전체 비우기
               </button>
             </div>
@@ -1005,18 +1157,22 @@
           <div class="summary-view-mode" id="summaryViewMode">
             • <strong>진료 핵심:</strong> <span id="viewSummaryText"></span><br>
             • <strong>처방/복약:</strong> <span id="viewMedText"></span><br>
-            • <strong>다음 내원:</strong> <span id="viewNextDateText" style="color:#0284c7; font-weight:700;"></span> (<span id="viewNextNoticeText"></span>)
+            • <strong>다음 내원:</strong> <span id="viewNextDateText" style="color:#0284c7; font-weight:700;"></span> (<span
+              id="viewNextNoticeText"></span>)
           </div>
 
           <!-- 편집 모드 (내용 수정 클릭 시 열림: 상단에 위치) -->
-          <div class="summary-edit-mode" id="summaryEditMode" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+          <div class="summary-edit-mode" id="summaryEditMode"
+            style="display: none; flex-direction: column; gap: 10px; margin-bottom: 14px;">
             <div>
               <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">진료 핵심 요약:</div>
-              <textarea id="editSummaryInput" class="input-field" style="width: 100%; height: 60px; resize: vertical;"></textarea>
+              <textarea id="editSummaryInput" class="input-field"
+                style="width: 100%; height: 60px; resize: vertical;"></textarea>
             </div>
             <div>
               <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">처방 및 복약법:</div>
-              <textarea id="editMedInput" class="input-field" style="width: 100%; height: 50px; resize: vertical;"></textarea>
+              <textarea id="editMedInput" class="input-field"
+                style="width: 100%; height: 50px; resize: vertical;"></textarea>
             </div>
             <div style="display: flex; gap: 8px;">
               <div style="flex: 1;">
@@ -1031,8 +1187,10 @@
           </div>
 
           <!-- ⚡ 1초 원클릭 퀵 템플릿 바 (현장 편의성 극대화) -->
-          <div style="background: white; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
-            <div style="font-size: 13px; font-weight: 800; color: #0284c7; display: flex; align-items: center; gap: 5px;">
+          <div
+            style="background: white; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+            <div
+              style="font-size: 13px; font-weight: 800; color: #0284c7; display: flex; align-items: center; gap: 5px;">
               ⚡ <span>원클릭 퀵 설정 & 직접 입력</span>
             </div>
 
@@ -1042,15 +1200,23 @@
               <div style="display: flex; gap: 14px; margin-top: 8px; align-items: flex-start;">
                 <!-- 좌측: 세로 배열 4대 칩 -->
                 <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
-                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(3일분)', this)">식후 30분(3일분)</button>
-                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(5일분)', this)">식후 30분(5일분)</button>
-                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(7일분)', this)">식후 30분(7일분)</button>
-                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;"
+                    onclick="applyQuickMed('식후 30분(3일분)', this)">식후 30분(3일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;"
+                    onclick="applyQuickMed('식후 30분(5일분)', this)">식후 30분(5일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;"
+                    onclick="applyQuickMed('식후 30분(7일분)', this)">식후 30분(7일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;"
+                    onclick="applyQuickMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
                 </div>
                 <!-- 우측: 직접 입력 영역 -->
-                <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+                <div
+                  style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
                   <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">✍️ 직접 입력 또는 세부 메모:</span>
-                  <textarea id="quickDirectMedInput" class="input-field" style="width: 100%; height: 75px; resize: none; font-size: 12.5px; line-height: 1.5;" placeholder="예) 취침 전 1회 복용 (14일분)&#10;식후 즉시 복용, 졸릴 수 있으니 운전 주의" oninput="handleDirectMedInput(this.value)"></textarea>
+                  <textarea id="quickDirectMedInput" class="input-field"
+                    style="width: 100%; height: 75px; resize: none; font-size: 12.5px; line-height: 1.5;"
+                    placeholder="예) 취침 전 1회 복용 (14일분)&#10;식후 즉시 복용, 졸릴 수 있으니 운전 주의"
+                    oninput="handleDirectMedInput(this.value)"></textarea>
                 </div>
               </div>
             </div>
@@ -1061,24 +1227,31 @@
               <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px;">
                 <div style="display: flex; align-items: center; gap: 4px;">
                   <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">날짜:</span>
-                  <input type="date" id="quickNextDatePicker" class="input-field" style="padding: 5px 8px; font-size: 12.5px;" onchange="handleDatePickerChange()">
+                  <input type="date" id="quickNextDatePicker" class="input-field"
+                    style="padding: 5px 8px; font-size: 12.5px;" onchange="handleDatePickerChange()">
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px;">
                   <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">시각:</span>
-                  <input type="time" id="quickNextTimePicker" class="input-field" style="padding: 5px 8px; font-size: 12.5px;" onchange="handleDatePickerChange()">
+                  <input type="time" id="quickNextTimePicker" class="input-field"
+                    style="padding: 5px 8px; font-size: 12.5px;" onchange="handleDatePickerChange()">
                 </div>
               </div>
               <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                 <span style="font-size: 11.5px; color: #64748b; font-weight: 700; white-space: nowrap;">안내 메모:</span>
-                <input type="text" id="quickDirectNoticeInput" class="input-field" style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 채혈 검사 예정 (공복 유지 후 내원)" oninput="handleDirectNoticeInput(this.value)">
+                <input type="text" id="quickDirectNoticeInput" class="input-field"
+                  style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 채혈 검사 예정 (공복 유지 후 내원)"
+                  oninput="handleDirectNoticeInput(this.value)">
               </div>
             </div>
           </div>
 
           <div class="action-buttons">
-            <button class="btn" id="editToggleBtn" style="background: white; border: 1px solid #cbd5e1; color: #475569;" onclick="toggleEditMode()">✏️ 내용 수정</button>
-            <button class="btn" id="saveEditBtn" style="background: #059669; color: white; display: none;" onclick="saveEditMode()">💾 수정 완료</button>
-            <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" onclick="sendToDeskQueue()">📋 데스크로 전달</button>
+            <button class="btn" id="editToggleBtn" style="background: white; border: 1px solid #cbd5e1; color: #475569;"
+              onclick="toggleEditMode()">✏️ 내용 수정</button>
+            <button class="btn" id="saveEditBtn" style="background: #059669; color: white; display: none;"
+              onclick="saveEditMode()">💾 수정 완료</button>
+            <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;"
+              onclick="sendToDeskQueue()">📋 데스크로 전달</button>
             <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송 (Enter)</button>
           </div>
         </div>
@@ -1087,7 +1260,8 @@
 
     <!-- 우측: 스마트폰 목업 -->
     <div class="patient-side" style="display:flex; flex-direction:column; align-items:center;">
-      <div class="section-title" style="margin-bottom: 12px; width: 340px; text-align: center; justify-content: center;">
+      <div class="section-title"
+        style="margin-bottom: 12px; width: 340px; text-align: center; justify-content: center;">
         <span>📱 환자 수신 화면 미리보기</span>
       </div>
 
@@ -1109,13 +1283,15 @@
             <!-- 1. 요약 -->
             <div class="info-section">
               <div class="info-section-title">📢 오늘 원장님 말씀 요약</div>
-              <div id="reportSummaryText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
+              <div id="reportSummaryText"
+                style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
             </div>
 
             <!-- 2. 약 복용법 -->
             <div class="info-section">
               <div class="info-section-title">💊 오늘 처방된 약 & 복용 방법</div>
-              <div id="reportMedText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
+              <div id="reportMedText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;">
+              </div>
 
               <!-- 눈에 번쩍 띄는 굵은 주황색 안전 경고 배지 -->
               <div class="med-safety-warning">
@@ -1134,19 +1310,22 @@
             <!-- 4. 맞춤 생활 건강 팁 -->
             <div class="info-section" style="background: #fffbeb; border-left: 4px solid #f59e0b;">
               <div class="info-section-title" style="color: #b45309;">💡 꼭 지켜주셔야 할 맞춤 생활 팁</div>
-              <div id="reportLifestyleTips" style="font-size: 14px; line-height: 1.6; color: #78350f; white-space: pre-wrap;"></div>
+              <div id="reportLifestyleTips"
+                style="font-size: 14px; line-height: 1.6; color: #78350f; white-space: pre-wrap;"></div>
             </div>
 
             <!-- 5. 토닥토닥 안심 한마디 -->
             <div class="info-section" style="background: #fdf2f8; border-left: 4px solid #ec4899;">
               <div class="info-section-title" style="color: #be185d;">🌷 토닥토닥 마음 안심 한마디</div>
-              <div id="reportWarmMessage" style="font-size: 14px; line-height: 1.6; color: #831843; font-weight: 500;"></div>
+              <div id="reportWarmMessage" style="font-size: 14px; line-height: 1.6; color: #831843; font-weight: 500;">
+              </div>
             </div>
 
             <!-- 6. 눈에 확 띄는 안심 법적 고지 배너 -->
-            <div style="margin-top: 16px; padding: 14px 16px; background: #fefce8; border: 2px solid #fde047; border-radius: 12px; font-size: 13px; color: #854d0e; line-height: 1.6;">
+            <div
+              style="margin-top: 16px; padding: 14px 16px; background: #fefce8; border: 2px solid #fde047; border-radius: 12px; font-size: 13px; color: #854d0e; line-height: 1.6;">
               📢 <strong>[보호자 및 환자 안내]</strong><br>
-              본 리포트는 진료실 대화를 AI로 알기 쉽게 요약한 건강 참고용 자료입니다. 
+              본 리포트는 진료실 대화를 AI로 알기 쉽게 요약한 건강 참고용 자료입니다.
               <strong>실제 처방약 복용은 약국 약 봉투의 안내를 절대적으로 우선</strong>해 주시기 바랍니다.
             </div>
 
@@ -1155,7 +1334,8 @@
             </button>
 
             <!-- 전략 1: 원장님께 감사/응원 남기기 박스 -->
-            <div style="margin-top: 14px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px; text-align: center;">
+            <div
+              style="margin-top: 14px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px; text-align: center;">
               <p style="font-size: 13.5px; font-weight: 700; color: #166534; margin-bottom: 4px;">
                 🩺 오늘 진료와 설명이 안심이 되셨나요?
               </p>
@@ -1378,7 +1558,7 @@
         if (!userRequestedStop && isRecording) {
           try {
             recognition.start();
-          } catch (e) {}
+          } catch (e) { }
           return;
         }
         isRecording = false;
@@ -1406,10 +1586,10 @@
         accumulatedTranscript = '';
         liveTranscript.innerText = '';
         // 녹음 중에도 검토 카드가 계속 보이도록 유지 (display: none 하지 않음)
-        try { recognition.start(); } catch(e){}
+        try { recognition.start(); } catch (e) { }
       } else {
         userRequestedStop = true;
-        try { recognition.stop(); } catch(e){}
+        try { recognition.stop(); } catch (e) { }
         isRecording = false;
         micBtn.classList.remove('active');
         micBtn.title = '진료 녹음 시작 (F9)';
@@ -1658,12 +1838,23 @@
       showToast('💾 수정 내용이 저장되었습니다!');
     }
 
-    function sendToDeskQueue() {
+    async function sendToDeskQueue() {
       if (!parsedResult) return;
       const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
       const pAge = document.getElementById('patientAge').value.trim();
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
       const pPhone = document.getElementById('patientPhone').value.trim();
+
+      // 현재 병원 식별자 획득
+      let hospId = 'default';
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.email) hospId = u.email;
+          else if (u.hospitalName) hospId = u.hospitalName;
+        } catch (e) { }
+      }
 
       const queueItem = {
         id: 'desk_' + Date.now(),
@@ -1678,11 +1869,26 @@
         createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
+      // 1) 로컬 백업 저장
       try {
         const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
         queue.unshift(queueItem);
-        localStorage.setItem('todak_desk_queue', JSON.stringify(queue.slice(0, 20))); // 최근 20건 보관
-      } catch (e) {}
+        localStorage.setItem('todak_desk_queue', JSON.stringify(queue.slice(0, 30)));
+      } catch (e) { }
+
+      // 2) 🌟 다른 데스크 PC로 실시간 클라우드 전송
+      try {
+        await fetch('/api/desk-queue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hospitalId: hospId,
+            item: queueItem
+          })
+        });
+      } catch (cloudErr) {
+        console.warn("데스크 클라우드 전송 실패 (로컬 유지):", cloudErr);
+      }
 
       alert(`📋 [수납 데스크 전달 완료]\n\n${pDisplayName}의 리포트가 수납 데스크로 안전하게 전달되었습니다.\n수납 및 다음 예약 시 데스크에서 최종 발송할 수 있습니다.`);
       showToast('📋 수납 데스크 대기열로 전달되었습니다.');
@@ -1732,7 +1938,7 @@
           const u = JSON.parse(userStr);
           if (u.hospitalName) hospTitle = u.hospitalName;
           if (u.doctorName) docTitle = u.doctorName;
-        } catch(e) {}
+        } catch (e) { }
       } else {
         const hospTagEl = document.querySelector('.hospital-tag');
         if (hospTagEl) {
@@ -1884,4 +2090,5 @@
 
   </script>
 </body>
+
 </html>

@@ -389,18 +389,47 @@
 
   <script>
     let activeQueueIndex = -1;
+    let deskQueueData = [];
 
-    function loadDeskQueue() {
+    // 현재 병원 ID 식별
+    function getHospitalId() {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          return u.email || u.hospitalName || 'default';
+        } catch(e) {}
+      }
+      return 'default';
+    }
+
+    // 🌟 서버 클라우드와 로컬 저장소를 동시에 조회 및 실시간 동기화
+    async function loadDeskQueue() {
       const tbody = document.getElementById('deskTableBody');
-      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      const hospId = getHospitalId();
 
-      if (queue.length === 0) {
+      // 1. 서버 API(/api/desk-queue)에서 다른 진료실 PC가 보낸 환자 목록 가져오기
+      try {
+        const res = await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.queue)) {
+            deskQueueData = data.queue;
+            localStorage.setItem('todak_desk_queue', JSON.stringify(deskQueueData));
+          }
+        }
+      } catch (err) {
+        // 서버 오프라인 시 로컬스토리지 백업 활용
+        deskQueueData = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+      }
+
+      if (!deskQueueData || deskQueueData.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="4" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
               <span style="font-size: 32px; display: block; margin-bottom: 8px;">📭</span>
               현재 대기 중인 환자가 없습니다.<br>
-              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 여기에 즉시 나타납니다.
+              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 여기에 나타납니다.
             </td>
           </tr>
         `;
@@ -408,7 +437,7 @@
       }
 
       tbody.innerHTML = '';
-      queue.forEach((item, idx) => {
+      deskQueueData.forEach((item, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="color: #64748b; font-size: 13px; font-weight: 600;">${item.createdAt || '방금'}</td>
@@ -426,8 +455,7 @@
 
     function openDeskModal(idx) {
       activeQueueIndex = idx;
-      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
-      const item = queue[idx];
+      const item = deskQueueData[idx];
       if (!item) return;
 
       document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 및 발송`;
@@ -498,8 +526,7 @@
 
     async function submitDeskSend() {
       if (activeQueueIndex < 0) return;
-      const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
-      const item = queue[activeQueueIndex];
+      const item = deskQueueData[activeQueueIndex];
       if (!item) return;
 
       const finalMed = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
@@ -561,8 +588,17 @@
         });
 
         alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
-        queue.splice(activeQueueIndex, 1);
-        localStorage.setItem('todak_desk_queue', JSON.stringify(queue));
+        
+        // 🌟 서버 클라우드 대기열에서도 발송 완료된 환자 삭제
+        try {
+          const hospId = getHospitalId();
+          await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}&id=${encodeURIComponent(item.id)}`, {
+            method: 'DELETE'
+          });
+        } catch (delErr) { }
+
+        deskQueueData.splice(activeQueueIndex, 1);
+        localStorage.setItem('todak_desk_queue', JSON.stringify(deskQueueData));
         document.getElementById('deskModalOverlay').style.display = 'none';
         loadDeskQueue();
       } catch (e) {
@@ -570,7 +606,9 @@
       }
     }
 
+    // 🌟 초기 1회 로드 및 3초마다 실시간 자동 갱신 (진료실 PC에서 보낸 환자 3초 내 자동 표시)
     loadDeskQueue();
+    setInterval(loadDeskQueue, 3500);
   </script>
 </body>
 
