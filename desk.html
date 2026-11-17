@@ -348,8 +348,9 @@
             <input type="date" id="modalDatePicker" class="form-input" style="flex: 1;" onchange="updateModalDateFromPicker()">
             <input type="time" id="modalTimePicker" class="form-input" style="flex: 0.8;" onchange="updateModalDateFromPicker()">
           </div>
-          <div style="margin-top: 6px;">
-            <input type="text" id="modalNoticeInput" class="form-input" placeholder="안내 메모: 예) 수납 데스크 예약 확인" oninput="updateModalPhoneView()">
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+            <span style="font-size: 11.5px; color: #64748b; font-weight: 700; white-space: nowrap;">안내 메모:</span>
+            <input type="text" id="modalNoticeInput" class="form-input" style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 채혈 검사 예정 (공복 유지 후 내원)" oninput="updateModalPhoneView()">
           </div>
         </div>
 
@@ -433,7 +434,7 @@
       document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
-      document.getElementById('modalNoticeInput').value = item.nextNotice || '데스크 예약 일정';
+      document.getElementById('modalNoticeInput').value = item.nextNotice || '';
 
       // 폰 목업 초기 렌더링
       document.getElementById('phonePatientName').innerText = item.patientName;
@@ -483,7 +484,7 @@
 
     function updateModalPhoneView() {
       const medText = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
-      const noticeText = document.getElementById('modalNoticeInput').value.trim() || '데스크 예약 확인';
+      const noticeText = document.getElementById('modalNoticeInput').value.trim();
       const dateVal = document.getElementById('modalDatePicker').value;
       const timeVal = document.getElementById('modalTimePicker').value;
 
