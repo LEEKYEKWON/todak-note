@@ -16,6 +16,46 @@ function getSolapiAuthHeader() {
   return `HMAC-SHA256 apiKey=${SOLAPI_API_KEY}, date=${date}, salt=${salt}, signature=${signature}`;
 }
 
+// 🌟 카카오 알림톡 버튼 링크 100자 이내 준수를 위한 초경량 단축 URL 생성기 (is.gd / tinyurl 백업)
+async function getShortUrl(longUrl) {
+  // 1순위: is.gd (매우 짧고 빠름)
+  try {
+    const res = await new Promise((resolve, reject) => {
+      const req = https.get(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(longUrl)}`, (r) => {
+        let body = '';
+        r.on('data', chunk => body += chunk);
+        r.on('end', () => {
+          if (r.statusCode === 200 && body.startsWith('http')) resolve(body.trim());
+          else reject(new Error('is.gd failed'));
+        });
+      });
+      req.on('error', reject);
+      req.setTimeout(2500, () => { req.destroy(); reject(new Error('timeout')); });
+    });
+    return res;
+  } catch (e) {}
+
+  // 2순위: tinyurl (글로벌 표준)
+  try {
+    const res = await new Promise((resolve, reject) => {
+      const req = https.get(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`, (r) => {
+        let body = '';
+        r.on('data', chunk => body += chunk);
+        r.on('end', () => {
+          if (r.statusCode === 200 && body.startsWith('http')) resolve(body.trim());
+          else reject(new Error('tinyurl failed'));
+        });
+      });
+      req.on('error', reject);
+      req.setTimeout(2500, () => { req.destroy(); reject(new Error('timeout')); });
+    });
+    return res;
+  } catch (e) {}
+
+  // 실패 시 원본 반환
+  return longUrl;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -60,10 +100,16 @@ module.exports = async (req, res) => {
     const currentPatient = patientName || '환자';
     const currentDoctor = doctorName || '홍길동';
 
-    // 1) 알림톡 변수 매핑
-    // 템플릿 등록 변수: #{병원명}, #{환자명}, #{원장명}, #{리포트링크}
-    // 링크 변수의 경우 프로토콜(https://)을 제외한 도메인/경로 형태 지원
-    const cleanUrl = finalReportUrl.replace(/^https?:\/\//i, '');
+    // 1) 🌟 초경량 단축 URL 생성 (카카오 버튼 100자 이내 준수 및 대체 문자 링크 깔끔화)
+    let shortenedUrl = finalReportUrl;
+    try {
+      shortenedUrl = await getShortUrl(finalReportUrl);
+    } catch (e) {
+      console.warn("단축 URL 생성 실패, 원본 유지:", e);
+    }
+
+    // 템플릿의 버튼은 https://#{리포트링크} 형태이므로 https:// 제외한 값 추출
+    const cleanUrl = shortenedUrl.replace(/^https?:\/\//i, '');
     const cleanDoctor = (currentDoctor || '홍길동').replace(/원장\s*$/, '').trim();
 
     const kakaoVariables = {
@@ -82,7 +128,7 @@ ${cleanDoctor} 원장님이 전해드리는 안심 진료노트가 도착했습�
 진료 요약 및 복약 지도, 다음 내원일과 맞춤 건강 팁을 아래 링크를 눌러 확인해 주세요.
 
 👉 진료 리포트 확인하기:
-${finalReportUrl}
+${shortenedUrl}
 
 ※ 본 안내는 환자분의 안전한 복약과 빠른 쾌유를 위해 발송되었습니다.`;
 
