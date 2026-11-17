@@ -112,16 +112,23 @@ module.exports = async (req, res) => {
     const cleanUrl = shortenedUrl.replace(/^https?:\/\//i, '');
     const cleanDoctor = (currentDoctor || '홍길동').replace(/원장\s*$/, '').trim();
 
+    // 🌟 카카오 알림톡 템플릿에 "안녕하세요, #{환자명}님."으로 "님"이 이미 붙어 있으므로,
+    // 전달받은 환자명에 이미 "님"이 붙어 있다면 제거하여 "님님" 중복 방지
+    // 예: "김영희 님 (만 32세)" ➔ "김영희 (만 32세)"
+    // 예: "김영희 님" ➔ "김영희"
+    let cleanPatient = (currentPatient || '환자').trim();
+    cleanPatient = cleanPatient.replace(/^([^(\n]+?)\s*님(?=\s*\(|$)/, '$1').trim();
+
     const kakaoVariables = {
       '#{병원명}': currentHosp,
-      '#{환자명}': currentPatient,
+      '#{환자명}': cleanPatient,
       '#{원장명}': cleanDoctor,
       '#{리포트링크}': cleanUrl
     };
 
     // 대체발송 문자 본문 (알림톡 미수신 시 전달)
     const fallbackText = `[${currentHosp}]
-안녕하세요, ${currentPatient}님.
+안녕하세요, ${cleanPatient}님.
 ${cleanDoctor} 원장님이 전해드리는 안심 진료노트가 도착했습니다.
 
 오늘 진료받으시느라 수고 많으셨습니다.
