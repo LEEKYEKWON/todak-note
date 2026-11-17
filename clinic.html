@@ -463,7 +463,7 @@
 
     /* AI 분석 완료 검토 카드 */
     .summary-review-card {
-      display: none;
+      display: block;
       border: 2px solid #0284c7;
       background: #f0f9ff;
       border-radius: 12px;
@@ -992,7 +992,12 @@
         <div class="summary-review-card" id="summaryReviewCard">
           <div class="summary-review-title">
             <span>✨ AI 진료 요약 완료 (원장님 최종 검토)</span>
-            <span style="font-size: 12px; color: #0284c7;" id="analysisTime">소요 시간: 1.2초</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; color: #0284c7;" id="analysisTime">소요 시간: 1.2초</span>
+              <button type="button" class="quick-chip-btn" style="background: white; border: 1px solid #cbd5e1; color: #64748b; font-size: 11px; padding: 3px 8px;" onclick="resetClinicForm()" title="현재 입력 및 리포트 내용 전체 비우기">
+                🗑️ 전체 비우기
+              </button>
+            </div>
           </div>
 
           <!-- 보기 모드 -->
@@ -1668,6 +1673,29 @@
 
       alert(`📋 [수납 데스크 전달 완료]\n\n${pDisplayName}의 리포트가 수납 데스크로 안전하게 전달되었습니다.\n수납 및 다음 예약 시 데스크에서 최종 발송할 수 있습니다.`);
       showToast('📋 수납 데스크 대기열로 전달되었습니다.');
+      // 데스크 전달 완료 후 다음 환자를 위해 진료실 내용 초기화
+      resetClinicForm();
+    }
+
+    function resetClinicForm() {
+      parsedResult = null;
+      fullTranscript = '';
+      accumulatedTranscript = '';
+      document.getElementById('liveTranscript').innerHTML = '<span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>';
+      document.getElementById('recordStatus').innerHTML = '[마이크 클릭] 또는 [F9]를 눌러 녹음을 시작하세요.';
+      document.getElementById('viewSummaryText').innerText = '';
+      document.getElementById('viewMedText').innerText = '';
+      document.getElementById('viewNextDateText').innerText = '';
+      document.getElementById('viewNextNoticeText').innerText = '';
+      document.getElementById('quickDirectMedInput').value = '';
+      document.getElementById('quickDirectNoticeInput').value = '';
+      document.getElementById('quickNextDatePicker').value = '';
+      document.getElementById('quickNextTimePicker').value = '';
+
+      // 우측 스마트폰 빈 상태로 되돌리기
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('reportCard').style.display = 'none';
+      showToast('🗑️ 진료실 입력 내용이 깨끗하게 비워졌습니다.');
     }
 
     async function sendReport() {

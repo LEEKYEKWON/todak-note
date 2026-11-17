@@ -5,7 +5,7 @@ const SOLAPI_API_KEY = process.env.SOLAPI_API_KEY || 'NCSK8Y3GEABTX0B0KKZJU8';
 const SOLAPI_API_SECRET = process.env.SOLAPI_API_SECRET || 'ANWFHRCJW1UD3OTT9TBJTO2XEQ1N3GED';
 const SENDER_PHONE = process.env.SENDER_PHONE || '01093442378';
 const KAKAO_TEMPLATE_ID = process.env.KAKAO_TEMPLATE_ID || 'KA01TP261113053545740Y0kVMg3uuuG';
-const KAKAO_CHANNEL_ID = process.env.KAKAO_CHANNEL_ID || '@todaknote';
+const KAKAO_CHANNEL_ID = process.env.KAKAO_CHANNEL_ID || 'KA01PF261113043443940D6zsL0yN1b6';
 
 function getSolapiAuthHeader() {
   const date = new Date().toISOString();

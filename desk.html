@@ -307,13 +307,16 @@
   </main>
 
   <!-- 📱 2안: 데스크 전용 설정 & 실시간 폰 화면 발송 모달 -->
-  <div class="desk-modal-overlay" id="deskModalOverlay" onclick="closeDeskModal(event)">
-    <div class="desk-modal-card" onclick="event.stopPropagation()">
+  <div class="desk-modal-overlay" id="deskModalOverlay">
+    <div class="desk-modal-card">
       <!-- 좌측: 복약 및 내원일 설정 폼 -->
       <div class="modal-left">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-          <h3 style="font-size: 18px; font-weight: 800;" id="modalPatientTitle">환자 리포트 검토 및 발송</h3>
-          <button style="border: none; background: none; font-size: 20px; cursor: pointer;" onclick="closeDeskModal()">✕</button>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #0f172a;" id="modalPatientTitle">환자 리포트 검토 및 발송</h3>
+            <div style="font-size: 13px; color: #0284c7; font-weight: 700; margin-top: 2px;" id="modalPatientPhoneDisplay">📞 수신번호: 010-0000-0000</div>
+          </div>
+          <button style="border: none; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: 700; cursor: pointer; color: #475569;" onclick="closeDeskModal(true)">✕</button>
         </div>
 
         <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.5; color: #0369a1;">
@@ -429,6 +432,7 @@
       if (!item) return;
 
       document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 및 발송`;
+      document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
       document.getElementById('modalNoticeInput').value = item.nextNotice || '데스크 예약 일정';
@@ -441,12 +445,11 @@
       document.getElementById('deskModalOverlay').style.display = 'flex';
     }
 
-    function closeDeskModal(e) {
-      if (e && e.target && e.target.id !== 'deskModalOverlay' && !e.target.classList.contains('desk-modal-overlay')) {
-        return;
+    function closeDeskModal(force) {
+      if (force === true) {
+        document.getElementById('deskModalOverlay').style.display = 'none';
+        activeQueueIndex = -1;
       }
-      document.getElementById('deskModalOverlay').style.display = 'none';
-      activeQueueIndex = -1;
     }
 
     function setModalMed(medText, btnEl) {
