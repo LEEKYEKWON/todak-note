@@ -972,9 +972,10 @@
             <span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>
           </div>
 
-          <div class="trigger-btn-group">
-            <button class="btn-analyze-now" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()">
-              기록된 대화로 AI 요약 생성하기
+          <!-- 미니 수동 재분석 버튼 (평소에는 조용히 우측 하단에 위치) -->
+          <div style="display: flex; justify-content: flex-end; width: 100%; margin-top: 6px;">
+            <button type="button" id="manualAnalyzeBtn" onclick="triggerAnalyzeDirectly()" style="background: none; border: 1px dashed #cbd5e1; color: #64748b; font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#0284c7'; this.style.color='#0284c7';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#64748b';">
+              🔄 텍스트 직접 입력 시 수동 요약
             </button>
           </div>
 
@@ -993,7 +994,7 @@
           <div class="summary-review-title">
             <span>✨ AI 진료 요약 완료 (원장님 최종 검토)</span>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 12px; color: #0284c7;" id="analysisTime">소요 시간: 1.2초</span>
+              <span style="font-size: 12px; color: #0284c7; display: none;" id="analysisTime"></span>
               <button type="button" class="quick-chip-btn" style="background: white; border: 1px solid #cbd5e1; color: #64748b; font-size: 11px; padding: 3px 8px;" onclick="resetClinicForm()" title="현재 입력 및 리포트 내용 전체 비우기">
                 🗑️ 전체 비우기
               </button>
@@ -1013,18 +1014,22 @@
               ⚡ <span>원클릭 퀵 설정 & 직접 입력</span>
             </div>
 
-            <!-- 약 복용법 퀵 칩 및 직접 입력 -->
+            <!-- 약 복용법 퀵 칩 (좌측 세로 배열) 및 직접 입력 (우측 배치) -->
             <div style="margin-top: 10px;">
               <span style="font-size: 12px; font-weight: 700; color: #475569;">💊 처방약 복용법:</span>
-              <div class="quick-chip-group">
-                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('식후 30분(3일분)', this)">식후 30분(3일분)</button>
-                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('식후 30분(5일분)', this)">식후 30분(5일분)</button>
-                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('식후 30분(7일분)', this)">식후 30분(7일분)</button>
-                <button type="button" class="quick-chip-btn med-chip" onclick="applyQuickMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-                <span style="font-size: 11.5px; color: #64748b; font-weight: 700; white-space: nowrap;">직접 입력:</span>
-                <input type="text" id="quickDirectMedInput" class="input-field" style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 취침 전 1회 복용 (14일분)" oninput="handleDirectMedInput(this.value)">
+              <div style="display: flex; gap: 14px; margin-top: 8px; align-items: flex-start;">
+                <!-- 좌측: 세로 배열 4대 칩 -->
+                <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(3일분)', this)">식후 30분(3일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(5일분)', this)">식후 30분(5일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('식후 30분(7일분)', this)">식후 30분(7일분)</button>
+                  <button type="button" class="quick-chip-btn med-chip" style="text-align: left;" onclick="applyQuickMed('원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.', this)">약국 봉투 안내 참고</button>
+                </div>
+                <!-- 우측: 직접 입력 영역 -->
+                <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
+                  <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">✍️ 직접 입력 또는 세부 메모:</span>
+                  <textarea id="quickDirectMedInput" class="input-field" style="width: 100%; height: 75px; resize: none; font-size: 12.5px; line-height: 1.5;" placeholder="예) 취침 전 1회 복용 (14일분)&#10;식후 즉시 복용, 졸릴 수 있으니 운전 주의" oninput="handleDirectMedInput(this.value)"></textarea>
+                </div>
               </div>
             </div>
 
@@ -1040,9 +1045,12 @@
                   <span style="font-size: 11.5px; color: #64748b; font-weight: 700;">시각:</span>
                   <input type="time" id="quickNextTimePicker" class="input-field" style="padding: 5px 8px; font-size: 12.5px;" onchange="handleDatePickerChange()">
                 </div>
-                <button type="button" class="quick-chip-btn" style="margin-left: 4px;" onclick="setNextDatePreset(3)">3일 뒤</button>
-                <button type="button" class="quick-chip-btn" onclick="setNextDatePreset(7)">1주일 뒤</button>
               </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                <span style="font-size: 11.5px; color: #64748b; font-weight: 700; white-space: nowrap;">안내 메모:</span>
+                <input type="text" id="quickDirectNoticeInput" class="input-field" style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 채혈 검사 예정 (공복 유지 후 내원)" oninput="handleDirectNoticeInput(this.value)">
+              </div>
+            </div>
               <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                 <span style="font-size: 11.5px; color: #64748b; font-weight: 700; white-space: nowrap;">안내 메모:</span>
                 <input type="text" id="quickDirectNoticeInput" class="input-field" style="flex: 1; padding: 6px 10px; font-size: 12.5px;" placeholder="예: 채혈 검사 예정 (공복 유지 후 내원)" oninput="handleDirectNoticeInput(this.value)">
@@ -1400,7 +1408,7 @@
         userRequestedStop = false;
         accumulatedTranscript = '';
         liveTranscript.innerText = '';
-        summaryReviewCard.style.display = 'none';
+        // 녹음 중에도 검토 카드가 계속 보이도록 유지 (display: none 하지 않음)
         try { recognition.start(); } catch(e){}
       } else {
         userRequestedStop = true;
@@ -1459,6 +1467,13 @@
         }
 
         if (!res.ok) throw new Error(data.error?.message || data.error || `서버 에러 (${res.status})`);
+
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        const analysisTimeEl = document.getElementById('analysisTime');
+        if (analysisTimeEl) {
+          analysisTimeEl.innerText = `소요 시간: ${elapsed}초`;
+          analysisTimeEl.style.display = 'inline-block';
+        }
 
         const normSummary = (data.summary || data.diagnosisSummary || '').trim();
         const normMed = (data.medication || data.medicationGuide || '').trim();
@@ -1695,6 +1710,11 @@
       // 우측 스마트폰 빈 상태로 되돌리기
       document.getElementById('emptyState').style.display = 'flex';
       document.getElementById('reportCard').style.display = 'none';
+      const analysisTimeEl = document.getElementById('analysisTime');
+      if (analysisTimeEl) {
+        analysisTimeEl.innerText = '';
+        analysisTimeEl.style.display = 'none';
+      }
       showToast('🗑️ 진료실 입력 내용이 깨끗하게 비워졌습니다.');
     }
 
