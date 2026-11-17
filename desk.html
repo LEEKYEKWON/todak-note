@@ -510,6 +510,40 @@
         return;
       }
 
+      // 🌟 초경량 URL 토큰 및 reportUrl 생성 (환자 스마트폰 열람 시 100% 즉시 렌더링)
+      function toBase64Url(obj) {
+        const jsonStr = JSON.stringify(obj);
+        const bytes = new TextEncoder().encode(jsonStr);
+        let binStr = '';
+        for (let i = 0; i < bytes.length; i++) binStr += String.fromCharCode(bytes[i]);
+        return btoa(binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      // 병원명/원장명 로그인 정보 반영
+      let currentHosp = '길동이의원';
+      let currentDoc = '홍길동';
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.hospitalName) currentHosp = u.hospitalName;
+          if (u.doctorName) currentDoc = u.doctorName;
+        } catch(e) {}
+      }
+
+      const compactPayload = [
+        currentHosp,
+        item.patientName,
+        item.summary || '',
+        finalMed,
+        finalNextDate,
+        finalNotice,
+        item.lifestyleTips || '',
+        item.warmMessage || ''
+      ];
+      const compactToken = toBase64Url(compactPayload);
+      const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;
+
       try {
         const res = await fetch('/api/send-sms', {
           method: 'POST',
@@ -517,10 +551,12 @@
           body: JSON.stringify({
             to: item.phone,
             patientName: item.patientName,
-            hospitalName: '연세바른내과의원',
+            hospitalName: currentHosp,
+            doctorName: currentDoc,
             summary: item.summary,
             medication: finalMed,
-            nextDate: finalNextDate
+            nextDate: finalNextDate,
+            reportUrl: reportUrl
           })
         });
 

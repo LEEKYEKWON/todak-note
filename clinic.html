@@ -1101,7 +1101,7 @@
 
           <div class="report-card" id="reportCard">
             <div class="report-header">
-              <span class="hospital-tag">🏥 연세바른내과의원 · 박준혁 원장</span>
+              <span class="hospital-tag">🏥 길동이의원 · 홍길동 원장</span>
               <h2 class="patient-greet" id="reportPatientName">김영희 님의 안심 진료노트</h2>
               <span style="font-size: 13px; color: #64748b;" id="reportTodayDate"></span>
             </div>
@@ -1723,8 +1723,23 @@
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
       const pPhone = document.getElementById('patientPhone').value.trim();
 
-      const hospTagEl = document.querySelector('.hospital-tag');
-      const hospTitle = hospTagEl ? hospTagEl.textContent.replace('🏥', '').trim() : '연세바른내과의원';
+      // 병원명/원장명 동적 획득
+      let hospTitle = '길동이의원';
+      let docTitle = '홍길동';
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.hospitalName) hospTitle = u.hospitalName;
+          if (u.doctorName) docTitle = u.doctorName;
+        } catch(e) {}
+      } else {
+        const hospTagEl = document.querySelector('.hospital-tag');
+        if (hospTagEl) {
+          const txt = hospTagEl.textContent.replace('🏥', '').trim();
+          hospTitle = txt.split('·')[0].trim() || '길동이의원';
+        }
+      }
 
       showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
       summaryReviewCard.style.display = 'none';
@@ -1800,6 +1815,7 @@
             receiverPhone: pPhone,
             patientName: pDisplayName,
             hospitalName: hospTitle,
+            doctorName: docTitle,
             summary: parsedResult.summary,
             medication: parsedResult.medication,
             nextDate: parsedResult.nextDate,

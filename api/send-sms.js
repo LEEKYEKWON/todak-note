@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
 
     const currentHosp = hospitalName || '길동이의원';
     const currentPatient = patientName || '환자';
-    const currentDoctor = doctorName || '원장';
+    const currentDoctor = doctorName || '홍길동';
 
     // 1) 알림톡 변수 매핑
     // 템플릿 등록 변수: #{병원명}, #{환자명}, #{원장명}, #{리포트링크}
