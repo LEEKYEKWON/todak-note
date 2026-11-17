@@ -64,18 +64,19 @@ module.exports = async (req, res) => {
     // 템플릿 등록 변수: #{병원명}, #{환자명}, #{원장명}, #{리포트링크}
     // 링크 변수의 경우 프로토콜(https://)을 제외한 도메인/경로 형태 지원
     const cleanUrl = finalReportUrl.replace(/^https?:\/\//i, '');
+    const cleanDoctor = (currentDoctor || '홍길동').replace(/원장\s*$/, '').trim();
 
     const kakaoVariables = {
       '#{병원명}': currentHosp,
       '#{환자명}': currentPatient,
-      '#{원장명}': currentDoctor,
+      '#{원장명}': cleanDoctor,
       '#{리포트링크}': cleanUrl
     };
 
     // 대체발송 문자 본문 (알림톡 미수신 시 전달)
     const fallbackText = `[${currentHosp}]
 안녕하세요, ${currentPatient}님.
-${currentDoctor} 원장님이 전해드리는 안심 진료노트가 도착했습니다.
+${cleanDoctor} 원장님이 전해드리는 안심 진료노트가 도착했습니다.
 
 오늘 진료받으시느라 수고 많으셨습니다.
 진료 요약 및 복약 지도, 다음 내원일과 맞춤 건강 팁을 아래 링크를 눌러 확인해 주세요.
