@@ -497,8 +497,9 @@
 
     .realtime-live-transcript {
       width: 100%;
-      min-height: 140px;
-      max-height: 220px;
+      height: 160px;
+      min-height: 160px;
+      max-height: 160px;
       overflow-y: auto;
       scroll-behavior: smooth;
       background: white;
@@ -510,6 +511,7 @@
       line-height: 1.65;
       text-align: left;
       white-space: pre-wrap;
+      resize: vertical;
     }
 
     /* 직접 실행 트리거 버튼 */
@@ -635,6 +637,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: sticky;
+      top: 24px;
+      align-self: flex-start;
     }
 
     .phone-mockup {
@@ -1122,9 +1127,7 @@
             [마이크 클릭] 또는 [F9]를 눌러 녹음을 시작하세요.
           </div>
 
-          <div class="realtime-live-transcript" id="liveTranscript" contenteditable="true" spellcheck="false">
-            <span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>
-          </div>
+          <textarea class="realtime-live-transcript" id="liveTranscript" spellcheck="false" placeholder="진료실 대화가 여기에 실시간으로 기록됩니다... (직접 타이핑하거나 수정하실 수도 있습니다)"></textarea>
 
           <!-- 미니 수동 재분석 버튼 (평소에는 조용히 우측 하단에 위치) -->
           <div style="display: flex; justify-content: flex-end; width: 100%; margin-top: 6px;">
@@ -1160,35 +1163,24 @@
             </div>
           </div>
 
-          <!-- 보기 모드 -->
-          <div class="summary-view-mode" id="summaryViewMode">
-            • <strong>진료 핵심:</strong> <span id="viewSummaryText"></span><br>
-            • <strong>처방/복약:</strong> <span id="viewMedText"></span><br>
-            • <strong>다음 내원:</strong> <span id="viewNextDateText" style="color:#0284c7; font-weight:700;"></span> (<span
-              id="viewNextNoticeText"></span>)
-          </div>
-
-          <!-- 편집 모드 (내용 수정 클릭 시 열림: 상단에 위치) -->
-          <div class="summary-edit-mode" id="summaryEditMode"
-            style="display: none; flex-direction: column; gap: 10px; margin-bottom: 14px;">
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">진료 핵심 요약:</div>
-              <textarea id="editSummaryInput" class="input-field"
-                style="width: 100%; height: 60px; resize: vertical;"></textarea>
-            </div>
-            <div>
-              <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">처방 및 복약법:</div>
-              <textarea id="editMedInput" class="input-field"
-                style="width: 100%; height: 50px; resize: vertical;"></textarea>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <div style="flex: 1;">
-                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">다음 내원일:</div>
-                <input type="text" id="editNextDateInput" class="input-field" style="width: 100%;">
+          <!-- 상시 직접 수정 가능한 스마트 입력창 -->
+          <div style="background: white; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <div style="margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 13px; font-weight: 800; color: #0284c7;">📢 진료 핵심 요약 (직접 수정 가능)</span>
+                <span style="font-size: 11px; color: #64748b;">수정 시 우측 미리보기에 즉시 반영됩니다</span>
               </div>
-              <div style="flex: 1.5;">
-                <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 3px;">환자 안내사항:</div>
-                <input type="text" id="editNextNoticeInput" class="input-field" style="width: 100%;">
+              <textarea id="editSummaryInput" class="input-field" style="width: 100%; min-height: 72px; padding: 10px 12px; font-size: 13.5px; line-height: 1.6; resize: vertical;" placeholder="AI 진료 요약 내용이 여기에 표시되며, 원장님이 직접 수정하실 수도 있습니다." oninput="handleDirectSummaryInput(this.value)"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+              <div style="flex: 1.2;">
+                <span style="font-size: 12px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px;">💊 처방 및 복약법:</span>
+                <input type="text" id="editMedInput" class="input-field" style="width: 100%; padding: 8px 10px; font-size: 13px;" placeholder="약 복용 안내" oninput="handleDirectMedInput(this.value)">
+              </div>
+              <div style="flex: 1;">
+                <span style="font-size: 12px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px;">🗓️ 다음 내원일:</span>
+                <input type="text" id="editNextDateInput" class="input-field" style="width: 100%; padding: 8px 10px; font-size: 13px; color: #0284c7; font-weight: 700;" placeholder="다음 내원일" oninput="handleDirectNextDateInput(this.value)">
               </div>
             </div>
           </div>
@@ -1253,10 +1245,6 @@
           </div>
 
           <div class="action-buttons">
-            <button class="btn" id="editToggleBtn" style="background: white; border: 1px solid #cbd5e1; color: #475569;"
-              onclick="toggleEditMode()">✏️ 내용 수정</button>
-            <button class="btn" id="saveEditBtn" style="background: #059669; color: white; display: none;"
-              onclick="saveEditMode()">💾 수정 완료</button>
             <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;"
               onclick="sendToDeskQueue()">📋 데스크로 전달</button>
             <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송 (Enter)</button>
@@ -1561,7 +1549,7 @@
               }
             }
           }
-          liveTranscript.innerText = accumulatedTranscript.trim();
+          liveTranscript.value = accumulatedTranscript.trim();
         } else {
           // PC: 실시간 타이핑 애니메이션 부드럽게 노출
           let interimText = '';
@@ -1570,7 +1558,7 @@
             if (e.results[i].isFinal) currentFinal += e.results[i][0].transcript + ' ';
             else interimText += e.results[i][0].transcript;
           }
-          liveTranscript.innerText = (accumulatedTranscript + currentFinal + interimText).trim();
+          liveTranscript.value = (accumulatedTranscript + currentFinal + interimText).trim();
         }
         // 📜 실시간 자동 스크롤
         liveTranscript.scrollTop = liveTranscript.scrollHeight;
@@ -1578,6 +1566,9 @@
 
       // 세션 종료 핸들러: 원장님이 직접 [녹음 종료]를 누르기 전까지는 세션이 끊겨도 자동 유지
       recognition.onend = () => {
+        accumulatedTranscript = liveTranscript.value.trim();
+        if (accumulatedTranscript) accumulatedTranscript += ' ';
+
         if (!userRequestedStop && isRecording) {
           try {
             recognition.start();
@@ -1608,7 +1599,7 @@
       if (!isRecording) {
         userRequestedStop = false;
         accumulatedTranscript = '';
-        liveTranscript.innerText = '';
+        liveTranscript.value = '';
         // 녹음 중에도 검토 카드가 계속 보이도록 유지 (display: none 하지 않음)
         try { recognition.start(); } catch (e) { }
       } else {
@@ -1625,7 +1616,7 @@
 
     // 🌟 핵심: 텍스트를 검증하고 OpenAI 서버로 100% 전송하는 함수
     async function triggerAnalyzeDirectly() {
-      let text = liveTranscript.innerText.trim();
+      let text = (liveTranscript.value || liveTranscript.innerText || '').trim();
       text = text.replace('진료실 대화가 여기에 실시간으로 기록됩니다...', '').trim();
 
       if (!text || text.length < 10) {
@@ -1698,10 +1689,22 @@
         };
 
         // 의사용 검토창에 렌더링
-        document.getElementById('viewSummaryText').innerText = normSummary;
-        document.getElementById('viewMedText').innerText = normMed;
-        document.getElementById('viewNextDateText').innerText = normNextDate;
-        document.getElementById('viewNextNoticeText').innerText = normNextNotice;
+        const viewSummaryEl = document.getElementById('viewSummaryText');
+        if (viewSummaryEl) viewSummaryEl.innerText = normSummary;
+        const viewMedEl = document.getElementById('viewMedText');
+        if (viewMedEl) viewMedEl.innerText = normMed;
+        const viewNextDateEl = document.getElementById('viewNextDateText');
+        if (viewNextDateEl) viewNextDateEl.innerText = normNextDate;
+        const viewNextNoticeEl = document.getElementById('viewNextNoticeText');
+        if (viewNextNoticeEl) viewNextNoticeEl.innerText = normNextNotice;
+
+        // 상시 직접 수정 입력창에도 동기화
+        const editSummaryEl = document.getElementById('editSummaryInput');
+        if (editSummaryEl) editSummaryEl.value = normSummary;
+        const editMedEl = document.getElementById('editMedInput');
+        if (editMedEl) editMedEl.value = normMed;
+        const editNextDateEl = document.getElementById('editNextDateInput');
+        if (editNextDateEl) editNextDateEl.value = normNextDate;
 
         // 우측 스마트폰 화면에도 실시간 즉시 렌더링
         document.getElementById('reportPatientName').innerText = `${pInfoString}의 안심 진료노트`;
@@ -1819,44 +1822,43 @@
       document.getElementById('reportNextNotice').innerText = val.trim();
     }
 
-    function toggleEditMode() {
-      if (!parsedResult) return;
-      isEditing = true;
-      document.getElementById('editSummaryInput').value = parsedResult.summary;
-      document.getElementById('editMedInput').value = parsedResult.medication;
-      document.getElementById('editNextDateInput').value = parsedResult.nextDate;
-      document.getElementById('editNextNoticeInput').value = parsedResult.nextNotice;
-
-      document.getElementById('summaryViewMode').style.display = 'none';
-      document.getElementById('summaryEditMode').style.display = 'flex';
-      document.getElementById('editToggleBtn').style.display = 'none';
-      document.getElementById('saveEditBtn').style.display = 'block';
-      showToast('✏️ 원하시는 내용으로 직접 수정하세요!');
+    function handleDirectSummaryInput(val) {
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
+      parsedResult.summary = val;
+      const reportSummaryEl = document.getElementById('reportSummaryText');
+      if (reportSummaryEl) reportSummaryEl.innerText = val;
+      // 환자 수신 화면이 닫혀있다면 열어주기
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (val && emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
     }
 
-    function saveEditMode() {
-      isEditing = false;
-      parsedResult.summary = document.getElementById('editSummaryInput').value;
-      parsedResult.medication = document.getElementById('editMedInput').value;
-      parsedResult.nextDate = document.getElementById('editNextDateInput').value;
-      parsedResult.nextNotice = document.getElementById('editNextNoticeInput').value;
-
-      document.getElementById('viewSummaryText').innerText = parsedResult.summary;
-      document.getElementById('viewMedText').innerText = parsedResult.medication;
-      document.getElementById('viewNextDateText').innerText = parsedResult.nextDate;
-      document.getElementById('viewNextNoticeText').innerText = parsedResult.nextNotice;
-
-      // 우측 폰 화면 동기화
-      document.getElementById('reportSummaryText').innerText = parsedResult.summary;
-      document.getElementById('reportMedText').innerText = parsedResult.medication;
-      document.getElementById('reportNextDate').innerText = parsedResult.nextDate;
-      document.getElementById('reportNextNotice').innerText = parsedResult.nextNotice;
-
-      document.getElementById('summaryEditMode').style.display = 'none';
-      document.getElementById('summaryViewMode').style.display = 'block';
-      document.getElementById('saveEditBtn').style.display = 'none';
-      document.getElementById('editToggleBtn').style.display = 'block';
-      showToast('💾 수정 내용이 저장되었습니다!');
+    function handleDirectNextDateInput(val) {
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
+      parsedResult.nextDate = val;
+      const reportDateEl = document.getElementById('reportNextDate');
+      if (reportDateEl) reportDateEl.innerText = val;
     }
 
     async function sendToDeskQueue() {
@@ -1921,12 +1923,15 @@
       parsedResult = null;
       fullTranscript = '';
       accumulatedTranscript = '';
-      document.getElementById('liveTranscript').innerHTML = '<span style="color:#94a3b8;">진료실 대화가 여기에 실시간으로 기록됩니다...</span>';
+      const liveTr = document.getElementById('liveTranscript');
+      if (liveTr) liveTr.value = '';
       document.getElementById('recordStatus').innerHTML = '[마이크 클릭] 또는 [F9]를 눌러 녹음을 시작하세요.';
-      document.getElementById('viewSummaryText').innerText = '';
-      document.getElementById('viewMedText').innerText = '';
-      document.getElementById('viewNextDateText').innerText = '';
-      document.getElementById('viewNextNoticeText').innerText = '';
+      const editSumm = document.getElementById('editSummaryInput');
+      if (editSumm) editSumm.value = '';
+      const editMed = document.getElementById('editMedInput');
+      if (editMed) editMed.value = '';
+      const editNext = document.getElementById('editNextDateInput');
+      if (editNext) editNext.value = '';
       document.getElementById('quickDirectMedInput').value = '';
       document.getElementById('quickDirectNoticeInput').value = '';
       document.getElementById('quickNextDatePicker').value = '';
