@@ -66,7 +66,8 @@ JSON 출력 포맷:
       response_format: { type: 'json_object' }
     });
 
-    const openAiApiKey = apiKey || process.env.OPENAI_API_KEY;
+    // 서버 기본 키 또는 클라이언트 전달 키
+    const openAiApiKey = (apiKey && apiKey.startsWith('sk-')) ? apiKey : (process.env.OPENAI_API_KEY || '');
 
     if (!openAiApiKey) {
       res.status(400).json({ error: 'OpenAI API 키가 필요합니다.' });
