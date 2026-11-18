@@ -1170,15 +1170,16 @@
                 <span style="font-size: 13px; font-weight: 800; color: #0284c7;">📢 진료 핵심 요약 (직접 수정 가능)</span>
                 <span style="font-size: 11px; color: #64748b;">수정 시 우측 미리보기에 즉시 반영됩니다</span>
               </div>
-              <textarea id="editSummaryInput" class="input-field" style="width: 100%; min-height: 90px; height: 90px; padding: 10px 12px; font-size: 13.5px; line-height: 1.6; resize: vertical !important;" placeholder="AI 진료 요약 내용이 여기에 표시되며, 원장님이 직접 수정하실 수도 있습니다." oninput="handleDirectSummaryInput(this.value)"></textarea>
+              <textarea id="editSummaryInput" class="input-field" style="width: 100%; min-height: 125px; height: 125px; padding: 12px 14px; font-size: 13.5px; line-height: 1.6; resize: vertical !important;" placeholder="AI 진료 요약 내용이 여기에 표시되며, 원장님이 직접 수정하실 수도 있습니다." oninput="handleDirectSummaryInput(this.value)"></textarea>
             </div>
 
-            <div style="display: flex; gap: 12px;">
-              <div style="flex: 1.2;">
+            <!-- 처방 및 복약법과 다음 내원일을 위아래로 배치하여 넓고 시원하게 수정 -->
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div>
                 <span style="font-size: 12px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px;">💊 처방 및 복약법:</span>
                 <input type="text" id="editMedInput" class="input-field" style="width: 100%; padding: 8px 10px; font-size: 13px;" placeholder="약 복용 안내" oninput="handleDirectMedInput(this.value)">
               </div>
-              <div style="flex: 1;">
+              <div>
                 <span style="font-size: 12px; font-weight: 700; color: #0369a1; display: block; margin-bottom: 4px;">🗓️ 다음 내원일:</span>
                 <input type="text" id="editNextDateInput" class="input-field" style="width: 100%; padding: 8px 10px; font-size: 13px; color: #0284c7; font-weight: 700;" placeholder="다음 내원일" oninput="handleDirectNextDateInput(this.value)">
               </div>
