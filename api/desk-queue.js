@@ -32,8 +32,14 @@ module.exports = async (req, res) => {
 
   loadQueue();
 
-  // 1. 대기 환자 목록 조회 (GET /api/desk-queue?hospitalId=...)
+  // 1. 대기 환자 목록 조회 (GET /api/desk-queue?hospitalId=...) 및 전체 초기화 (?action=reset_all)
   if (req.method === 'GET') {
+    if (req.query.action === 'reset_all') {
+      global._deskQueueCache = {};
+      saveQueue();
+      res.status(200).json({ success: true, message: '모든 대기열 환자 데이터가 완전히 초기화되었습니다.' });
+      return;
+    }
     const hospitalId = (req.query.hospitalId || req.query.hosp || 'default').trim();
     const queue = global._deskQueueCache[hospitalId] || [];
     res.status(200).json({ success: true, queue });

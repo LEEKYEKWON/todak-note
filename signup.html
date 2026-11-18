@@ -230,7 +230,9 @@
       </div>
 
       <div style="font-size: 12.5px; color: #94a3b8; text-align: center; margin-bottom: 14px; line-height: 1.5;">
-        가입을 완료하시면 <a href="terms.html" target="_blank" style="color: #38bdf8; text-decoration: underline;">이용약관</a> 및 <a href="privacy.html" target="_blank" style="color: #38bdf8; text-decoration: underline; font-weight: 700;">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.
+        가입을 완료하시면 <a href="terms.html" target="_blank" style="color: #38bdf8; text-decoration: underline;">이용약관</a> 및 <a
+          href="privacy.html" target="_blank"
+          style="color: #38bdf8; text-decoration: underline; font-weight: 700;">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.
       </div>
 
       <button type="submit" class="btn-submit">
@@ -266,7 +268,7 @@
     // 초기 로딩 시 플랜 설정
     selectPlan(currentPlan);
 
-    function handleSignup(e) {
+    async function handleSignup(e) {
       e.preventDefault();
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
@@ -275,18 +277,36 @@
       const phone = document.getElementById('signupPhone').value.trim();
 
       const userData = {
+        action: 'signup',
         email,
         password,
         doctorName,
         hospitalName,
         phone,
-        plan: currentPlan === 'standard' ? 'Standard' : 'Pro',
-        joinedAt: new Date().toISOString()
+        plan: currentPlan === 'standard' ? 'Standard' : 'Pro'
       };
 
-      // 브라우저 로컬스토리지에 회원 정보 및 로그인 세션 저장
+      // 1) 서버 클라우드(/api/auth)에 영구 회원 등록
+      try {
+        const res = await fetch('/api/auth?action=signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        });
+        const resData = await res.json();
+        if (!res.ok || resData.error) {
+          throw new Error(resData.error || '회원가입 실패');
+        }
+      } catch (err) {
+        console.warn("서버 동기화 경고 (로컬 가입 병행):", err);
+      }
+
+      // 2) 브라우저 로컬스토리지에 회원 정보 및 로그인 세션 저장
       localStorage.setItem('todak_user_' + email, JSON.stringify(userData));
       localStorage.setItem('todak_current_user', JSON.stringify(userData));
+
+      // 3) 신규 회원이므로 이전 병원의 대기열 로컬 캐시 초기화
+      localStorage.removeItem('todak_desk_queue');
 
       alert(`🎉 환영합니다, ${hospitalName} ${doctorName}님!\n회원가입이 완료되어 진료실 프로그램으로 즉시 입장합니다.`);
       window.location.href = 'clinic.html';

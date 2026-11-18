@@ -1969,11 +1969,12 @@
         createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      // 1) 로컬 백업 저장
+      // 1) 병원별 로컬 백업 저장
       try {
-        const queue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+        const queueKey = `todak_desk_queue_${hospId}`;
+        const queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
         queue.unshift(queueItem);
-        localStorage.setItem('todak_desk_queue', JSON.stringify(queue.slice(0, 30)));
+        localStorage.setItem(queueKey, JSON.stringify(queue.slice(0, 30)));
       } catch (e) { }
 
       // 2) 🌟 다른 데스크 PC로 실시간 클라우드 전송

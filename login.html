@@ -150,44 +150,78 @@
     <div class="auth-footer">
       아직 계정이 없으신가요?
       <a href="signup.html">회원가입하기</a>
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
+        <a href="clear-data.html" style="color: #f87171; font-size: 12px; font-weight: normal;">🧹 테스트 데이터 및 계정 완전 초기화</a>
+      </div>
     </div>
   </div>
 
   <script>
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      const savedUserStr = localStorage.getItem('todak_user_' + email);
+      // 1) 서버 클라우드(/api/auth) 로그인 시도
+      let loggedUser = null;
+      try {
+        const res = await fetch('/api/auth?action=login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login', email, password })
+        });
+        const resData = await res.json();
+        if (res.ok && resData.user) {
+          loggedUser = resData.user;
+        }
+      } catch (cloudErr) {
+        console.warn("서버 로그인 통신 실패, 로컬 캐시 조회:", cloudErr);
+      }
 
-      if (!savedUserStr) {
-        // 데모용 기본 계정 허용 또는 신규 가입 유도
-        if (email === 'doctor@hospital.com' || email.includes('@')) {
-          const defaultUser = {
+      // 2) 서버에 없거나 오프라인일 경우 로컬스토리지 조회
+      if (!loggedUser) {
+        const savedUserStr = localStorage.getItem('todak_user_' + email);
+        if (savedUserStr) {
+          const user = JSON.parse(savedUserStr);
+          if (user.password === password) {
+            loggedUser = user;
+          } else {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+          }
+        }
+      }
+
+      // 3) 그래도 없으면 데모 계정 체크 또는 가입 안내
+      if (!loggedUser) {
+        if (email === 'doctor@hospital.com') {
+          loggedUser = {
             email,
             doctorName: '홍길동',
             hospitalName: '길동이의원',
             plan: 'Pro'
           };
-          localStorage.setItem('todak_current_user', JSON.stringify(defaultUser));
-          alert(`🎉 환영합니다, ${defaultUser.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
-          window.location.href = 'clinic.html';
+        } else {
+          alert('등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.');
+          window.location.href = 'signup.html';
           return;
         }
-        alert('등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.');
-        window.location.href = 'signup.html';
-        return;
       }
 
-      const user = JSON.parse(savedUserStr);
-      if (user.password !== password) {
-        alert('비밀번호가 일치하지 않습니다.');
-        return;
+      // 이전 로그인 사용자와 다르면 이전 대기열 캐시 초기화
+      const prevUserStr = localStorage.getItem('todak_current_user');
+      if (prevUserStr) {
+        try {
+          const prevUser = JSON.parse(prevUserStr);
+          if (prevUser.email !== loggedUser.email) {
+            localStorage.removeItem('todak_desk_queue');
+          }
+        } catch (e) {}
       }
 
-      localStorage.setItem('todak_current_user', JSON.stringify(user));
-      alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
+      localStorage.setItem('todak_user_' + loggedUser.email, JSON.stringify(loggedUser));
+      localStorage.setItem('todak_current_user', JSON.stringify(loggedUser));
+      alert(`🎉 환영합니다, ${loggedUser.hospitalName} ${loggedUser.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
       window.location.href = 'clinic.html';
     }
   </script>

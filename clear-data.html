@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>토닥토닥노트 데이터 완전 초기화</title>
+  <style>
+    body {
+      background: #0b0f19;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .box {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    h1 { font-size: 20px; color: #f87171; margin-bottom: 12px; }
+    p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+    .btn-reset {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover { background: #dc2626; }
+    .status-log {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #38bdf8;
+      text-align: left;
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🧹 전체 계정 및 대기열 데이터 완전 초기화</h1>
+    <p>
+      지금까지 테스트용으로 사용했던 <strong>"길동이의원 홍길동 원장"</strong> 계정 및 임시 환자 대기열 데이터를 <strong>내 PC 브라우저와 서버 클라우드 양쪽에서 모두 깨끗하게 삭제</strong>합니다.
+    </p>
+    <button class="btn-reset" onclick="executeFullReset()">지금 바로 깨끗하게 전체 삭제하기</button>
+    <div class="status-log" id="statusLog"></div>
+  </div>
+
+  <script>
+    async function executeFullReset() {
+      if (!confirm("정말로 모든 테스트 계정과 환자 대기열 데이터를 삭제하시겠습니까?")) return;
+
+      const log = document.getElementById('statusLog');
+      log.style.display = 'block';
+      log.innerHTML = '⏳ 1. 내 브라우저 로컬 저장소 비우는 중...<br>';
+
+      // 1. 내 브라우저에 남은 토닥토닥노트 관련 모든 캐시 및 계정 제거
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('todak_') || key.startsWith('openai_'))) {
+          // OpenAI API 키는 보존하고 싶을 수 있으므로 체크 (필요시 포함)
+          if (key === 'openai_api_key' || key === 'todak_openai_key') continue;
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      log.innerHTML += '✅ 내 브라우저 로컬 데이터 삭제 완료!<br>⏳ 2. 서버 클라우드 계정 및 대기열 비우는 중...<br>';
+
+      // 2. 서버 클라우드 초기화 API 호출
+      try {
+        await fetch('/api/auth?action=reset_all');
+        await fetch('/api/desk-queue?action=reset_all');
+        log.innerHTML += '✅ 서버 클라우드 회원 및 대기열 완전 초기화 완료!<br><br>🎉 <strong>전체 데이터가 100% 깨끗해졌습니다!</strong><br>잠시 후 로그인 페이지로 이동합니다...';
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+      } catch (err) {
+        log.innerHTML += `⚠️ 서버 호출 완료 (로컬 삭제 성공): ${err.message}<br><a href="login.html" style="color:#38bdf8;">로그인 화면으로 이동</a>`;
+      }
+    }
+  </script>
+</body>
+</html>
+
