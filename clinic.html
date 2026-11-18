@@ -258,9 +258,10 @@
       font-size: 13px;
       font-weight: 700;
       text-decoration: none;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
       backdrop-filter: blur(8px);
       transition: all 0.2s;
     }
@@ -1027,89 +1028,10 @@
       transform: translateY(-1px);
     }
 
-    /* 🌟 모바일 완벽 반응형 스타일 (화면 너비 900px 이하) */
-    @media (max-width: 900px) {
-      header {
-        padding: 12px 14px;
-        flex-direction: column;
-        gap: 12px;
-        align-items: stretch;
-      }
-
-      .logo-area {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .logo-title {
-        font-size: 16px;
-      }
-
-      /* 모바일 상단 내비게이션 버튼 & 컬러 칩 정돈 */
-      .header-nav-group {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 6px;
-        width: 100%;
-      }
-
-      .dashboard-nav-link {
-        padding: 5px 10px;
-        font-size: 11.5px;
-        border-radius: 14px;
-      }
-
-      .theme-palette-wrapper {
-        padding: 4px 10px;
-        gap: 6px;
-      }
-
-      .color-chip-btn {
-        width: 18px;
-        height: 18px;
-      }
-
-      .main-container {
-        flex-direction: column;
-        padding: 12px;
-        gap: 16px;
-      }
-
-      .patient-input-group {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .doctor-side, .patient-side {
-        width: 100%;
-        max-width: 100%;
-      }
-
-      .phone-mockup {
-        width: 100% !important;
-        max-width: 100%;
-        height: auto;
-        min-height: 520px;
-        border-radius: 20px;
-        border: 3px solid #0f172a;
-      }
-
-      .phone-notch {
-        width: 80px;
-        height: 14px;
-      }
-
-      .action-buttons {
-        flex-direction: column;
-      }
-
-      .action-buttons .btn {
-        width: 100%;
-      }
+    .header-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
   </style>
 </head>
@@ -1124,10 +1046,7 @@
     </div>
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
-    <div class="header-nav-group">
-      <button type="button" class="dashboard-nav-link" onclick="promptApiKey()" style="background: rgba(254, 229, 0, 0.25); border-color: #facc15; color: #1e293b; font-weight: 800;" title="OpenAI API 키 설정">
-        🔑 AI 키 설정
-      </button>
+    <div style="display: flex; align-items: center; gap: 10px;">
       <a href="desk.html" class="dashboard-nav-link" style="background: rgba(2, 132, 199, 0.1); border-color: #38bdf8;"
         title="수납 데스크 대기열 및 발송 모드">
         📋 데스크 모드
