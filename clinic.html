@@ -1732,11 +1732,33 @@
 
     // ⚡ 1초 퀵 칩 적용 함수 (약 복용법 & 내원일)
     function applyQuickMed(medText, btnEl) {
-      if (!parsedResult) return;
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
       parsedResult.medication = medText;
-      document.getElementById('viewMedText').innerText = medText;
-      document.getElementById('editMedInput').value = medText;
-      document.getElementById('reportMedText').innerText = medText;
+      const viewMedEl = document.getElementById('viewMedText');
+      if (viewMedEl) viewMedEl.innerText = medText;
+      const editMedEl = document.getElementById('editMedInput');
+      if (editMedEl) editMedEl.value = medText;
+      const quickDirectMedEl = document.getElementById('quickDirectMedInput');
+      if (quickDirectMedEl) quickDirectMedEl.value = medText;
+      const reportMedEl = document.getElementById('reportMedText');
+      if (reportMedEl) reportMedEl.innerText = medText;
+
+      // 환자 수신 화면이 닫혀있다면 열어주기
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
 
       // 활성화 버튼 하이라이트
       document.querySelectorAll('.med-chip').forEach(b => b.classList.remove('active'));
@@ -1775,17 +1797,48 @@
     }
 
     function handleDirectMedInput(val) {
-      if (!parsedResult) return;
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
       const text = val.trim() || '원외 약국에서 조제 받으신 약 봉투의 복약 안내를 꼭 확인해 주세요.';
       parsedResult.medication = text;
-      document.getElementById('viewMedText').innerText = text;
-      document.getElementById('editMedInput').value = text;
-      document.getElementById('reportMedText').innerText = text;
+      const viewMedEl = document.getElementById('viewMedText');
+      if (viewMedEl) viewMedEl.innerText = text;
+      const editMedEl = document.getElementById('editMedInput');
+      if (editMedEl && editMedEl.value !== val) editMedEl.value = val;
+      const quickDirectMedEl = document.getElementById('quickDirectMedInput');
+      if (quickDirectMedEl && quickDirectMedEl.value !== val) quickDirectMedEl.value = val;
+      const reportMedEl = document.getElementById('reportMedText');
+      if (reportMedEl) reportMedEl.innerText = text;
+
+      // 환자 수신 화면이 닫혀있다면 열어주기
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (val && emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
       document.querySelectorAll('.med-chip').forEach(b => b.classList.remove('active'));
     }
 
     function handleDatePickerChange() {
-      if (!parsedResult) return;
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
       const dateVal = document.getElementById('quickNextDatePicker').value;
       const timeVal = document.getElementById('quickNextTimePicker').value;
 
@@ -1799,9 +1852,19 @@
       }
 
       parsedResult.nextDate = formatted;
-      document.getElementById('viewNextDateText').innerText = formatted;
-      document.getElementById('editNextDateInput').value = formatted;
-      document.getElementById('reportNextDate').innerText = formatted;
+      const viewNextDateEl = document.getElementById('viewNextDateText');
+      if (viewNextDateEl) viewNextDateEl.innerText = formatted;
+      const editNextDateEl = document.getElementById('editNextDateInput');
+      if (editNextDateEl) editNextDateEl.value = formatted;
+      const reportNextDateEl = document.getElementById('reportNextDate');
+      if (reportNextDateEl) reportNextDateEl.innerText = formatted;
+
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
     }
 
     function setNextDatePreset(daysAfter) {
@@ -1815,11 +1878,30 @@
     }
 
     function handleDirectNoticeInput(val) {
-      if (!parsedResult) return;
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
       parsedResult.nextNotice = val.trim();
-      document.getElementById('viewNextNoticeText').innerText = val.trim();
-      document.getElementById('editNextNoticeInput').value = val.trim();
-      document.getElementById('reportNextNotice').innerText = val.trim();
+      const viewNoticeEl = document.getElementById('viewNextNoticeText');
+      if (viewNoticeEl) viewNoticeEl.innerText = val.trim();
+      const editNoticeEl = document.getElementById('editNextNoticeInput');
+      if (editNoticeEl) editNoticeEl.value = val.trim();
+      const reportNoticeEl = document.getElementById('reportNextNotice');
+      if (reportNoticeEl) reportNoticeEl.innerText = val.trim();
+
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (val && emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
     }
 
     function handleDirectSummaryInput(val) {
@@ -1859,6 +1941,13 @@
       parsedResult.nextDate = val;
       const reportDateEl = document.getElementById('reportNextDate');
       if (reportDateEl) reportDateEl.innerText = val;
+
+      const emptyStateEl = document.getElementById('emptyState');
+      const reportCardEl = document.getElementById('reportCard');
+      if (val && emptyStateEl && reportCardEl) {
+        emptyStateEl.style.display = 'none';
+        reportCardEl.style.display = 'block';
+      }
     }
 
     async function sendToDeskQueue() {
