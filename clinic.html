@@ -1030,21 +1030,53 @@
     /* 🌟 모바일 완벽 반응형 스타일 (화면 너비 900px 이하) */
     @media (max-width: 900px) {
       header {
-        padding: 12px 16px;
+        padding: 12px 14px;
         flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
+        gap: 12px;
+        align-items: stretch;
       }
 
       .logo-area {
         width: 100%;
+        display: flex;
+        align-items: center;
         justify-content: space-between;
+      }
+
+      .logo-title {
+        font-size: 16px;
+      }
+
+      /* 모바일 상단 내비게이션 버튼 & 컬러 칩 정돈 */
+      .header-nav-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        width: 100%;
+      }
+
+      .dashboard-nav-link {
+        padding: 5px 10px;
+        font-size: 11.5px;
+        border-radius: 14px;
+      }
+
+      .theme-palette-wrapper {
+        padding: 4px 10px;
+        gap: 6px;
+      }
+
+      .color-chip-btn {
+        width: 18px;
+        height: 18px;
       }
 
       .main-container {
         flex-direction: column;
-        padding: 14px;
-        gap: 20px;
+        padding: 12px;
+        gap: 16px;
       }
 
       .patient-input-group {
@@ -1059,16 +1091,16 @@
 
       .phone-mockup {
         width: 100% !important;
-        max-width: 420px;
+        max-width: 100%;
         height: auto;
         min-height: 520px;
-        border-radius: 24px;
-        border: 4px solid #0f172a;
+        border-radius: 20px;
+        border: 3px solid #0f172a;
       }
 
       .phone-notch {
-        width: 90px;
-        height: 16px;
+        width: 80px;
+        height: 14px;
       }
 
       .action-buttons {
@@ -1092,7 +1124,10 @@
     </div>
 
     <!-- 우측 내비게이션 및 컬러 칩 -->
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div class="header-nav-group">
+      <button type="button" class="dashboard-nav-link" onclick="promptApiKey()" style="background: rgba(254, 229, 0, 0.25); border-color: #facc15; color: #1e293b; font-weight: 800;" title="OpenAI API 키 설정">
+        🔑 AI 키 설정
+      </button>
       <a href="desk.html" class="dashboard-nav-link" style="background: rgba(2, 132, 199, 0.1); border-color: #38bdf8;"
         title="수납 데스크 대기열 및 발송 모드">
         📋 데스크 모드
@@ -1583,11 +1618,9 @@
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.lang = 'ko-KR';
-      // 모바일(안드로이드 크롬)은 continuous=true 시 침묵마다 끊어지며 재시작 시 비프음("띵동")이 주기적으로 울리므로
-      // 모바일에서는 continuous=false로 단일 발화 세션 처리하고 음성 종료 시 깔끔하게 종료하거나,
-      // 사용자가 직접 녹음 종료를 누를 때까지 불필요한 즉각 재시작 루프를 제어합니다.
-      recognition.continuous = !isMobileDevice;
-      // 🌟 모바일 크롬의 심각한 버그(단어 무한 중복 복제 버그) 방지: 모바일은 interimResults=false로 안정적 인식
+      // PC 및 모바일 공통으로 continuous = true 유지
+      recognition.continuous = true;
+      // 🌟 모바일 크롬의 단어 무한 중복 복제 버그 방지 (모바일은 최종 확정 발화만 누적)
       recognition.interimResults = !isMobileDevice;
 
       recognition.onstart = () => {
@@ -1624,30 +1657,13 @@
         liveTranscript.scrollTop = liveTranscript.scrollHeight;
       };
 
-      // 세션 종료 핸들러
+      // 세션 종료 핸들러: 원장님이 직접 [녹음 종료]를 누르기 전까지는 세션이 끊겨도 자동 유지
       recognition.onend = () => {
-        if (isMobileDevice) {
-          // 모바일: 침묵으로 자연 종료된 경우, 사용자가 명시적으로 중지하지 않았더라도
-          // 무한 start() 재호출로 비프음("띵동")이 5초마다 반복되는 현상을 차단하고 상태를 정상 대기로 전환합니다.
-          // 녹음된 텍스트가 있으면 상태 안내를 업데이트합니다.
-          if (!userRequestedStop && isRecording) {
-            isRecording = false;
-            micBtn.classList.remove('active');
-            micBtn.title = '진료 녹음 시작';
-            micBox.classList.remove('recording');
-            recordStatus.innerHTML = '✨ <strong>음성 입력 완료!</strong> 추가 녹음 시 마이크를 다시 누르거나 요약을 진행하세요.';
-            return;
-          }
-        } else {
-          accumulatedTranscript = liveTranscript.innerText.trim();
-          if (accumulatedTranscript) accumulatedTranscript += ' ';
-
-          if (!userRequestedStop && isRecording) {
-            try {
-              recognition.start();
-            } catch (e) { }
-            return;
-          }
+        if (!userRequestedStop && isRecording) {
+          try {
+            recognition.start();
+          } catch (e) { }
+          return;
         }
 
         isRecording = false;
