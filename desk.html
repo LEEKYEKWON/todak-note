@@ -408,13 +408,20 @@
       const tbody = document.getElementById('deskTableBody');
       const hospId = getHospitalId();
 
-      // 1. 서버 API(/api/desk-queue)에서 다른 진료실 PC가 보낸 환자 목록 가져오기
+      // 1. 서버 API(/api/desk-queue)에서 다른 진료실 PC가 보낸 환자 목록 가져오기 (캐시 방지 타임스탬프)
       try {
-        const res = await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}`);
+        const res = await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}&_t=${Date.now()}`, {
+          cache: 'no-store'
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.queue)) {
-            deskQueueData = data.queue;
+            // 서버 대기열과 로컬 대기열 합치기 (중복 제거)
+            const localQueue = JSON.parse(localStorage.getItem('todak_desk_queue') || '[]');
+            const map = new Map();
+            data.queue.forEach(item => map.set(item.id, item));
+            localQueue.forEach(item => { if (!map.has(item.id)) map.set(item.id, item); });
+            deskQueueData = Array.from(map.values());
             localStorage.setItem('todak_desk_queue', JSON.stringify(deskQueueData));
           }
         }
