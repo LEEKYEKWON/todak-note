@@ -1026,6 +1026,59 @@
       background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
       transform: translateY(-1px);
     }
+
+    /* 🌟 모바일 완벽 반응형 스타일 (화면 너비 900px 이하) */
+    @media (max-width: 900px) {
+      header {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .logo-area {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .main-container {
+        flex-direction: column;
+        padding: 14px;
+        gap: 20px;
+      }
+
+      .patient-input-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .doctor-side, .patient-side {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .phone-mockup {
+        width: 100% !important;
+        max-width: 420px;
+        height: auto;
+        min-height: 520px;
+        border-radius: 24px;
+        border: 4px solid #0f172a;
+      }
+
+      .phone-notch {
+        width: 90px;
+        height: 16px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 
@@ -1530,7 +1583,10 @@
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.lang = 'ko-KR';
-      recognition.continuous = true;
+      // 모바일(안드로이드 크롬)은 continuous=true 시 침묵마다 끊어지며 재시작 시 비프음("띵동")이 주기적으로 울리므로
+      // 모바일에서는 continuous=false로 단일 발화 세션 처리하고 음성 종료 시 깔끔하게 종료하거나,
+      // 사용자가 직접 녹음 종료를 누를 때까지 불필요한 즉각 재시작 루프를 제어합니다.
+      recognition.continuous = !isMobileDevice;
       // 🌟 모바일 크롬의 심각한 버그(단어 무한 중복 복제 버그) 방지: 모바일은 interimResults=false로 안정적 인식
       recognition.interimResults = !isMobileDevice;
 
@@ -1568,19 +1624,32 @@
         liveTranscript.scrollTop = liveTranscript.scrollHeight;
       };
 
-      // 침묵으로 세션이 끊겨도 기존 대화를 누적하고 즉시 재연결
+      // 세션 종료 핸들러
       recognition.onend = () => {
-        if (!isMobileDevice) {
+        if (isMobileDevice) {
+          // 모바일: 침묵으로 자연 종료된 경우, 사용자가 명시적으로 중지하지 않았더라도
+          // 무한 start() 재호출로 비프음("띵동")이 5초마다 반복되는 현상을 차단하고 상태를 정상 대기로 전환합니다.
+          // 녹음된 텍스트가 있으면 상태 안내를 업데이트합니다.
+          if (!userRequestedStop && isRecording) {
+            isRecording = false;
+            micBtn.classList.remove('active');
+            micBtn.title = '진료 녹음 시작';
+            micBox.classList.remove('recording');
+            recordStatus.innerHTML = '✨ <strong>음성 입력 완료!</strong> 추가 녹음 시 마이크를 다시 누르거나 요약을 진행하세요.';
+            return;
+          }
+        } else {
           accumulatedTranscript = liveTranscript.innerText.trim();
           if (accumulatedTranscript) accumulatedTranscript += ' ';
+
+          if (!userRequestedStop && isRecording) {
+            try {
+              recognition.start();
+            } catch (e) { }
+            return;
+          }
         }
 
-        if (!userRequestedStop && isRecording) {
-          try {
-            recognition.start();
-          } catch (e) { }
-          return;
-        }
         isRecording = false;
         micBtn.classList.remove('active');
         micBtn.title = '진료 녹음 시작 (F9)';

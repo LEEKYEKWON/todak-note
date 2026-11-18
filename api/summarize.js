@@ -67,10 +67,13 @@ JSON 출력 포맷:
     });
 
     // 서버 기본 키 또는 클라이언트 전달 키
-    const openAiApiKey = (apiKey && apiKey.startsWith('sk-')) ? apiKey : (process.env.OPENAI_API_KEY || '');
+    const serverDefaultKey = process.env.OPENAI_API_KEY || '';
+    const openAiApiKey = (apiKey && apiKey.startsWith('sk-')) ? apiKey : serverDefaultKey;
 
     if (!openAiApiKey) {
-      res.status(400).json({ error: 'OpenAI API 키가 필요합니다.' });
+      res.status(400).json({
+        error: 'OpenAI API 키가 필요합니다. Vercel 환경변수(OPENAI_API_KEY)를 등록해 주시거나 진료실 상단의 키 설정을 확인해 주세요.'
+      });
       return;
     }
 
