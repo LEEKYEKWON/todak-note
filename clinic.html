@@ -497,9 +497,9 @@
 
     .realtime-live-transcript {
       width: 100%;
-      height: 160px;
-      min-height: 160px;
-      max-height: 160px;
+      height: 195px;
+      min-height: 195px;
+      max-height: 450px;
       overflow-y: auto;
       scroll-behavior: smooth;
       background: white;
@@ -511,7 +511,7 @@
       line-height: 1.65;
       text-align: left;
       white-space: pre-wrap;
-      resize: vertical;
+      resize: vertical !important;
     }
 
     /* 직접 실행 트리거 버튼 */
@@ -1170,7 +1170,7 @@
                 <span style="font-size: 13px; font-weight: 800; color: #0284c7;">📢 진료 핵심 요약 (직접 수정 가능)</span>
                 <span style="font-size: 11px; color: #64748b;">수정 시 우측 미리보기에 즉시 반영됩니다</span>
               </div>
-              <textarea id="editSummaryInput" class="input-field" style="width: 100%; min-height: 72px; padding: 10px 12px; font-size: 13.5px; line-height: 1.6; resize: vertical;" placeholder="AI 진료 요약 내용이 여기에 표시되며, 원장님이 직접 수정하실 수도 있습니다." oninput="handleDirectSummaryInput(this.value)"></textarea>
+              <textarea id="editSummaryInput" class="input-field" style="width: 100%; min-height: 90px; height: 90px; padding: 10px 12px; font-size: 13.5px; line-height: 1.6; resize: vertical !important;" placeholder="AI 진료 요약 내용이 여기에 표시되며, 원장님이 직접 수정하실 수도 있습니다." oninput="handleDirectSummaryInput(this.value)"></textarea>
             </div>
 
             <div style="display: flex; gap: 12px;">
@@ -1247,7 +1247,7 @@
           <div class="action-buttons">
             <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;"
               onclick="sendToDeskQueue()">📋 데스크로 전달</button>
-            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송 (Enter)</button>
+            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송</button>
           </div>
         </div>
       </div>
@@ -1592,7 +1592,6 @@
     micBtn.addEventListener('click', toggleRecording);
     window.addEventListener('keydown', (e) => {
       if (e.key === 'F9') { e.preventDefault(); toggleRecording(); }
-      else if (e.key === 'Enter' && summaryReviewCard.style.display === 'block') { e.preventDefault(); sendReport(); }
     });
 
     function toggleRecording() {
