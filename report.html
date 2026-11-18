@@ -247,6 +247,9 @@
   <div class="report-container">
     <!-- 상단 병원 정보 & 환자 이름 -->
     <div class="report-header">
+      <div id="hospLogoContainer" style="display: none; margin-bottom: 8px;">
+        <img id="hospLogoImg" src="" alt="병원 로고" style="max-height: 40px; max-width: 140px; object-fit: contain;">
+      </div>
       <div class="hospital-tag" id="hospName">🏥 토닥토닥 안심진료</div>
       <h1 class="patient-greet" id="patientNameTitle">환자님의 안심 진료노트</h1>
       <span class="today-date" id="reportTodayDate">진료일시: 불러오는 중...</span>
@@ -410,6 +413,16 @@
 
     function renderReportData(data) {
       if (!data) return;
+
+      // 병원 전용 로고 (고급형 Pro 등록 시)
+      if (data.logoUrl) {
+        const logoContainer = document.getElementById('hospLogoContainer');
+        const logoImg = document.getElementById('hospLogoImg');
+        if (logoContainer && logoImg) {
+          logoImg.src = data.logoUrl;
+          logoContainer.style.display = 'block';
+        }
+      }
 
       // 병원명
       if (data.hospitalName) {

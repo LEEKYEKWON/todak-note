@@ -1105,11 +1105,11 @@
         <div class="patient-input-group">
           <!-- 환자 이름 & 나이 입력 양식 -->
           <div class="input-box-wrapper" style="flex: 1.3;">
-            <span class="input-label">이름 :</span>
-            <input type="text" id="patientName" class="input-field-clean" value="김영희" placeholder="성함 입력">
+            <span class="input-label">환자 이름 :</span>
+            <input type="text" id="patientName" class="input-field-clean" value="" placeholder="성함 입력" oninput="updateLivePatientPreview()">
             <span class="input-label" style="margin-left: 10px;">나이 :</span>
             <input type="text" id="patientAge" class="input-field-clean" style="max-width: 48px; text-align: center;"
-              value="32" placeholder="선택">
+              value="" placeholder="선택" oninput="updateLivePatientPreview()">
             <span class="input-unit">세</span>
           </div>
 
@@ -1260,7 +1260,7 @@
           <div class="report-card" id="reportCard">
             <div class="report-header">
               <span class="hospital-tag">🏥 길동이의원 · 홍길동 원장</span>
-              <h2 class="patient-greet" id="reportPatientName">김영희 님의 안심 진료노트</h2>
+              <h2 class="patient-greet" id="reportPatientName">환자 님의 안심 진료노트</h2>
               <span style="font-size: 13px; color: #64748b;" id="reportTodayDate"></span>
             </div>
 
@@ -1420,7 +1420,16 @@
 
       const hospTag = document.querySelector('.hospital-tag');
       if (hospTag) {
-        hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+        if (user.logoUrl) {
+          hospTag.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <img src="${user.logoUrl}" alt="병원로고" style="max-height: 28px; max-width: 90px; object-fit: contain; border-radius: 4px;">
+              <span>🏥 ${user.hospitalName} · ${user.doctorName || '원장'}</span>
+            </div>
+          `;
+        } else {
+          hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+        }
       }
 
       const isPro = user.plan && user.plan.toLowerCase() === 'pro';
@@ -1434,7 +1443,8 @@
       if (badgeArea) {
         if (isPro) {
           badgeArea.innerHTML = `
-            <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 4px;">
+            <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 6px;">
+              ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
               🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>
             </span>
           `;
@@ -1445,6 +1455,17 @@
             </span>
           `;
         }
+      }
+    }
+
+    // 🌟 환자 이름과 나이를 입력/수정할 때 우측 환자 수신 화면에 실시간 즉시 반영
+    function updateLivePatientPreview() {
+      const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
+      const pAge = document.getElementById('patientAge').value.trim();
+      const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
+      const reportPatientNameEl = document.getElementById('reportPatientName');
+      if (reportPatientNameEl) {
+        reportPatientNameEl.innerText = `${pDisplayName}의 안심 진료노트`;
       }
     }
 
