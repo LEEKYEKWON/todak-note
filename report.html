@@ -426,14 +426,16 @@
       }
 
       // 7. 병원 최신 브랜딩(로고/네이버 링크) 비동기 즉시 보강
-      const hospCleanName = (data && data.hospitalName) ? data.hospitalName.replace('🏥', '').trim() : '';
+      const hospCleanName = (data && data.hospitalName) ? data.hospitalName.replace(/🏥\s*/g, '').trim() : '';
       if (hospCleanName && hospCleanName !== '토닥토닥 안심진료') {
         try {
           const brandRes = await fetch(`/api/hosp-brand?hospitalName=${encodeURIComponent(hospCleanName)}&_t=${Date.now()}`);
           if (brandRes.ok) {
             const bData = await brandRes.json();
             if (bData.success && bData.brand) {
-              if (bData.brand.naverReviewUrl) currentNaverUrl = bData.brand.naverReviewUrl;
+              if (bData.brand.naverReviewUrl) {
+                currentNaverUrl = bData.brand.naverReviewUrl.trim();
+              }
               if (bData.brand.logoUrl) {
                 const logoContainer = document.getElementById('hospLogoContainer');
                 const logoImg = document.getElementById('hospLogoImg');
@@ -444,7 +446,9 @@
               }
             }
           }
-        } catch (e) { }
+        } catch (e) {
+          console.warn("브랜딩 로드 실패:", e);
+        }
       }
     });
 
@@ -455,7 +459,7 @@
 
       // 네이버 플레이스 리뷰 URL 저장
       if (data.naverReviewUrl) {
-        currentNaverUrl = data.naverReviewUrl;
+        currentNaverUrl = data.naverReviewUrl.trim();
       }
 
       // 병원 전용 로고 (고급형 Pro 등록 시)
