@@ -1,13 +1,32 @@
 // 병원 브랜딩(로고, 네이버 플레이스 리뷰 주소) 전용 독립 API - Supabase 영구 DB 연동
-const { supabaseQuery } = require('./supabase');
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fabzvobawvtsdprixmyf.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+
+async function supabaseQuery(endpoint, options = {}) {
+  const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': options.prefer || 'return=representation',
+    ...(options.headers || {})
+  };
+
+  try {
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      const errText = await res.text();
+      return { ok: false, status: res.status, error: errText };
+    }
+    const data = await res.json();
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 // 오프라인/캐시 대비 로컬 백업
-let preloadedBrands = {};
-try {
-  preloadedBrands = require('./brand-data.js');
-} catch (e) { }
-
-global._brandCache = global._brandCache || Object.assign({}, preloadedBrands);
+global._brandCache = global._brandCache || {};
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -43,16 +62,14 @@ module.exports = async (req, res) => {
       updatedAt: Date.now()
     };
 
-    // 🌟 Supabase 클라우드 영구 저장 (upsert: 있으면 갱신, 없으면 신규 삽입)
+    // 🌟 Supabase 클라우드 영구 저장
     try {
       await supabaseQuery('hospitals', {
         method: 'POST',
         prefer: 'resolution=merge-duplicates,return=representation',
         body: JSON.stringify(brandData)
       });
-    } catch (e) {
-      console.warn("Supabase 병원 저장 실패:", e);
-    }
+    } catch (e) { }
 
     res.status(200).json({ success: true, brand: global._brandCache[key] });
     return;
@@ -80,11 +97,9 @@ module.exports = async (req, res) => {
         res.status(200).json({ success: true, brand });
         return;
       }
-    } catch (sbErr) {
-      console.warn("Supabase 병원 조회 실패, 캐시 확인:", sbErr);
-    }
+    } catch (sbErr) { }
 
-    // 2순위: 로컬 메모리/파일 백업 캐시 확인
+    // 2순위: 로컬 메모리 백업 캐시 확인
     if (global._brandCache[rawName]) {
       res.status(200).json({ success: true, brand: global._brandCache[rawName] });
       return;

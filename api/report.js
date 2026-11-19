@@ -1,5 +1,29 @@
 // 환자 진료 리포트 영구 저장 및 조회 API - Supabase 연동
-const { supabaseQuery } = require('./supabase');
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fabzvobawvtsdprixmyf.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+
+async function supabaseQuery(endpoint, options = {}) {
+  const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': options.prefer || 'return=representation',
+    ...(options.headers || {})
+  };
+
+  try {
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      const errText = await res.text();
+      return { ok: false, status: res.status, error: errText };
+    }
+    const data = await res.json();
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 // 메모리 백업 캐시
 global._reportCache = global._reportCache || {};
@@ -49,9 +73,7 @@ module.exports = async (req, res) => {
         prefer: 'resolution=merge-duplicates,return=representation',
         body: JSON.stringify(dbPayload)
       });
-    } catch (e) {
-      console.warn("Supabase 리포트 저장 실패, 로컬 캐시 유지:", e);
-    }
+    } catch (e) { }
 
     res.status(200).json({ success: true, id });
     return;
@@ -87,9 +109,7 @@ module.exports = async (req, res) => {
         res.status(200).json(reportData);
         return;
       }
-    } catch (sbErr) {
-      console.warn("Supabase 리포트 조회 실패, 캐시 확인:", sbErr);
-    }
+    } catch (sbErr) { }
 
     // 2순위: 메모리 캐시 조회
     if (global._reportCache[id]) {
