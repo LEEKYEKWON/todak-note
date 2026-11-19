@@ -428,33 +428,16 @@
 
     // 🌟 리포트 페이지 로딩 완료 후 병원 최신 브랜딩(로고/네이버링크) 비동기 보강
     window.addEventListener('DOMContentLoaded', async () => {
-      // 컴팩트 토큰 또는 URL에 hospitalId(이메일)가 있는 경우 서버에서 최신 정보 조회
-      const urlParams = new URLSearchParams(window.location.search);
-      const cParam = urlParams.get('c');
-      let targetHospId = '';
-
-      if (cParam) {
-        try {
-          let base64 = cParam.replace(/-/g, '+').replace(/_/g, '/');
-          while (base64.length % 4) base64 += '=';
-          const binStr = atob(base64);
-          const bytes = new Uint8Array(binStr.length);
-          for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
-          const arr = JSON.parse(new TextDecoder().decode(bytes));
-          if (arr[8]) targetHospId = arr[8];
-        } catch (e) { }
-      }
-
-      // 내 브라우저 로컬 저장소 확인 (테스트 환경 대비)
+      // 1) 내 브라우저 로컬 저장소 우선 확인 (테스트 환경)
       const localUserStr = localStorage.getItem('todak_current_user');
       if (localUserStr) {
         try {
           const u = JSON.parse(localUserStr);
-          if (u.naverReviewUrl && !currentNaverUrl) currentNaverUrl = u.naverReviewUrl;
+          if (u.naverReviewUrl) currentNaverUrl = u.naverReviewUrl;
           if (u.logoUrl) {
             const logoContainer = document.getElementById('hospLogoContainer');
             const logoImg = document.getElementById('hospLogoImg');
-            if (logoContainer && logoImg && logoContainer.style.display === 'none') {
+            if (logoContainer && logoImg) {
               logoImg.src = u.logoUrl;
               logoContainer.style.display = 'block';
             }
@@ -462,19 +445,21 @@
         } catch (e) { }
       }
 
-      // 서버 클라우드에서 최신 병원 정보 조회
-      if (targetHospId) {
+      // 2) 리포트에 표시된 병원명을 기반으로 최신 브랜딩(/api/hosp-brand) 조회
+      const hospEl = document.getElementById('hospName');
+      const hospCleanName = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '';
+      if (hospCleanName && hospCleanName !== '토닥토닥 안심진료') {
         try {
-          const res = await fetch(`/api/auth?email=${encodeURIComponent(targetHospId)}`);
-          if (res.ok) {
-            const resData = await res.json();
-            if (resData.user) {
-              if (resData.user.naverReviewUrl) currentNaverUrl = resData.user.naverReviewUrl;
-              if (resData.user.logoUrl) {
+          const brandRes = await fetch(`/api/hosp-brand?hospitalName=${encodeURIComponent(hospCleanName)}&_t=${Date.now()}`);
+          if (brandRes.ok) {
+            const bData = await brandRes.json();
+            if (bData.success && bData.brand) {
+              if (bData.brand.naverReviewUrl) currentNaverUrl = bData.brand.naverReviewUrl;
+              if (bData.brand.logoUrl) {
                 const logoContainer = document.getElementById('hospLogoContainer');
                 const logoImg = document.getElementById('hospLogoImg');
                 if (logoContainer && logoImg) {
-                  logoImg.src = resData.user.logoUrl;
+                  logoImg.src = bData.brand.logoUrl;
                   logoContainer.style.display = 'block';
                 }
               }
@@ -589,9 +574,9 @@
     }
 
     function handleReview() {
-      // 1) 등록된 병원 네이버 플레이스 주소가 있는 경우 바로 이동
+      // 1) 등록된 병원 네이버 플레이스 주소가 있는 경우 바로 이동 (카카오톡 인앱 브라우저 호환을 위해 location.href 사용)
       if (currentNaverUrl && currentNaverUrl.startsWith('http')) {
-        window.open(currentNaverUrl, '_blank');
+        window.location.href = currentNaverUrl;
         return;
       }
 
@@ -600,7 +585,7 @@
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '';
       if (hospClean && hospClean !== '토닥토닥 안심진료') {
         const searchUrl = `https://m.search.naver.com/search.naver?query=${encodeURIComponent(hospClean + ' 리뷰')}`;
-        window.open(searchUrl, '_blank');
+        window.location.href = searchUrl;
         return;
       }
 

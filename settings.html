@@ -709,6 +709,17 @@
             logoUrl: currentUser.logoUrl || ''
           })
         });
+
+        // 🌟 병원명 기반 브랜딩(로고/네이버링크) 독립 API에도 즉시 동기화
+        await fetch('/api/hosp-brand', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hospitalName: currentUser.hospitalName,
+            logoUrl: currentUser.logoUrl || '',
+            naverReviewUrl: currentUser.naverReviewUrl || ''
+          })
+        });
       } catch (err) {
         console.warn("프로필 서버 동기화 실패:", err);
       }
