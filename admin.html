@@ -625,42 +625,72 @@
           badgeCount.textContent = `누적 케어 환자 ${reports.length}명`;
         }
 
-        if (tbody && reports.length > 0) {
+        if (tbody) {
           tbody.innerHTML = '';
-          reports.slice(0, 10).forEach(r => {
-            const raw = r.raw_data || {};
-            const created = r.created_at ? new Date(r.created_at) : new Date();
-            const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
-            const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
+          if (reports.length > 0) {
+            reports.slice(0, 10).forEach(r => {
+              const raw = r.raw_data || {};
+              const created = r.created_at ? new Date(r.created_at) : new Date();
+              const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
+              const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
 
-            // 마스킹 연락처
-            let phoneDisplay = '010-****-****';
-            if (raw.receiverPhone || raw.phone) {
-              const p = (raw.receiverPhone || raw.phone).replace(/[^0-9]/g, '');
-              if (p.length >= 10) {
-                phoneDisplay = `${p.substring(0, 3)}-****-${p.substring(p.length - 4)}`;
+              // 마스킹 연락처
+              let phoneDisplay = '010-****-****';
+              if (raw.receiverPhone || raw.phone) {
+                const p = (raw.receiverPhone || raw.phone).replace(/[^0-9]/g, '');
+                if (p.length >= 10) {
+                  phoneDisplay = `${p.substring(0, 3)}-****-${p.substring(p.length - 4)}`;
+                }
               }
-            }
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td><strong>${r.patient_name || '환자 님'}</strong></td>
-              <td>${phoneDisplay}</td>
-              <td>${dateStr}</td>
-              <td><span style="color:#0284c7; font-weight:700;">${nextDate}</span></td>
-              <td><span class="tag-status status-done">알림톡 발송완료</span></td>
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td><strong>${r.patient_name || '환자 님'}</strong></td>
+                <td>${phoneDisplay}</td>
+                <td>${dateStr}</td>
+                <td><span style="color:#0284c7; font-weight:700;">${nextDate}</span></td>
+                <td><span class="tag-status status-done">알림톡 발송완료</span></td>
+              `;
+              tbody.appendChild(tr);
+            });
+          } else {
+            // 발송 이력이 아직 없을 때 깨끗한 대기 상태 안내
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 36px 12px; color: #94a3b8; font-size: 14px;">
+                  📋 아직 발송된 진료 리포트가 없습니다.<br>
+                  <span style="font-size: 12.5px; color: #cbd5e1;">진료실 프로그램에서 환자에게 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>
+                </td>
+              </tr>
             `;
-            tbody.appendChild(tr);
-          });
+          }
         }
 
         // 3. 실시간 환자 반응 로그 갱신
-        const feedContainer = document.querySelector('.section-card:nth-child(2)');
+        const feedContainer = document.querySelectorAll('.review-feed-item');
         if (reports.length > 0) {
           const firstPatient = reports[0].patient_name || '환자 님';
           const feedItems = document.querySelectorAll('.review-feed-item .feed-content strong:first-child');
           if (feedItems.length > 0) {
             feedItems[0].textContent = `${firstPatient}`;
+          }
+        } else {
+          // 아직 발송 이력이 없을 때 피드 안내
+          const feedArea = document.querySelector('.section-card:nth-child(2)');
+          if (feedArea) {
+            const items = feedArea.querySelectorAll('.review-feed-item');
+            items.forEach((item, idx) => {
+              if (idx > 0) item.style.display = 'none';
+              else {
+                item.innerHTML = `
+                  <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
+                  <div class="feed-content" style="color:#94a3b8;">
+                    환자 반응 로그 대기 중입니다. 진료 리포트 발송 시 실시간 열람/리뷰 클릭 반응이 여기에 기록됩니다.
+                    <div class="feed-time">실시간 대기 중</div>
+                  </div>
+                `;
+              }
+            });
           }
         }
 
