@@ -478,6 +478,9 @@
       if (data) {
         window._currentReportData = data;
         renderReportData(data);
+
+        // 🌟 실시간 환자 열람 로그 Supabase DB 기록 (최초 1회)
+        recordReportAction('view', data);
       } else {
         document.getElementById('diagSummary').innerHTML = '⚠️ 리포트 데이터를 불러오지 못했습니다.<br>문자로 전송된 링크를 다시 확인해 주세요.';
       }
@@ -594,10 +597,43 @@
       }
     }
 
+    // 🌟 실시간 대시보드 연동: 환자 열람 / 가족 공유 / 네이버 리뷰 클릭 로그 Supabase DB 전송
+    async function recordReportAction(actionType, reportData) {
+      const data = reportData || window._currentReportData;
+      if (!data) return;
+      const reportId = data.reportId || new URLSearchParams(window.location.search).get('id') || '';
+      const hospClean = (data.hospitalName || '').replace(/🏥\s*/g, '').trim();
+      const patientName = data.patientName || '환자 님';
+
+      try {
+        const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+        await fetch(`${SUPABASE_URL}/rest/v1/report_logs`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            report_id: String(reportId),
+            hospital_name: hospClean,
+            patient_name: patientName,
+            action_type: actionType, // 'view', 'share', 'review'
+            created_at: new Date().toISOString()
+          })
+        });
+      } catch (e) { }
+    }
+
     function handleShare() {
       const pTitle = document.getElementById('patientNameTitle').textContent || '환자 님의 안심 진료노트';
       const hospEl = document.getElementById('hospName');
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
+
+      // 🌟 실시간 공유 이벤트 DB 기록
+      recordReportAction('share');
 
       // 🌟 핵심 해결: 수백 글자짜리 Base64 토큰 대신, 깔끔한 1초 단축 ID 주소 생성!
       // 만약 과거 리포트라 DB에 id가 없는 경우 대비 cParam 전체 전달
@@ -644,6 +680,9 @@
     }
 
     function handleReview() {
+      // 🌟 실시간 네이버 리뷰 클릭 이벤트 DB 기록
+      recordReportAction('review');
+
       // 1) 등록된 병원 네이버 플레이스 주소가 있는 경우 바로 이동 (카카오톡 인앱 브라우저 호환을 위해 location.href 사용)
       if (currentNaverUrl && currentNaverUrl.startsWith('http')) {
         window.location.href = currentNaverUrl;

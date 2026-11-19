@@ -553,6 +553,17 @@
         if (!res.ok) return;
         const reports = await res.json();
 
+        // 🌟 실시간 환자 활동 로그(열람, 공유, 리뷰 클릭) Supabase DB 조회
+        let logs = [];
+        try {
+          let logUrl = `${SUPABASE_URL}/rest/v1/report_logs?select=*&order=created_at.desc&limit=50`;
+          if (hospitalName) logUrl += `&hospital_name=eq.${encodeURIComponent(hospitalName)}`;
+          const logRes = await fetch(logUrl, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          });
+          if (logRes.ok) logs = await logRes.json();
+        } catch (e) { }
+
         // 1. 오늘 날짜 기준 발송 통계 계산
         const todayStr = new Date().toISOString().slice(0, 10);
         const todayReports = reports.filter(r => r.created_at && r.created_at.startsWith(todayStr));
@@ -566,10 +577,12 @@
           metricValues[1].textContent = totalCount; // 이번 주 재방문 관리 환자
         }
 
-        // 실시간 공유 및 리뷰 통계 계산 (실제 데이터 비례)
-        const shareCount = Math.round(totalCount * 0.38);
+        // 실시간 공유 및 리뷰 통계 계산 (실제 DB 로그 집계)
+        const shareLogs = logs.filter(l => l.action_type === 'share');
+        const reviewLogs = logs.filter(l => l.action_type === 'review');
+        const shareCount = shareLogs.length;
         const shareRate = totalCount > 0 ? ((shareCount / totalCount) * 100).toFixed(1) : '0.0';
-        const reviewCount = Math.round(totalCount * 0.33);
+        const reviewCount = reviewLogs.length;
         const reviewRate = totalCount > 0 ? ((reviewCount / totalCount) * 100).toFixed(1) : '0.0';
 
         const valShareEl = document.getElementById('valShareCount');
@@ -649,31 +662,59 @@
           }
         }
 
-        // 3. 실시간 환자 반응 로그 갱신
-        const feedContainer = document.querySelectorAll('.review-feed-item');
-        if (reports.length > 0) {
-          const firstPatient = reports[0].patient_name || '환자 님';
-          const feedItems = document.querySelectorAll('.review-feed-item .feed-content strong:first-child');
-          if (feedItems.length > 0) {
-            feedItems[0].textContent = `${firstPatient}`;
-          }
-        } else {
-          // 아직 발송 이력이 없을 때 피드 안내
-          const feedArea = document.querySelector('.section-card:nth-child(2)');
-          if (feedArea) {
-            const items = feedArea.querySelectorAll('.review-feed-item');
-            items.forEach((item, idx) => {
-              if (idx > 0) item.style.display = 'none';
-              else {
-                item.innerHTML = `
-                  <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
-                  <div class="feed-content" style="color:#94a3b8;">
-                    환자 반응 로그 대기 중입니다. 진료 리포트 발송 시 실시간 열람/리뷰 클릭 반응이 여기에 기록됩니다.
-                    <div class="feed-time">실시간 대기 중</div>
-                  </div>
-                `;
+        // 3. 실시간 환자 반응 로그 갱신 (DB 로그 기반 실제 활동 표시)
+        const feedList = document.getElementById('reviewFeedList');
+        if (feedList) {
+          if (logs.length > 0) {
+            feedList.innerHTML = '';
+            logs.slice(0, 5).forEach(log => {
+              const pName = log.patient_name || '환자 님';
+              const logTime = log.created_at ? new Date(log.created_at) : new Date();
+              const timeStr = `${logTime.getHours().toString().padStart(2, '0')}:${logTime.getMinutes().toString().padStart(2, '0')}`;
+              
+              let icon = '✓';
+              let iconBg = '#e0f2fe';
+              let iconColor = '#0284c7';
+              let textContent = '';
+
+              if (log.action_type === 'view') {
+                icon = '✓';
+                iconBg = '#e0f2fe';
+                iconColor = '#0284c7';
+                textContent = `<strong>${pName}</strong>이 안심 진료 리포트를 열람했습니다.`;
+              } else if (log.action_type === 'share') {
+                icon = '👨‍👩‍👧';
+                iconBg = '#fef9c3';
+                iconColor = '#ca8a04';
+                textContent = `<strong>${pName}</strong>의 보호자(가족)가 <strong>가족 단톡방에 진료 리포트를 공유</strong>했습니다.`;
+              } else if (log.action_type === 'review') {
+                icon = '★';
+                iconBg = '#dcfce7';
+                iconColor = '#16a34a';
+                textContent = `<strong>${pName}</strong>이 리포트 확인 후 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.`;
               }
+
+              const item = document.createElement('div');
+              item.className = 'review-feed-item';
+              item.innerHTML = `
+                <div class="feed-avatar" style="background:${iconBg}; color:${iconColor};">${icon}</div>
+                <div class="feed-content">
+                  ${textContent}
+                  <div class="feed-time">${timeStr}</div>
+                </div>
+              `;
+              feedList.appendChild(item);
             });
+          } else {
+            feedList.innerHTML = `
+              <div class="review-feed-item">
+                <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
+                <div class="feed-content" style="color:#94a3b8;">
+                  환자 반응 로그 대기 중입니다. 진료 리포트 발송 시 환자의 열람 및 네이버 리뷰 클릭 반응이 실시간으로 기록됩니다.
+                  <div class="feed-time">실시간 대기 중</div>
+                </div>
+              </div>
+            `;
           }
         }
 
