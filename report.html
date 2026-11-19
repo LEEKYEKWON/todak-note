@@ -8,15 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-  <script>
-    // 카카오 JavaScript SDK 초기화 (카카오 공유 공식 키)
-    try {
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init('812fa4cebc3793f18e955ff48cbfe5d1');
-      }
-    } catch (e) { }
-  </script>
   <style>
     * {
       box-sizing: border-box;
@@ -433,30 +424,9 @@
       } else {
         document.getElementById('diagSummary').innerHTML = '⚠️ 리포트 데이터를 불러오지 못했습니다.<br>문자로 전송된 링크를 다시 확인해 주세요.';
       }
-    });
 
-    // 🌟 리포트 페이지 로딩 완료 후 병원 최신 브랜딩(로고/네이버링크) 비동기 보강
-    window.addEventListener('DOMContentLoaded', async () => {
-      // 1) 내 브라우저 로컬 저장소 우선 확인 (테스트 환경)
-      const localUserStr = localStorage.getItem('todak_current_user');
-      if (localUserStr) {
-        try {
-          const u = JSON.parse(localUserStr);
-          if (u.naverReviewUrl) currentNaverUrl = u.naverReviewUrl;
-          if (u.logoUrl) {
-            const logoContainer = document.getElementById('hospLogoContainer');
-            const logoImg = document.getElementById('hospLogoImg');
-            if (logoContainer && logoImg) {
-              logoImg.src = u.logoUrl;
-              logoContainer.style.display = 'block';
-            }
-          }
-        } catch (e) { }
-      }
-
-      // 2) 리포트에 표시된 병원명을 기반으로 최신 브랜딩(/api/hosp-brand) 조회
-      const hospEl = document.getElementById('hospName');
-      const hospCleanName = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '';
+      // 7. 병원 최신 브랜딩(로고/네이버 링크) 비동기 즉시 보강
+      const hospCleanName = (data && data.hospitalName) ? data.hospitalName.replace('🏥', '').trim() : '';
       if (hospCleanName && hospCleanName !== '토닥토닥 안심진료') {
         try {
           const brandRes = await fetch(`/api/hosp-brand?hospitalName=${encodeURIComponent(hospCleanName)}&_t=${Date.now()}`);
@@ -477,6 +447,8 @@
         } catch (e) { }
       }
     });
+
+    let currentNaverUrl = '';
 
     function renderReportData(data) {
       if (!data) return;
@@ -543,43 +515,11 @@
     }
 
     async function handleShare() {
-      const pTitle = document.getElementById('patientNameTitle').textContent || '환자 님의 안심 진료노트';
-      const hospEl = document.getElementById('hospName');
-      const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
+      const shareTitle = document.getElementById('patientNameTitle').textContent || '토닥토닥 안심 진료노트';
       const shareUrl = window.location.href;
-      const shareText = `[${hospClean}] ${pTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
+      const shareText = `${shareTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
 
-      // 🌟 1순위: 카카오톡 앱 공식 공유창 (카톡 인앱 브라우저에서 친구/가족 단톡방 선택창 100% 즉시 실행!)
-      if (window.Kakao && window.Kakao.isInitialized() && window.Kakao.Share) {
-        try {
-          window.Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title: `${pTitle}`,
-              description: `[${hospClean}]에서 오늘 진료 내용을 알기 쉽게 정리한 안심 리포트가 도착했습니다.`,
-              imageUrl: 'https://todak-note.vercel.app/open_book_heart_clean_1794109984125.jpg',
-              link: {
-                mobileWebUrl: shareUrl,
-                webUrl: shareUrl,
-              },
-            },
-            buttons: [
-              {
-                title: '진료 리포트 확인하기',
-                link: {
-                  mobileWebUrl: shareUrl,
-                  webUrl: shareUrl,
-                },
-              },
-            ],
-          });
-          return;
-        } catch (kakaoErr) {
-          console.warn("카카오톡 SDK 공유 실패, 시스템 공유 시도:", kakaoErr);
-        }
-      }
-
-      // 🌟 2순위: 스마트폰 시스템 공유 API (문자 링크로 열었을 때 등 일반 브라우저)
+      // 1. 모바일 브라우저 표준 공유 API (지원 기기)
       if (navigator.share) {
         try {
           await navigator.share({
@@ -593,7 +533,7 @@
         }
       }
 
-      // 🌟 3순위: 클립보드 복사 폴백
+      // 2. 클립보드 복사 폴백
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(shareUrl);
