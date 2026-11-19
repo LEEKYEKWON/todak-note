@@ -581,28 +581,39 @@
       }
     }
 
-    async function handleShare() {
+    function handleShare() {
       const pTitle = document.getElementById('patientNameTitle').textContent || '환자 님의 안심 진료노트';
       const hospEl = document.getElementById('hospName');
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
       const shareUrl = window.location.href;
-      const shareText = `[${hospClean}] ${pTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
+      const shareText = `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n가족과 함께 건강 정보를 확인해 보세요!\n\n👉 리포트 보기:\n${shareUrl}`;
 
-      // 에러 확인용 디버그
-      try {
-        if (!navigator.share) {
-          alert("이 브라우저는 navigator.share를 지원하지 않습니다.");
-        } else {
-          await navigator.share({
-            title: '토닥토닥 안심 진료노트',
-            text: shareText,
-            url: shareUrl
-          });
-          return;
-        }
-      } catch (err) {
-        alert("공유창 실패 원인: " + err.name + " / " + err.message);
+      // 🌟 안드로이드 카카오 인앱 웹뷰에서 OS 기본 [텍스트 공유창]을 100% 강제 호출하는 공식 네이티브 Intent!
+      const isAndroid = /android/i.test(navigator.userAgent);
+
+      if (isAndroid) {
+        // 안드로이드 OS의 ACTION_SEND 인텐트 호출 ➔ 스크린샷의 [텍스트 공유] 창(카카오톡, 단톡방, 문자 등) 즉시 오픈!
+        const intentUrl = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT=${encodeURIComponent(shareText)};end`;
+        window.location.href = intentUrl;
         return;
+      }
+
+      // iOS 또는 일반 브라우저에서 navigator.share 지원 시
+      if (navigator.share) {
+        navigator.share({
+          title: `[${hospClean}] ${pTitle}`,
+          text: shareText,
+          url: shareUrl
+        }).catch(() => {});
+        return;
+      }
+
+      // PC 등 기타 환경 클립보드 복사
+      try {
+        navigator.clipboard.writeText(shareText);
+        alert('📋 리포트 링크가 복사되었습니다!\n가족 단톡방에 붙여넣어 공유해 보세요.');
+      } catch (e) {
+        prompt('아래 링크를 복사하여 공유해 주세요:', shareUrl);
       }
     }
 
