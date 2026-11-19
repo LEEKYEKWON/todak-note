@@ -625,7 +625,8 @@
         finalNotice,
         item.lifestyleTips || '',
         item.warmMessage || '',
-        hospId
+        hospId,
+        reportId
       ];
       const compactToken = toBase64Url(compactPayload);
       const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;

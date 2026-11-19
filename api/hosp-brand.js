@@ -2,7 +2,12 @@
 const fs = require('fs');
 const path = require('path');
 
-global._brandCache = global._brandCache || {};
+let preloadedBrands = {};
+try {
+  preloadedBrands = require('./brand-data.js');
+} catch (e) { }
+
+global._brandCache = global._brandCache || Object.assign({}, preloadedBrands);
 const BRAND_FILE = path.join('/tmp', 'todak_brands.json');
 
 function loadBrands() {
