@@ -588,39 +588,21 @@
       const shareUrl = window.location.href;
       const shareText = `[${hospClean}] ${pTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
 
-      // 🌟 1순위: 스크린샷과 같은 스마트폰 기본 OS 공유창 (카카오톡, 문자, 가족단톡방 원클릭 선택!)
-      // 안드로이드 크롬/삼성인터넷/웹뷰에서 url 필드가 반드시 있어야 '텍스트 공유' 팝업이 100% 뜹니다.
-      if (navigator.share) {
-        try {
+      // 에러 확인용 디버그
+      try {
+        if (!navigator.share) {
+          alert("이 브라우저는 navigator.share를 지원하지 않습니다.");
+        } else {
           await navigator.share({
             title: '토닥토닥 안심 진료노트',
             text: shareText,
             url: shareUrl
           });
           return;
-        } catch (e) {
-          // 사용자가 취소(X) 누른 경우 아무것도 안 함
-          if (e.name === 'AbortError' || e.name === 'NotAllowedError') return;
         }
-      }
-
-      // 🌟 2순위: 시스템 공유를 지원하지 않는 PC 브라우저 등에서만 복사창 띄움
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = `${shareText}\n${shareUrl}`;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-        }
-        alert('📋 리포트 링크가 복사되었습니다!\n가족 채팅방에 붙여넣어 공유해 보세요.');
       } catch (err) {
-        prompt('아래 링크를 복사하여 공유해 주세요:', shareUrl);
+        alert("공유창 실패 원인: " + err.name + " / " + err.message);
+        return;
       }
     }
 
