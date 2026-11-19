@@ -366,7 +366,8 @@
             lifestyleCare: arr[6] ? (Array.isArray(arr[6]) ? arr[6] : [arr[6]]) : ['처방약 복용 지침을 꼭 확인하세요.'],
             warmMessage: arr[7] || '',
             hospitalId: arr[8] || '',
-            reportId: arr[9] || ''
+            reportId: arr[9] || '',
+            naverReviewUrl: arr[10] || ''
           };
         } catch (e) {
           console.error("컴팩트 토큰 디코딩 실패:", e);
@@ -567,46 +568,29 @@
       const hospEl = document.getElementById('hospName');
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
       const shareUrl = window.location.href;
-      const shareText = `[${hospClean}] ${pTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
+      const shareText = `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n가족과 함께 건강 정보를 확인해 보세요!\n\n👉 리포트 보기: ${shareUrl}`;
 
-      // 🌟 1순위: 카카오톡 앱 공식 공유창 (카톡 인앱 브라우저에서 친구/가족 단톡방 선택창 100% 즉시 실행!)
-      if (window.Kakao && window.Kakao.isInitialized() && window.Kakao.Share) {
-        try {
-          window.Kakao.Share.sendDefault({
-            objectType: 'text',
-            text: `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n아래 링크를 눌러 확인해 보세요!\n\n👉 리포트 보기: ${shareUrl}`,
-            link: {
-              mobileWebUrl: shareUrl,
-              webUrl: shareUrl,
-            },
-          });
-          return;
-        } catch (kakaoErr) {
-          console.warn("카카오톡 SDK 공유 실패, 시스템 공유 시도:", kakaoErr);
-        }
-      }
-
-      // 🌟 2순위: 스마트폰 시스템 공유 API (문자 링크로 열었을 때 등 일반 브라우저)
+      // 🌟 1순위: 모바일 OS 내장 시스템 공유창 (카카오톡, 문자, 밴드, 단톡방 등 100% 오류 없이 즉시 선택 가능!)
       if (navigator.share) {
         try {
           await navigator.share({
-            title: '토닥토닥 안심 진료노트',
+            title: `[${hospClean}] ${pTitle}`,
             text: shareText,
             url: shareUrl
           });
           return;
         } catch (e) {
-          if (e.name === 'AbortError') return;
+          if (e.name === 'AbortError') return; // 사용자가 창을 닫은 경우
         }
       }
 
-      // 🌟 3순위: 클립보드 복사 폴백
+      // 🌟 2순위: 클립보드 원클릭 복사
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(shareUrl);
+          await navigator.clipboard.writeText(shareText);
         } else {
           const ta = document.createElement('textarea');
-          ta.value = shareUrl;
+          ta.value = shareText;
           ta.style.position = 'fixed';
           ta.style.opacity = '0';
           document.body.appendChild(ta);
@@ -614,9 +598,9 @@
           document.execCommand('copy');
           document.body.removeChild(ta);
         }
-        alert('📋 리포트 링크가 복사되었습니다!\n원하시는 카카오톡 가족/지인 채팅방에 붙여넣기(길게 터치 후 붙여넣기)하여 전송해 보세요.');
+        alert('📋 리포트 안내 링크가 복사되었습니다!\n카카오톡 가족 단톡방이나 지인 채팅창에 붙여넣어 공유해 보세요. ❤️');
       } catch (err) {
-        prompt('아래 링크를 길게 눌러 복사한 후 가족 채팅방에 공유해 주세요:', shareUrl);
+        prompt('아래 링크를 복사하여 가족 채팅방에 공유해 주세요:', shareUrl);
       }
     }
 
