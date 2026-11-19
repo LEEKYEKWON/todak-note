@@ -464,6 +464,7 @@
 
       // 6. 데이터가 있으면 렌더링
       if (data) {
+        window._currentReportData = data;
         renderReportData(data);
       } else {
         document.getElementById('diagSummary').innerHTML = '⚠️ 리포트 데이터를 불러오지 못했습니다.<br>문자로 전송된 링크를 다시 확인해 주세요.';
@@ -585,8 +586,18 @@
       const pTitle = document.getElementById('patientNameTitle').textContent || '환자 님의 안심 진료노트';
       const hospEl = document.getElementById('hospName');
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
-      const shareUrl = window.location.href;
-      const shareText = `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n가족과 함께 건강 정보를 확인해 보세요!\n\n👉 리포트 보기:\n${shareUrl}`;
+
+      // 🌟 핵심 해결: 수백 글자짜리 Base64 토큰 대신, 깔끔한 1초 단축 ID 주소 생성!
+      // 현재 열려있는 리포트의 ID를 추출하여 "https://todak-note.vercel.app/report.html?id=12345" 로 공유
+      const urlParams = new URLSearchParams(window.location.search);
+      const reportId = urlParams.get('id') || (window._currentReportData && window._currentReportData.reportId) || '';
+      
+      let cleanShareUrl = window.location.href;
+      if (reportId) {
+        cleanShareUrl = `${window.location.origin}/report.html?id=${reportId}`;
+      }
+
+      const shareText = `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n가족과 함께 건강 정보를 확인해 보세요!\n\n👉 리포트 확인하기:\n${cleanShareUrl}`;
 
       // 🌟 안드로이드 카카오 인앱 웹뷰에서 OS 기본 [텍스트 공유창]을 100% 강제 호출하는 공식 네이티브 Intent!
       const isAndroid = /android/i.test(navigator.userAgent);
@@ -603,7 +614,7 @@
         navigator.share({
           title: `[${hospClean}] ${pTitle}`,
           text: shareText,
-          url: shareUrl
+          url: cleanShareUrl
         }).catch(() => {});
         return;
       }
@@ -613,7 +624,7 @@
         navigator.clipboard.writeText(shareText);
         alert('📋 리포트 링크가 복사되었습니다!\n가족 단톡방에 붙여넣어 공유해 보세요.');
       } catch (e) {
-        prompt('아래 링크를 복사하여 공유해 주세요:', shareUrl);
+        prompt('아래 링크를 복사하여 공유해 주세요:', cleanShareUrl);
       }
     }
 
