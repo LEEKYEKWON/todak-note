@@ -374,6 +374,18 @@
         }
       }
 
+      // 2. 🌟 가족 공유 링크(?id=...)로 열었을 때: Supabase DB에서 최우선 즉시 조회!
+      if (!data && reportId) {
+        try {
+          const res = await fetch(`/api/report?id=${encodeURIComponent(reportId)}&_t=${Date.now()}`);
+          if (res.ok) {
+            data = await res.json();
+          }
+        } catch (e) {
+          console.warn("리포트 ID 조회 실패:", e);
+        }
+      }
+
       // 파라미터 없이 report.html만 단독으로 열었을 때 기본 샘플 리포트로 즉시 시연 제공
       if (!data && !cParam && !reportId && !dParam) {
         data = {
@@ -588,13 +600,16 @@
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
 
       // 🌟 핵심 해결: 수백 글자짜리 Base64 토큰 대신, 깔끔한 1초 단축 ID 주소 생성!
-      // 현재 열려있는 리포트의 ID를 추출하여 "https://todak-note.vercel.app/report.html?id=12345" 로 공유
+      // 만약 과거 리포트라 DB에 id가 없는 경우 대비 cParam 전체 전달
       const urlParams = new URLSearchParams(window.location.search);
       const reportId = urlParams.get('id') || (window._currentReportData && window._currentReportData.reportId) || '';
+      const cParam = urlParams.get('c');
       
       let cleanShareUrl = window.location.href;
       if (reportId) {
         cleanShareUrl = `${window.location.origin}/report.html?id=${reportId}`;
+      } else if (cParam) {
+        cleanShareUrl = `${window.location.origin}/report.html?c=${cParam}`;
       }
 
       const shareText = `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n가족과 함께 건강 정보를 확인해 보세요!\n\n👉 리포트 확인하기:\n${cleanShareUrl}`;
