@@ -85,7 +85,29 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // 3. 프로필 조회 (GET /api/auth?email=...) 및 전체 초기화 (GET /api/auth?action=reset_all)
+  // 3. 프로필 저장/업데이트 (POST /api/auth?action=update_profile)
+  if (req.method === 'POST' && action === 'update_profile') {
+    const { email, hospitalName, doctorName, phone, naverReviewUrl, logoUrl } = req.body || {};
+    if (!email) {
+      res.status(400).json({ error: '이메일이 필요합니다.' });
+      return;
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    if (!global._usersCache[cleanEmail]) {
+      global._usersCache[cleanEmail] = { email: cleanEmail };
+    }
+    if (hospitalName) global._usersCache[cleanEmail].hospitalName = hospitalName;
+    if (doctorName) global._usersCache[cleanEmail].doctorName = doctorName;
+    if (phone) global._usersCache[cleanEmail].phone = phone;
+    if (naverReviewUrl !== undefined) global._usersCache[cleanEmail].naverReviewUrl = naverReviewUrl;
+    if (logoUrl !== undefined) global._usersCache[cleanEmail].logoUrl = logoUrl;
+
+    saveUsers();
+    res.status(200).json({ success: true, user: global._usersCache[cleanEmail] });
+    return;
+  }
+
+  // 4. 프로필 조회 (GET /api/auth?email=...) 및 전체 초기화 (GET /api/auth?action=reset_all)
   if (req.method === 'GET') {
     if (action === 'reset_all') {
       global._usersCache = {};

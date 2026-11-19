@@ -272,8 +272,9 @@
 
   <header>
     <div class="header-left">
-      <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="logo-img">
+      <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="logo-img" id="deskAppLogo">
       <h1 class="header-title">📋 토닥토닥노트 수납 데스크 발송 모드</h1>
+      <div id="deskHospitalBadge" style="display: flex; align-items: center; gap: 8px; margin-left: 10px;"></div>
     </div>
     <div class="header-nav">
       <a href="clinic.html" class="nav-btn">
@@ -576,14 +577,44 @@
       // 병원명/원장명 로그인 정보 반영
       let currentHosp = '길동이의원';
       let currentDoc = '홍길동';
+      let hospId = '';
+      let hospLogo = '';
+      let naverUrl = '';
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
           if (u.hospitalName) currentHosp = u.hospitalName;
           if (u.doctorName) currentDoc = u.doctorName;
+          if (u.email) hospId = u.email;
+          if (u.logoUrl) hospLogo = u.logoUrl;
+          if (u.naverReviewUrl) naverUrl = u.naverReviewUrl;
         } catch (e) { }
       }
+
+      const reportId = Date.now().toString();
+      const reportData = {
+        hospitalName: currentHosp,
+        patientName: item.patientName,
+        diagnosisSummary: item.summary || '',
+        medicationGuide: finalMed,
+        nextVisitDate: finalNextDate,
+        nextVisitNotice: finalNotice,
+        lifestyleCare: [item.lifestyleTips || ''],
+        warmMessage: item.warmMessage || '',
+        hospitalId: hospId,
+        logoUrl: hospLogo,
+        naverReviewUrl: naverUrl
+      };
+
+      // 서버(/api/report)에 리포트 백업 저장
+      try {
+        await fetch('/api/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: reportId, reportData })
+        });
+      } catch (cacheErr) { }
 
       const compactPayload = [
         currentHosp,
@@ -593,7 +624,8 @@
         finalNextDate,
         finalNotice,
         item.lifestyleTips || '',
-        item.warmMessage || ''
+        item.warmMessage || '',
+        hospId
       ];
       const compactToken = toBase64Url(compactPayload);
       const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;
@@ -634,7 +666,32 @@
       }
     }
 
+    // 병원 헤더 및 뱃지 렌더링
+    function renderDeskHeader() {
+      const badgeArea = document.getElementById('deskHospitalBadge');
+      if (!badgeArea) return;
+
+      let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          user = Object.assign(user, u);
+        } catch (e) { }
+      }
+
+      const isPro = (user.plan || '').toLowerCase() === 'pro';
+
+      badgeArea.innerHTML = `
+        <span style="background: ${isPro ? 'linear-gradient(135deg, #0284c7, #0ea5e9)' : '#e2e8f0'}; color: ${isPro ? 'white' : '#334155'}; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: ${isPro ? '0 2px 6px rgba(2,132,199,0.3)' : 'none'}; display: flex; align-items: center; gap: 6px;">
+          ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
+          🏥 ${user.hospitalName} ${isPro ? '<span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>' : ''}
+        </span>
+      `;
+    }
+
     // 🌟 초기 1회 로드 및 3초마다 실시간 자동 갱신 (진료실 PC에서 보낸 환자 3초 내 자동 표시)
+    renderDeskHeader();
     loadDeskQueue();
     setInterval(loadDeskQueue, 3500);
   </script>

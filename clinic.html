@@ -2017,6 +2017,12 @@
       parsedResult = null;
       fullTranscript = '';
       accumulatedTranscript = '';
+      const patientNameEl = document.getElementById('patientName');
+      if (patientNameEl) patientNameEl.value = '';
+      const patientAgeEl = document.getElementById('patientAge');
+      if (patientAgeEl) patientAgeEl.value = '';
+      const patientPhoneEl = document.getElementById('patientPhone');
+      if (patientPhoneEl) patientPhoneEl.value = '';
       const liveTr = document.getElementById('liveTranscript');
       if (liveTr) liveTr.value = '';
       document.getElementById('recordStatus').innerHTML = '[마이크 클릭] 또는 [F9]를 눌러 녹음을 시작하세요.';
@@ -2034,6 +2040,8 @@
       // 우측 스마트폰 빈 상태로 되돌리기
       document.getElementById('emptyState').style.display = 'flex';
       document.getElementById('reportCard').style.display = 'none';
+      const reportPatientNameEl = document.getElementById('reportPatientName');
+      if (reportPatientNameEl) reportPatientNameEl.innerText = '환자 님의 안심 진료노트';
       const analysisTimeEl = document.getElementById('analysisTime');
       if (analysisTimeEl) {
         analysisTimeEl.innerText = '';
@@ -2052,12 +2060,18 @@
       // 병원명/원장명 동적 획득
       let hospTitle = '길동이의원';
       let docTitle = '홍길동';
+      let hospId = '';
+      let hospLogo = '';
+      let naverUrl = '';
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
           if (u.hospitalName) hospTitle = u.hospitalName;
           if (u.doctorName) docTitle = u.doctorName;
+          if (u.email) hospId = u.email;
+          if (u.logoUrl) hospLogo = u.logoUrl;
+          if (u.naverReviewUrl) naverUrl = u.naverReviewUrl;
         } catch (e) { }
       } else {
         const hospTagEl = document.querySelector('.hospital-tag');
@@ -2093,7 +2107,10 @@
         nextVisitDate: parsedResult.nextDate,
         nextVisitNotice: parsedResult.nextNotice,
         lifestyleCare: [parsedResult.lifestyleTips],
-        warmMessage: parsedResult.warmMessage
+        warmMessage: parsedResult.warmMessage,
+        hospitalId: hospId,
+        logoUrl: hospLogo,
+        naverReviewUrl: naverUrl
       };
       localStorage.setItem('todak_report_' + reportId, JSON.stringify(reportData));
       localStorage.setItem('todak_last_report', JSON.stringify(reportData));
@@ -2115,7 +2132,8 @@
         parsedResult.nextDate,
         parsedResult.nextNotice || '',
         parsedResult.lifestyleTips || '',
-        parsedResult.warmMessage || ''
+        parsedResult.warmMessage || '',
+        hospId
       ];
       const compactToken = toBase64Url(compactPayload);
       const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;

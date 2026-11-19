@@ -681,7 +681,7 @@
       }
     }
 
-    function handleSaveProfile(e) {
+    async function handleSaveProfile(e) {
       e.preventDefault();
       currentUser.hospitalName = document.getElementById('inputHospitalName').value.trim();
       currentUser.doctorName = document.getElementById('inputDoctorName').value.trim();
@@ -692,6 +692,25 @@
       localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
       if (currentUser.email) {
         localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
+      }
+
+      // 서버 클라우드에도 저장
+      try {
+        await fetch('/api/auth?action=update_profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_profile',
+            email: currentUser.email,
+            hospitalName: currentUser.hospitalName,
+            doctorName: currentUser.doctorName,
+            phone: currentUser.phone,
+            naverReviewUrl: currentUser.naverReviewUrl,
+            logoUrl: currentUser.logoUrl || ''
+          })
+        });
+      } catch (err) {
+        console.warn("프로필 서버 동기화 실패:", err);
       }
 
       showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
