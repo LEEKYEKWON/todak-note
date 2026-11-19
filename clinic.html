@@ -1955,11 +1955,24 @@
     }
 
     async function sendToDeskQueue() {
-      if (!parsedResult) return;
-      const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
+      if (!parsedResult) {
+        alert("⚠️ 먼저 진료 녹음을 진행하거나 [텍스트 직접 입력 시 수동 요약]을 완료해 주세요.");
+        return;
+      }
+      const pNameOnly = document.getElementById('patientName').value.trim();
+      if (!pNameOnly) {
+        alert("⚠️ 환자 이름을 입력해 주세요!");
+        document.getElementById('patientName').focus();
+        return;
+      }
+      const pPhone = document.getElementById('patientPhone').value.trim();
+      if (!pPhone) {
+        alert("⚠️ 환자 전화번호를 입력해 주세요!");
+        document.getElementById('patientPhone').focus();
+        return;
+      }
       const pAge = document.getElementById('patientAge').value.trim();
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
-      const pPhone = document.getElementById('patientPhone').value.trim();
 
       // 현재 병원 식별자 획득
       let hospId = 'default';
@@ -2051,11 +2064,24 @@
     }
 
     async function sendReport() {
-      if (!parsedResult) return;
-      const pNameOnly = document.getElementById('patientName').value.trim() || '환자';
+      if (!parsedResult) {
+        alert("⚠️ 먼저 진료 녹음을 진행하거나 [텍스트 직접 입력 시 수동 요약]을 완료해 주세요.");
+        return;
+      }
+      const pNameOnly = document.getElementById('patientName').value.trim();
+      if (!pNameOnly) {
+        alert("⚠️ 환자 이름을 입력해 주세요!");
+        document.getElementById('patientName').focus();
+        return;
+      }
+      const pPhone = document.getElementById('patientPhone').value.trim();
+      if (!pPhone) {
+        alert("⚠️ 환자 전화번호를 입력해 주세요!");
+        document.getElementById('patientPhone').focus();
+        return;
+      }
       const pAge = document.getElementById('patientAge').value.trim();
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
-      const pPhone = document.getElementById('patientPhone').value.trim();
 
       // 병원명/원장명 동적 획득
       let hospTitle = '길동이의원';

@@ -557,6 +557,12 @@
       const item = deskQueueData[activeQueueIndex];
       if (!item) return;
 
+      const pPhoneClean = (item.phone || '').replace(/[^0-9]/g, '');
+      if (!pPhoneClean || pPhoneClean.length < 9) {
+        alert("⚠️ 환자 전화번호가 올바르지 않아 알림톡을 발송할 수 없습니다!\n전화번호를 확인해 주세요.");
+        return;
+      }
+
       const finalMed = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
       const finalNextDate = document.getElementById('phoneNextDate').innerText;
       const finalNotice = document.getElementById('modalNoticeInput').value.trim();

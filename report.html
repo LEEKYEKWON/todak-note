@@ -497,6 +497,25 @@
         }
       }
 
+      // 만약 data에 로고나 네이버링크가 없다면, 브라우저 로컬 데이터에서도 백업 확인
+      if (!currentNaverUrl || !data.logoUrl) {
+        const localUser = localStorage.getItem('todak_current_user');
+        if (localUser) {
+          try {
+            const u = JSON.parse(localUser);
+            if (!currentNaverUrl && u.naverReviewUrl) currentNaverUrl = u.naverReviewUrl.trim();
+            if (!data.logoUrl && u.logoUrl) {
+              const logoContainer = document.getElementById('hospLogoContainer');
+              const logoImg = document.getElementById('hospLogoImg');
+              if (logoContainer && logoImg) {
+                logoImg.src = u.logoUrl;
+                logoContainer.style.display = 'block';
+              }
+            }
+          } catch(e) {}
+        }
+      }
+
       // 병원명
       if (data.hospitalName) {
         document.getElementById('hospName').textContent = data.hospitalName.includes('🏥')
@@ -554,25 +573,12 @@
       if (window.Kakao && window.Kakao.isInitialized() && window.Kakao.Share) {
         try {
           window.Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title: `${pTitle}`,
-              description: `[${hospClean}]에서 오늘 진료 내용을 알기 쉽게 정리한 안심 리포트가 도착했습니다.`,
-              imageUrl: 'https://todak-note.vercel.app/open_book_heart_clean_1794109984125.jpg',
-              link: {
-                mobileWebUrl: shareUrl,
-                webUrl: shareUrl,
-              },
+            objectType: 'text',
+            text: `[${hospClean}] ${pTitle}\n오늘 진료 요약과 안심 케어 리포트가 도착했습니다.\n아래 링크를 눌러 확인해 보세요!\n\n👉 리포트 보기: ${shareUrl}`,
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
             },
-            buttons: [
-              {
-                title: '진료 리포트 확인하기',
-                link: {
-                  mobileWebUrl: shareUrl,
-                  webUrl: shareUrl,
-                },
-              },
-            ],
           });
           return;
         } catch (kakaoErr) {
