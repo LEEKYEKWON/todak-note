@@ -1,13 +1,8 @@
-// Supabase 클라우드 데이터베이스 공식 연동 클라이언트
-// GitHub Secret Protection 방지를 위해 키를 분할/인코딩 처리
+// Supabase 클라우드 데이터베이스 공식 연동 클라이언트 (공개키 Publishable Key 사용)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fabzvobawvtsdprixmyf.supabase.co';
 
-// Base64로 인코딩된 서비스 키 (GitHub 보안 차단 방지)
-// 'sb_secret_Bnkwplyf6yhxe6qjaBZDiw_SL8xqoKm'
-const DEFAULT_KEY_B64 = 'c2Jfc2VjcmV0X0Jua3dwbHlmNnloeGU2cWphQlpEaXdfU0w4eHFvS20=';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  Buffer.from(DEFAULT_KEY_B64, 'base64').toString('utf-8');
+// 공개키(Publishable Key)는 깃허브 보안에 전혀 걸리지 않으며, SQL RLS 정책(Public Full Access)으로 완벽하게 동작합니다!
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
 
 async function supabaseQuery(endpoint, options = {}) {
   const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
