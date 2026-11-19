@@ -8,6 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+  <script>
+    // 카카오 JavaScript SDK 초기화 (카카오 공유 공식 키)
+    try {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init('812fa4cebc3793f18e955ff48cbfe5d1');
+      }
+    } catch (e) { }
+  </script>
   <style>
     * {
       box-sizing: border-box;
@@ -534,11 +543,43 @@
     }
 
     async function handleShare() {
-      const shareTitle = document.getElementById('patientNameTitle').textContent || '토닥토닥 안심 진료노트';
+      const pTitle = document.getElementById('patientNameTitle').textContent || '환자 님의 안심 진료노트';
+      const hospEl = document.getElementById('hospName');
+      const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '토닥토닥 안심진료';
       const shareUrl = window.location.href;
-      const shareText = `${shareTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
+      const shareText = `[${hospClean}] ${pTitle}입니다. 우리 가족 진료 리포트를 확인해 보세요.`;
 
-      // 1. 모바일 브라우저 표준 공유 API (카카오톡 인앱 브라우저에서도 시도)
+      // 🌟 1순위: 카카오톡 앱 공식 공유창 (카톡 인앱 브라우저에서 친구/가족 단톡방 선택창 100% 즉시 실행!)
+      if (window.Kakao && window.Kakao.isInitialized() && window.Kakao.Share) {
+        try {
+          window.Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: `${pTitle}`,
+              description: `[${hospClean}]에서 오늘 진료 내용을 알기 쉽게 정리한 안심 리포트가 도착했습니다.`,
+              imageUrl: 'https://todak-note.vercel.app/open_book_heart_clean_1794109984125.jpg',
+              link: {
+                mobileWebUrl: shareUrl,
+                webUrl: shareUrl,
+              },
+            },
+            buttons: [
+              {
+                title: '진료 리포트 확인하기',
+                link: {
+                  mobileWebUrl: shareUrl,
+                  webUrl: shareUrl,
+                },
+              },
+            ],
+          });
+          return;
+        } catch (kakaoErr) {
+          console.warn("카카오톡 SDK 공유 실패, 시스템 공유 시도:", kakaoErr);
+        }
+      }
+
+      // 🌟 2순위: 스마트폰 시스템 공유 API (문자 링크로 열었을 때 등 일반 브라우저)
       if (navigator.share) {
         try {
           await navigator.share({
@@ -548,12 +589,11 @@
           });
           return;
         } catch (e) {
-          // 사용자가 공유 창에서 취소(AbortError)한 경우 조용히 종료
           if (e.name === 'AbortError') return;
         }
       }
 
-      // 2. 인앱 브라우저 등에서 navigator.share 미지원 또는 차단 시 클립보드 복사 폴백
+      // 🌟 3순위: 클립보드 복사 폴백
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(shareUrl);
