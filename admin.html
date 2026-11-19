@@ -452,10 +452,6 @@
           </div>
           <span class="section-badge" id="badgeFollowUpCount" style="background:#eff6ff; color:#1d4ed8;">누적 케어 환자 0명</span>
         </div>
-            <span>🗓️ 재방문(Follow-up) 환자 케어 명단</span>
-          </div>
-          <span class="section-badge" style="background:#eff6ff; color:#1d4ed8;">이번 주 예정 28명</span>
-        </div>
 
         <table class="patient-table">
           <thead>
@@ -469,39 +465,10 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>김영희 님 (32세)</strong></td>
-              <td>010-9344-****</td>
-              <td>11.08</td>
-              <td><span style="color:#0284c7; font-weight:700;">11.12 (목) 14:00</span></td>
-              <td><span class="tag-status status-ready">재방문 알림톡 대기</span></td>
-            </tr>
-            <tr>
-              <td><strong>박철수 님 (78세)</strong></td>
-              <td>010-3849-****</td>
-              <td>11.08</td>
-              <td><span style="color:#0284c7; font-weight:700;">11.15 (일) 오전</span></td>
-              <td><span class="tag-status status-done">리포트 확인 완료</span></td>
-            </tr>
-            <tr>
-              <td><strong>이순자 님 (65세)</strong></td>
-              <td>010-4491-****</td>
-              <td>11.02</td>
-              <td><span style="color:#ef4444; font-weight:700;">11.09 (오늘 내원)</span></td>
-              <td><span class="tag-status status-danger">⚠️ 당일 재방문 확인 필요</span></td>
-            </tr>
-            <tr>
-              <td><strong>최민수 님 (45세)</strong></td>
-              <td>010-8219-****</td>
-              <td>11.07</td>
-              <td><span style="color:#0284c7; font-weight:700;">11.14 (토) 10:30</span></td>
-              <td><span class="tag-status status-done">가족 공유 완료</span></td>
-            </tr>
-            <tr>
-              <td><strong>정다은 님 (28세)</strong></td>
-              <td>010-5192-****</td>
-              <td>11.06</td>
-              <td><span style="color:#64748b;">필요시 내원</span></td>
-              <td><span class="tag-status status-done">치료 종결 안내</span></td>
+              <td colspan="5" style="text-align: center; padding: 40px 12px; color: #94a3b8; font-size: 14px;">
+                📋 아직 발송된 진료 리포트가 없습니다.<br>
+                <span style="font-size: 12.5px; color: #cbd5e1;">진료실 프로그램에서 환자에게 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -516,11 +483,11 @@
           <span class="section-badge" id="badgeRoi" style="background:#fef3c7; color:#b45309;">ROI 0% 달성</span>
         </div>
 
-        <!-- 마케팅 성과 배너 (상하 2단 정렬로 텍스트 줄바꿈 완전 해결) -->
+        <!-- 마케팅 성과 배너 (확정된 고급형 Pro 구독료 월 139,000원 기준 반영) -->
         <div class="roi-banner">
           <div class="roi-top-row">
             <h4>이번 달 네이버 플레이스 유입 가치</h4>
-            <span class="roi-sub-label">월 9.9만원 투자 대비 효과</span>
+            <span class="roi-sub-label" id="roiSubLabel">월 13.9만원 투자 대비 효과</span>
           </div>
           <div class="roi-bottom-row">
             <span class="roi-detail-tag" id="roiDetailTag">영수증 리뷰 0건 발생 환산</span>
@@ -530,35 +497,13 @@
 
         <h4 style="font-size:14px; color:#475569; margin-bottom:12px; font-weight:700;">실시간 환자 반응 로그 (최근)</h4>
 
-        <div class="review-feed-item">
-          <div class="feed-avatar" style="background:#dcfce7; color:#16a34a;">★</div>
-          <div class="feed-content">
-            <strong>김영희 님</strong>이 리포트 확인 후 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.
-            <div class="feed-time">12분 전</div>
-          </div>
-        </div>
-
-        <div class="review-feed-item">
-          <div class="feed-avatar" style="background:#fef9c3; color:#ca8a04;">👨‍👩‍👧</div>
-          <div class="feed-content">
-            <strong>박철수 님</strong>의 보호자(자녀)가 <strong>가족 단톡방에 진료 리포트를 공유</strong>했습니다.
-            <div class="feed-time">34분 전</div>
-          </div>
-        </div>
-
-        <div class="review-feed-item">
-          <div class="feed-avatar" style="background:#e0f2fe; color:#0284c7;">✓</div>
-          <div class="feed-content">
-            <strong>최민수 님</strong>이 카카오톡 알림톡으로 안심 리포트를 열람했습니다.
-            <div class="feed-time">1시간 전</div>
-          </div>
-        </div>
-
-        <div class="review-feed-item">
-          <div class="feed-avatar" style="background:#dcfce7; color:#16a34a;">★</div>
-          <div class="feed-content">
-            <strong>이순자 님</strong>이 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.
-            <div class="feed-time">2시간 전</div>
+        <div id="reviewFeedList">
+          <div class="review-feed-item">
+            <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
+            <div class="feed-content" style="color:#94a3b8;">
+              환자 반응 로그 대기 중입니다. 진료 리포트 발송 시 환자의 열람 및 네이버 리뷰 클릭 반응이 실시간으로 기록됩니다.
+              <div class="feed-time">실시간 대기 중</div>
+            </div>
           </div>
         </div>
 
@@ -638,16 +583,18 @@
         if (unitReviewEl) unitReviewEl.textContent = `건 (클릭률 ${reviewRate}%)`;
         if (footerReviewEl) footerReviewEl.textContent = `🔥 이번 달 누적 ${reviewCount}건 달성!`;
 
-        // 마케팅 ROI 계산 (영수증 리뷰 1건당 약 7,500원 마케팅 가치 산출)
+        // 마케팅 ROI 계산 (우리가 확정한 실제 고급형 Pro 요금: 월 139,000원 기준!)
         const marketingValue = reviewCount * 7500;
-        const roiPercent = marketingValue > 0 ? Math.round((marketingValue / 99000) * 100) : 0;
+        const roiPercent = marketingValue > 0 ? Math.round((marketingValue / 139000) * 100) : 0;
         const badgeRoi = document.getElementById('badgeRoi');
         const roiDetail = document.getElementById('roiDetailTag');
         const roiValue = document.getElementById('roiValueText');
+        const roiSub = document.getElementById('roiSubLabel');
 
         if (badgeRoi) badgeRoi.textContent = `ROI ${roiPercent}% 달성`;
         if (roiDetail) roiDetail.textContent = `영수증 리뷰 ${reviewCount}건 발생 환산`;
         if (roiValue) roiValue.textContent = `약 ${marketingValue.toLocaleString()}원 상당`;
+        if (roiSub) roiSub.textContent = `월 13.9만원 투자 대비 효과`;
 
         // 2. 재방문(Follow-up) 실제 환자 테이블 렌더링
         const tbody = document.querySelector('.patient-table tbody');
