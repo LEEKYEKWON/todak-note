@@ -515,16 +515,17 @@
 
   <script>
     // 로그인된 원장님 병원 정보 및 Supabase 실시간 리포트 통계 연동
+    let currentUser = null;
     window.addEventListener('DOMContentLoaded', async () => {
       const userStr = localStorage.getItem('todak_current_user');
       let currentHosp = '';
       if (userStr) {
         try {
-          const user = JSON.parse(userStr);
+          currentUser = JSON.parse(userStr);
           const badge = document.querySelector('.hospital-badge');
-          if (badge && user.hospitalName) {
-            currentHosp = user.hospitalName.replace(/^🏥\s*/, '').trim();
-            badge.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+          if (badge && currentUser.hospitalName) {
+            currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
+            badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
           }
         } catch (e) { }
       }
@@ -583,9 +584,13 @@
         if (unitReviewEl) unitReviewEl.textContent = `건 (클릭률 ${reviewRate}%)`;
         if (footerReviewEl) footerReviewEl.textContent = `🔥 이번 달 누적 ${reviewCount}건 달성!`;
 
-        // 마케팅 ROI 계산 (우리가 확정한 실제 고급형 Pro 요금: 월 139,000원 기준!)
+        // 마케팅 ROI 계산 (가입 시기에 따른 실제 원장님 구독 결제 금액 기준 동적 계산!)
+        // 선착순 50명 얼리버드는 월 139,000원, 이후 정가 가입자는 월 199,000원
+        const userPlanPrice = (currentUser && currentUser.planPrice) ? Number(currentUser.planPrice) : 139000;
+        const priceInManwon = (userPlanPrice / 10000).toFixed(1);
+
         const marketingValue = reviewCount * 7500;
-        const roiPercent = marketingValue > 0 ? Math.round((marketingValue / 139000) * 100) : 0;
+        const roiPercent = marketingValue > 0 ? Math.round((marketingValue / userPlanPrice) * 100) : 0;
         const badgeRoi = document.getElementById('badgeRoi');
         const roiDetail = document.getElementById('roiDetailTag');
         const roiValue = document.getElementById('roiValueText');
@@ -594,7 +599,7 @@
         if (badgeRoi) badgeRoi.textContent = `ROI ${roiPercent}% 달성`;
         if (roiDetail) roiDetail.textContent = `영수증 리뷰 ${reviewCount}건 발생 환산`;
         if (roiValue) roiValue.textContent = `약 ${marketingValue.toLocaleString()}원 상당`;
-        if (roiSub) roiSub.textContent = `월 13.9만원 투자 대비 효과`;
+        if (roiSub) roiSub.textContent = `월 ${priceInManwon}만원 투자 대비 효과`;
 
         // 2. 재방문(Follow-up) 실제 환자 테이블 렌더링
         const tbody = document.querySelector('.patient-table tbody');
