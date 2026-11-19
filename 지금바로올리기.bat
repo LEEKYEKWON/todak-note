@@ -7,13 +7,12 @@ echo   TODAK NOTE - GitHub and Vercel Auto Deploy
 echo ========================================================
 echo.
 
-echo [1/3] Reset Commit & Re-Add...
-git reset HEAD~1
+echo [1/3] Git Add All Files...
 git add -A
 
 echo.
 echo [2/3] Git Commit...
-git commit -m "Integrate Supabase persistent cloud database"
+git commit -m "Deploy with Supabase Persistent Database"
 
 echo.
 echo [3/3] Git Push...

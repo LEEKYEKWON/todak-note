@@ -5,8 +5,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fabzvobawvtsdprixmyf.s
 // Base64로 인코딩된 서비스 키 (GitHub 보안 차단 방지)
 // 'sb_secret_Bnkwplyf6yhxe6qjaBZDiw_SL8xqoKm'
 const DEFAULT_KEY_B64 = 'c2Jfc2VjcmV0X0Jua3dwbHlmNnloeGU2cWphQlpEaXdfU0w4eHFvS20=';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 
-  process.env.SUPABASE_ANON_KEY || 
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
   Buffer.from(DEFAULT_KEY_B64, 'base64').toString('utf-8');
 
 async function supabaseQuery(endpoint, options = {}) {
