@@ -1444,19 +1444,32 @@
     // 로그인 회원 정보 및 플랜에 따른 메뉴/헤더 렌더링
     window.addEventListener('DOMContentLoaded', async () => {
       renderHospitalHeader();
-      // 🌟 서버 DB에서 최신 회원 프로필(병원명, 로고 등) 실시간 동기화
+      // 🌟 Supabase DB(users)에서 최신 회원 프로필(병원명, 로고 등) 실시간 동기화
+      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
           if (u.email) {
-            const res = await fetch(`/api/auth?email=${encodeURIComponent(u.email)}&_t=${Date.now()}`);
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(u.email.toLowerCase())}&select=*`, {
+              headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+              }
+            });
             if (res.ok) {
-              const data = await res.json();
-              if (data.success && data.user) {
-                const updated = Object.assign(u, data.user);
-                localStorage.setItem('todak_current_user', JSON.stringify(updated));
-                localStorage.setItem('todak_user_' + u.email, JSON.stringify(updated));
+              const list = await res.json();
+              if (Array.isArray(list) && list.length > 0) {
+                const row = list[0];
+                u.hospitalName = row.hospital_name || u.hospitalName;
+                u.doctorName = row.doctor_name || u.doctorName;
+                u.phone = row.phone || u.phone;
+                u.naverReviewUrl = row.naver_review_url || u.naverReviewUrl;
+                u.logoUrl = row.logo_url || u.logoUrl;
+                localStorage.setItem('todak_current_user', JSON.stringify(u));
+                localStorage.setItem('todak_user_' + u.email, JSON.stringify(u));
                 renderHospitalHeader();
               }
             }
