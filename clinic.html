@@ -730,6 +730,43 @@
       margin-bottom: 12px;
       border: 1px solid #f1f5f9;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      position: relative;
+    }
+
+    /* 환자 미리보기 인라인 편집 스타일 */
+    .editable-report-field {
+      border: 1px dashed transparent;
+      border-radius: 6px;
+      padding: 4px 6px;
+      margin: -4px -6px;
+      transition: all 0.2s ease;
+      cursor: text;
+    }
+
+    .editable-report-field:hover {
+      background: #f8fafc;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+    }
+
+    .editable-report-field:focus {
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+      outline: none;
+    }
+
+    .preview-edit-hint {
+      font-size: 11px;
+      color: #0284c7;
+      font-weight: 600;
+      background: #e0f2fe;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 4px;
     }
 
     .info-section-title {
@@ -1245,8 +1282,11 @@
     <!-- 우측: 스마트폰 목업 -->
     <div class="patient-side" style="display:flex; flex-direction:column; align-items:center;">
       <div class="section-title"
-        style="margin-bottom: 12px; width: 340px; text-align: center; justify-content: center;">
+        style="margin-bottom: 6px; width: 340px; text-align: center; justify-content: center;">
         <span>📱 환자 수신 화면 미리보기</span>
+      </div>
+      <div class="preview-edit-hint" style="margin-bottom: 10px;">
+        ✏️ 본문을 클릭하여 내용을 바로 수정할 수 있습니다
       </div>
 
       <div class="phone-mockup">
@@ -1267,15 +1307,17 @@
             <!-- 1. 요약 -->
             <div class="info-section">
               <div class="info-section-title">📢 오늘 원장님 말씀 요약</div>
-              <div id="reportSummaryText"
-                style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"></div>
+              <div id="reportSummaryText" class="editable-report-field" contenteditable="true" spellcheck="false"
+                style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"
+                oninput="syncFromPreview('summary', this.innerText)" title="클릭하여 직접 수정"></div>
             </div>
 
             <!-- 2. 약 복용법 -->
             <div class="info-section">
               <div class="info-section-title">💊 오늘 처방된 약 & 복용 방법</div>
-              <div id="reportMedText" style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;">
-              </div>
+              <div id="reportMedText" class="editable-report-field" contenteditable="true" spellcheck="false"
+                style="font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap;"
+                oninput="syncFromPreview('medication', this.innerText)" title="클릭하여 직접 수정"></div>
 
               <!-- 눈에 번쩍 띄는 굵은 주황색 안전 경고 배지 -->
               <div class="med-safety-warning">
@@ -1287,22 +1329,26 @@
             <!-- 3. 다음 병원 오시는 날 -->
             <div class="info-section next-visit-box">
               <div class="info-section-title">🗓️ 다음 병원 오시는 날 (놓치지 마세요!)</div>
-              <div class="date-badge" id="reportNextDate"></div>
-              <p style="font-size: 13px; color: #1e3a8a; margin-top: 6px; line-height: 1.5;" id="reportNextNotice"></p>
+              <div class="date-badge editable-report-field" id="reportNextDate" contenteditable="true" spellcheck="false"
+                oninput="syncFromPreview('nextDate', this.innerText)" title="클릭하여 날짜 직접 수정"></div>
+              <p style="font-size: 13px; color: #1e3a8a; margin-top: 6px; line-height: 1.5;" id="reportNextNotice" class="editable-report-field" contenteditable="true" spellcheck="false"
+                oninput="syncFromPreview('nextNotice', this.innerText)" title="클릭하여 안내사항 직접 수정"></p>
             </div>
 
             <!-- 4. 맞춤 생활 건강 팁 -->
             <div class="info-section" style="background: #fffbeb; border-left: 4px solid #f59e0b;">
               <div class="info-section-title" style="color: #b45309;">💡 꼭 지켜주셔야 할 맞춤 생활 팁</div>
-              <div id="reportLifestyleTips"
-                style="font-size: 14px; line-height: 1.6; color: #78350f; white-space: pre-wrap;"></div>
+              <div id="reportLifestyleTips" class="editable-report-field" contenteditable="true" spellcheck="false"
+                style="font-size: 14px; line-height: 1.6; color: #78350f; white-space: pre-wrap;"
+                oninput="syncFromPreview('lifestyleTips', this.innerText)" title="클릭하여 직접 수정"></div>
             </div>
 
             <!-- 5. 토닥토닥 안심 한마디 -->
             <div class="info-section" style="background: #fdf2f8; border-left: 4px solid #ec4899;">
               <div class="info-section-title" style="color: #be185d;">🌷 토닥토닥 마음 안심 한마디</div>
-              <div id="reportWarmMessage" style="font-size: 14px; line-height: 1.6; color: #831843; font-weight: 500;">
-              </div>
+              <div id="reportWarmMessage" class="editable-report-field" contenteditable="true" spellcheck="false"
+                style="font-size: 14px; line-height: 1.6; color: #831843; font-weight: 500;"
+                oninput="syncFromPreview('warmMessage', this.innerText)" title="클릭하여 직접 수정"></div>
             </div>
 
             <!-- 6. 눈에 확 띄는 안심 법적 고지 배너 -->
@@ -1951,6 +1997,47 @@
       if (val && emptyStateEl && reportCardEl) {
         emptyStateEl.style.display = 'none';
         reportCardEl.style.display = 'block';
+      }
+    }
+
+    // 🌟 환자 미리보기 화면에서 직접 편집 시 왼쪽 검토 카드 및 발송 데이터 실시간 동기화
+    function syncFromPreview(field, val) {
+      if (!parsedResult) {
+        parsedResult = {
+          summary: '',
+          medication: '',
+          nextDate: '',
+          nextNotice: '',
+          lifestyleTips: '',
+          warmMessage: ''
+        };
+      }
+      parsedResult[field] = val;
+
+      if (field === 'summary') {
+        const viewSummaryEl = document.getElementById('viewSummaryText');
+        if (viewSummaryEl) viewSummaryEl.innerText = val;
+        const editSummaryEl = document.getElementById('editSummaryInput');
+        if (editSummaryEl && editSummaryEl.value !== val) editSummaryEl.value = val;
+      } else if (field === 'medication') {
+        const viewMedEl = document.getElementById('viewMedText');
+        if (viewMedEl) viewMedEl.innerText = val;
+        const editMedEl = document.getElementById('editMedInput');
+        if (editMedEl && editMedEl.value !== val) editMedEl.value = val;
+        const quickDirectMedEl = document.getElementById('quickDirectMedInput');
+        if (quickDirectMedEl && quickDirectMedEl.value !== val) quickDirectMedEl.value = val;
+      } else if (field === 'nextDate') {
+        const viewNextDateEl = document.getElementById('viewNextDateText');
+        if (viewNextDateEl) viewNextDateEl.innerText = val;
+        const editNextDateEl = document.getElementById('editNextDateInput');
+        if (editNextDateEl && editNextDateEl.value !== val) editNextDateEl.value = val;
+      } else if (field === 'nextNotice') {
+        const viewNoticeEl = document.getElementById('viewNextNoticeText');
+        if (viewNoticeEl) viewNoticeEl.innerText = val;
+        const editNoticeEl = document.getElementById('editNextNoticeInput');
+        if (editNoticeEl && editNoticeEl.value !== val) editNoticeEl.value = val;
+        const quickDirectNoticeEl = document.getElementById('quickDirectNoticeInput');
+        if (quickDirectNoticeEl && quickDirectNoticeEl.value !== val) quickDirectNoticeEl.value = val;
       }
     }
 
