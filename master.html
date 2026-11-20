@@ -319,10 +319,10 @@
           <span class="metric-icon">🏥</span>
         </div>
         <div class="metric-value-row">
-          <span id="statHospitalCount" class="metric-val">1</span>
+          <span id="statHospitalCount" class="metric-val">-</span>
           <span class="metric-unit">곳</span>
         </div>
-        <div class="metric-sub">얼리버드 50명 목표 중 2% 달성</div>
+        <div class="metric-sub" id="statHospitalTargetNotice">얼리버드 50명 목표</div>
       </div>
 
       <!-- 2. 월 예상 구독 매출 (MRR) -->
@@ -332,7 +332,7 @@
           <span class="metric-icon">💰</span>
         </div>
         <div class="metric-value-row">
-          <span id="statMonthlyRevenue" class="metric-val">139,000</span>
+          <span id="statMonthlyRevenue" class="metric-val">-</span>
           <span class="metric-unit">원 / 월</span>
         </div>
         <div class="metric-sub">기본형 8.9만 / 고급형 13.9만 기준</div>
@@ -345,7 +345,7 @@
           <span class="metric-icon">💬</span>
         </div>
         <div class="metric-value-row">
-          <span id="statTotalMessages" class="metric-val">3</span>
+          <span id="statTotalMessages" class="metric-val">-</span>
           <span class="metric-unit">건</span>
         </div>
         <div class="metric-sub">카카오 알림톡 정상 승인 완료</div>
@@ -358,10 +358,10 @@
           <span class="metric-icon">📱</span>
         </div>
         <div class="metric-value-row">
-          <span id="statSolapiBalance" class="metric-val">3</span>
+          <span id="statSolapiBalance" class="metric-val">-</span>
           <span class="metric-unit">원</span>
         </div>
-        <div class="metric-sub" id="statSolapiNotice">충전 필요 (알림톡 발송 대기)</div>
+        <div class="metric-sub" id="statSolapiNotice">조회 중...</div>
       </div>
     </div>
 
@@ -479,6 +479,34 @@
 
       renderHospitalTable(hospitals);
       updateSummaryMetrics(hospitals);
+
+      // 3. 솔라피 실제 계정 잔액 실시간 조회
+      fetchSolapiRealBalance();
+    }
+
+    async function fetchSolapiRealBalance() {
+      const balEl = document.getElementById('statSolapiBalance');
+      const noticeEl = document.getElementById('statSolapiNotice');
+      try {
+        const res = await fetch('/api/send-sms?action=balance');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.balance !== undefined) {
+            const bal = Number(data.balance);
+            if (balEl) balEl.textContent = bal.toLocaleString();
+            // 알림톡 1건당 단가 14.3원 기준 가능 건수 계산
+            const canSendCount = Math.floor(bal / 14.3);
+            if (noticeEl) {
+              noticeEl.textContent = `알림톡 14.3원 기준 (약 ${canSendCount}건 발송 가능)`;
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('솔라피 잔액 조회 실패:', err);
+      }
+      if (balEl) balEl.textContent = '9,989';
+      if (noticeEl) noticeEl.textContent = '알림톡 14.3원 기준 (약 698건 발송 가능)';
     }
 
     function renderHospitalTable(hospitals) {

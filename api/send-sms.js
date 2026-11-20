@@ -61,8 +61,38 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
+  // 솔라피 잔액 조회 (GET /api/send-sms?action=balance)
+  if (req.method === 'GET' && req.query.action === 'balance') {
+    const options = {
+      hostname: 'api.solapi.com',
+      port: 443,
+      path: '/cash/v1/balance',
+      method: 'GET',
+      headers: {
+        'Authorization': getSolapiAuthHeader()
+      }
+    };
+
+    const balReq = https.request(options, balRes => {
+      let data = '';
+      balRes.on('data', chunk => data += chunk);
+      balRes.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          // 솔라피 balance API 응답: { balance: 9989, point: 0 }
+          const balance = parsed.balance !== undefined ? parsed.balance : (parsed.point || 0);
+          res.status(200).json({ success: true, balance: balance, raw: parsed });
+        } catch (e) {
+          res.status(500).json({ error: '솔라피 잔액 파싱 실패', raw: data });
+        }
+      });
+    });
+
+    balReq.on('error', err => {
+      res.status(500).json({ error: err.message });
+    });
+
+    balReq.end();
     return;
   }
 

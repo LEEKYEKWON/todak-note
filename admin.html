@@ -387,7 +387,7 @@
           <div class="metric-icon-box" style="background:#e0f2fe; color:#0284c7;">📱</div>
         </div>
         <div class="metric-value-box">
-          <span class="metric-value">42</span>
+          <span class="metric-value" id="valTodayCount">-</span>
           <span class="metric-unit">건 / 오늘</span>
         </div>
         <div class="metric-footer">
@@ -402,7 +402,7 @@
           <div class="metric-icon-box" style="background:#eff6ff; color:#3b82f6;">🗓️</div>
         </div>
         <div class="metric-value-box">
-          <span class="metric-value">28</span>
+          <span class="metric-value" id="valWeeklyFollowUp">-</span>
           <span class="metric-unit">명</span>
         </div>
         <div class="metric-footer" style="color:#2563eb;">
@@ -571,11 +571,10 @@
         const todayCount = todayReports.length;
 
         // 지표 카드 숫자 및 퍼센티지 실시간 갱신
-        const metricValues = document.querySelectorAll('.metric-value');
-        if (metricValues.length >= 4) {
-          metricValues[0].textContent = todayCount; // 오늘 안심 리포트 발송
-          metricValues[1].textContent = totalCount; // 이번 주 재방문 관리 환자
-        }
+        const valTodayEl = document.getElementById('valTodayCount');
+        const valWeeklyEl = document.getElementById('valWeeklyFollowUp');
+        if (valTodayEl) valTodayEl.textContent = todayCount;
+        if (valWeeklyEl) valWeeklyEl.textContent = totalCount;
 
         // 실시간 공유 및 리뷰 통계 계산 (실제 DB 로그 집계)
         const shareLogs = logs.filter(l => l.action_type === 'share');
