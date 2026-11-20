@@ -164,6 +164,7 @@
 
       // 1) 서버 클라우드(/api/auth) 로그인 시도
       let loggedUser = null;
+      let serverErrorMsg = '';
       try {
         const res = await fetch('/api/auth?action=login', {
           method: 'POST',
@@ -173,6 +174,8 @@
         const resData = await res.json();
         if (res.ok && resData.user) {
           loggedUser = resData.user;
+        } else if (resData && resData.error) {
+          serverErrorMsg = resData.error;
         }
       } catch (cloudErr) {
         console.warn("서버 로그인 통신 실패, 로컬 캐시 조회:", cloudErr);
@@ -202,7 +205,7 @@
             plan: 'Pro'
           };
         } else {
-          alert('등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.');
+          alert(serverErrorMsg || '등록되지 않은 이메일 주소이거나 비밀번호가 일치하지 않습니다.\n회원가입을 먼저 진행해 주세요.');
           window.location.href = 'signup.html';
           return;
         }

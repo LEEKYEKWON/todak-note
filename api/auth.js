@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
     try {
       await supabaseQuery('users', {
         method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+        headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
           email: cleanEmail,
           password: password,
@@ -116,7 +116,7 @@ module.exports = async (req, res) => {
     }
 
     if (!user) {
-      res.status(404).json({ error: '등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.' });
+      res.status(401).json({ error: '등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.' });
       return;
     }
 

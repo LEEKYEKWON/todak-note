@@ -524,7 +524,7 @@
     // 현재 로그인된 유저 데이터 불러오기
     let currentUser = null;
 
-    function loadUserData() {
+    async function loadUserData() {
       try {
         const stored = localStorage.getItem('todak_current_user');
         if (stored) {
@@ -535,7 +535,6 @@
       }
 
       if (!currentUser) {
-        // 기본 샘플 데이터 (비로그인 상태 대비)
         currentUser = {
           email: 'doctor@hospital.com',
           doctorName: '홍길동 원장',
@@ -544,6 +543,23 @@
           plan: 'Pro',
           naverReviewUrl: ''
         };
+      }
+
+      // 🌟 서버 DB에서 최신 프로필 정보 실시간 조회하여 로컬 덮어쓰기
+      if (currentUser && currentUser.email) {
+        try {
+          const res = await fetch(`/api/auth?email=${encodeURIComponent(currentUser.email)}&_t=${Date.now()}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.user) {
+              currentUser = Object.assign(currentUser, data.user);
+              localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+              localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
+            }
+          }
+        } catch (netErr) {
+          console.warn("최신 프로필 서버 동기화 실패 (로컬 유지):", netErr);
+        }
       }
 
       renderProfile();

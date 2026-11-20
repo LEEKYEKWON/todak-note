@@ -1442,8 +1442,27 @@
     document.getElementById('reportTodayDate').innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
 
     // 로그인 회원 정보 및 플랜에 따른 메뉴/헤더 렌더링
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       renderHospitalHeader();
+      // 🌟 서버 DB에서 최신 회원 프로필(병원명, 로고 등) 실시간 동기화
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.email) {
+            const res = await fetch(`/api/auth?email=${encodeURIComponent(u.email)}&_t=${Date.now()}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && data.user) {
+                const updated = Object.assign(u, data.user);
+                localStorage.setItem('todak_current_user', JSON.stringify(updated));
+                localStorage.setItem('todak_user_' + u.email, JSON.stringify(updated));
+                renderHospitalHeader();
+              }
+            }
+          }
+        } catch (e) { }
+      }
     });
 
     function renderHospitalHeader() {
