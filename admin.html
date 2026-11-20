@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>토닥토닥노트 - 원장님 경영 통계 대시보드</title>
+  <script src="todak-db.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -526,6 +527,21 @@
           if (badge && currentUser.hospitalName) {
             currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
             badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
+          }
+        } catch (e) { }
+      }
+
+      // 최신 프로필 DB 동기화
+      if (window.TodakDB) {
+        try {
+          const fresh = await TodakDB.getCurrentUserProfile();
+          if (fresh) {
+            currentUser = fresh;
+            const badge = document.querySelector('.hospital-badge');
+            if (badge && currentUser.hospitalName) {
+              currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
+              badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
+            }
           }
         } catch (e) { }
       }

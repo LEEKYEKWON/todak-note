@@ -546,17 +546,35 @@
     let currentUser = null;
 
     async function loadUserData() {
-      // 🌟 Supabase DB를 단일 진실의 원천으로 프로필 로드
-      currentUser = await TodakDB.getCurrentUserProfile();
+      // 1. 우선 로컬에 저장된 최신 상태로 즉시 화면 렌더링
+      const localStr = localStorage.getItem('todak_current_user');
+      if (localStr) {
+        try {
+          currentUser = JSON.parse(localStr);
+          renderProfile();
+          renderPlanInfo();
+        } catch (e) { }
+      }
+
+      // 2. Supabase DB 최신 데이터 가져와서 최종 동기화
+      if (window.TodakDB) {
+        try {
+          const fresh = await TodakDB.getCurrentUserProfile();
+          if (fresh) {
+            currentUser = fresh;
+            renderProfile();
+            renderPlanInfo();
+          }
+        } catch (e) {
+          console.warn('DB 최신 프로필 갱신 실패:', e);
+        }
+      }
 
       if (!currentUser) {
         alert('로그인이 필요합니다.');
         window.location.href = 'login.html';
         return;
       }
-
-      renderProfile();
-      renderPlanInfo();
     }
 
     function renderProfile() {
@@ -697,6 +715,7 @@
       const phone = document.getElementById('inputPhone').value.trim();
       const naverReviewUrl = document.getElementById('inputNaverReviewUrl').value.trim();
       const logoUrl = currentUser.logoUrl || '';
+      const currentPlan = currentUser.plan || 'Pro';
 
       const saveBtn = document.querySelector('.save-btn');
       const originalText = saveBtn.textContent;
@@ -704,14 +723,15 @@
       saveBtn.disabled = true;
 
       try {
-        // 🌟 단일 진실의 원천: TodakDB를 통해 Supabase DB에 100% 영구 저장
+        // 🌟 단일 진실의 원천: TodakDB를 통해 Supabase DB에 100% 영구 저장 (현재 plan 유지)
         currentUser = await TodakDB.updateProfile({
           email: currentUser.email,
           hospitalName,
           doctorName,
           phone,
           naverReviewUrl,
-          logoUrl
+          logoUrl,
+          plan: currentPlan
         });
 
         // 성공 UI 피드백

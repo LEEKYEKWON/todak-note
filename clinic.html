@@ -1557,7 +1557,7 @@
 
       try {
         if (window.TodakDB && user.email) {
-          // 🌟 Supabase DB users 테이블에 plan: 'Pro' 영구 업데이트
+          // 🌟 Supabase DB users 테이블에 plan: 'Pro' 확실하게 대기 완료 후 업데이트
           user = await TodakDB.updatePlan(user.email, 'Pro');
         } else {
           user.plan = 'Pro';

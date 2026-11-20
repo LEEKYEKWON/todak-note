@@ -74,7 +74,8 @@ const TodakDB = {
     if (!localUser || !localUser.email) return localUser;
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(localUser.email.toLowerCase())}&select=*`, {
+      const cleanEmail = localUser.email.trim().toLowerCase();
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}&select=*`, {
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -96,7 +97,13 @@ const TodakDB = {
 
   // 4. 프로필 정보 영구 수정 (병원명, 원장명, 로고, 네이버링크, 요금제 플랜 등)
   async updateProfile({ email, hospitalName, doctorName, phone, naverReviewUrl, logoUrl, plan }) {
-    const cleanEmail = email.trim().toLowerCase();
+    if (!email) {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try { email = JSON.parse(userStr).email; } catch (e) {}
+      }
+    }
+    const cleanEmail = (email || '').trim().toLowerCase();
     const updateBody = {
       updated_at: new Date().toISOString()
     };
@@ -134,7 +141,13 @@ const TodakDB = {
 
   // 5. 플랜 업그레이드 / 전환 (Supabase DB 직접 반영)
   async updatePlan(email, newPlan) {
-    return this.updateProfile({ email, plan: newPlan });
+    if (!email) {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try { email = JSON.parse(userStr).email; } catch (e) {}
+      }
+    }
+    return await this.updateProfile({ email, plan: newPlan });
   },
 
   // 규격 통일 헬퍼
