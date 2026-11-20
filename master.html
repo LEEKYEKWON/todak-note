@@ -569,16 +569,31 @@
     async function togglePlan(email, currentPlan) {
       const nextPlan = (currentPlan || 'Pro').toLowerCase() === 'pro' ? 'Standard' : 'Pro';
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}`, {
+        const cleanEmail = email.trim().toLowerCase();
+        await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
           method: 'PATCH',
           headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ plan: nextPlan })
+          body: JSON.stringify({ plan: nextPlan, updated_at: new Date().toISOString() })
         });
+
+        // 현재 브라우저에 로그인된 사용자가 본인이라면 로컬스토리지도 즉시 동기화
+        const userStr = localStorage.getItem('todak_current_user');
+        if (userStr) {
+          try {
+            const u = JSON.parse(userStr);
+            if (u.email && u.email.toLowerCase() === cleanEmail) {
+              u.plan = nextPlan;
+              localStorage.setItem('todak_current_user', JSON.stringify(u));
+            }
+          } catch (e) { }
+        }
+
         loadHospitals();
+        alert(`[플랜 전환 완료] ${email} 계정이 '${nextPlan}' 플랜으로 변경되었습니다.`);
       } catch (e) {
         alert('플랜 전환 실패: ' + e.message);
       }
