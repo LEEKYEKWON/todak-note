@@ -432,20 +432,17 @@
       let hospitals = [];
       let totalReportsCount = 0;
 
-      // 1. Supabase users 테이블에서 실제 가입된 원장님 목록 조회 (캐시 방지 헤더 & 쿼리)
+      // 1. Supabase users 테이블에서 실제 가입된 원장님 목록 조회
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/users?select=*&order=created_at.desc&_t=${Date.now()}`, {
-          cache: 'no-store',
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/users?select=*&order=created_at.desc`, {
           headers: {
             'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Cache-Control': 'no-cache, no-store, must-revalidate'
+            'Authorization': `Bearer ${SUPABASE_KEY}`
           }
         });
         if (res.ok) {
           const list = await res.json();
           if (Array.isArray(list)) {
-            // 현재 로그인된 사용자의 최신 로컬스토리지 정보가 있다면 우선 보정
             let localUser = null;
             try {
               const uStr = localStorage.getItem('todak_current_user');
@@ -472,14 +469,12 @@
         console.warn('Supabase users 조회 오류:', e);
       }
 
-      // 2. Supabase reports 테이블에서 실제 누적 발송 건수 집계 (캐시 방지)
+      // 2. Supabase reports 테이블에서 실제 누적 발송 건수 집계
       try {
-        const repRes = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=id&_t=${Date.now()}`, {
-          cache: 'no-store',
+        const repRes = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=id`, {
           headers: {
             'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Cache-Control': 'no-cache, no-store, must-revalidate'
+            'Authorization': `Bearer ${SUPABASE_KEY}`
           }
         });
         if (repRes.ok) {
