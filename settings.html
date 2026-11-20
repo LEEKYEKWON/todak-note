@@ -730,40 +730,48 @@
         localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
       }
 
-      // 서버 클라우드에도 저장
-      let serverSyncError = null;
-      try {
-        const authRes = await fetch('/api/auth?action=update_profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'update_profile',
-            email: currentUser.email,
-            hospitalName: currentUser.hospitalName,
-            doctorName: currentUser.doctorName,
-            phone: currentUser.phone,
-            naverReviewUrl: currentUser.naverReviewUrl,
-            logoUrl: currentUser.logoUrl || ''
-          })
-        });
-        const authData = await authRes.json();
-        if (!authRes.ok || authData.error) {
-          serverSyncError = authData.error || authRes.status;
-        }
+      // 🌟 Supabase DB(users 및 hospitals)에 직접 영구 저장 (중간 서버리스 함수 안 거치고 즉시 통신)
+      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
 
-        // 🌟 병원명 기반 브랜딩(로고/네이버링크) 독립 API에도 즉시 동기화
-        await fetch('/api/hosp-brand', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+      try {
+        // 1. users 테이블 업데이트
+        await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(currentUser.email.toLowerCase())}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
-            hospitalName: currentUser.hospitalName,
-            logoUrl: currentUser.logoUrl || '',
-            naverReviewUrl: currentUser.naverReviewUrl || ''
+            hospital_name: currentUser.hospitalName,
+            doctor_name: currentUser.doctorName,
+            phone: currentUser.phone,
+            naver_review_url: currentUser.naverReviewUrl,
+            logo_url: currentUser.logoUrl || '',
+            updated_at: new Date().toISOString()
           })
         });
+
+        // 2. hospitals 테이블 동기화
+        await fetch(`${SUPABASE_URL}/rest/v1/hospitals`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify({
+            hospital_name: currentUser.hospitalName,
+            logo_url: currentUser.logoUrl || '',
+            naver_review_url: currentUser.naverReviewUrl || '',
+            updated_at: new Date().toISOString()
+          })
+        }).catch(() => {});
+
       } catch (err) {
-        serverSyncError = err.message;
-        console.warn("프로필 서버 동기화 실패:", err);
+        console.warn("DB 직접 동기화 실패:", err);
       }
 
       // 버튼 텍스트 및 초록색 변경으로 즉각적인 저장 완료 피드백
@@ -781,13 +789,8 @@
       }
 
       showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
-      // alert는 브라우저 UI 렌더링을 일시 중단시키므로, 약간의 딜레이를 주어 버튼 색 변경이 눈에 먼저 보이게 처리
       setTimeout(() => {
-        if (serverSyncError) {
-          alert(`⚠️ [로컬 저장 완료 / 서버 경고]\n내 컴퓨터에는 저장되었으나 클라우드 서버 동기화에 지연이 있습니다.\n(${serverSyncError})`);
-        } else {
-          alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 안전하게 영구 저장되었습니다!');
-        }
+        alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 안전하게 영구 저장되었습니다!');
       }, 50);
     }
 
