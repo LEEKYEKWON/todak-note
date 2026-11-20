@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // 2. 진료실에서 환자 리포트 데스크로 전송 (POST /api/desk-queue)
+  // 2. 진료실에서 환자 리포트 데스크로 전송 및 상태 갱신 (POST /api/desk-queue)
   if (req.method === 'POST') {
     const { hospitalId, item } = req.body || {};
     const key = (hospitalId || 'default').trim();
@@ -63,13 +63,13 @@ module.exports = async (req, res) => {
     // 중복 방지 (동일 ID인 경우 최신화)
     const existingIndex = global._deskQueueCache[key].findIndex(q => q.id === item.id);
     if (existingIndex >= 0) {
-      global._deskQueueCache[key][existingIndex] = item;
+      global._deskQueueCache[key][existingIndex] = { ...global._deskQueueCache[key][existingIndex], ...item };
     } else {
       global._deskQueueCache[key].unshift(item); // 최신 환자 맨 위에 추가
     }
 
-    // 최대 30건 유지
-    global._deskQueueCache[key] = global._deskQueueCache[key].slice(0, 30);
+    // 최대 50건 유지
+    global._deskQueueCache[key] = global._deskQueueCache[key].slice(0, 50);
     saveQueue();
 
     res.status(200).json({ success: true, count: global._deskQueueCache[key].length });

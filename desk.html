@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
+  <script src="todak-db.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -741,12 +742,24 @@
 
         alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
 
-        // 🌟 목록에서 삭제하지 않고 'status: sent'로 상태만 변경하여 영구 보존!
+        // 🌟 서버 클라우드 대기열에서도 'status: sent'로 상태 갱신
         item.status = 'sent';
         item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         item.medication = finalMed;
         item.nextDate = finalNextDate;
         item.nextNotice = finalNotice;
+
+        try {
+          const hospId = getHospitalId();
+          await fetch('/api/desk-queue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              hospitalId: hospId,
+              item: item
+            })
+          });
+        } catch (syncErr) { }
 
         const hospId = getHospitalId();
         localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
@@ -758,17 +771,19 @@
     }
 
     // 병원 헤더 및 뱃지 렌더링
-    function renderDeskHeader() {
+    async function renderDeskHeader() {
       const badgeArea = document.getElementById('deskHospitalBadge');
       if (!badgeArea) return;
 
       let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
-      const userStr = localStorage.getItem('todak_current_user');
-      if (userStr) {
-        try {
-          const u = JSON.parse(userStr);
-          user = Object.assign(user, u);
-        } catch (e) { }
+      if (window.TodakDB) {
+        const fresh = await TodakDB.getCurrentUserProfile();
+        if (fresh) user = fresh;
+      } else {
+        const userStr = localStorage.getItem('todak_current_user');
+        if (userStr) {
+          try { user = Object.assign(user, JSON.parse(userStr)); } catch (e) { }
+        }
       }
 
       const isPro = (user.plan || '').toLowerCase() === 'pro';
