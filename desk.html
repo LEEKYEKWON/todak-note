@@ -285,22 +285,32 @@
 
   <main>
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
         <div>
-          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 대기 환자 리포트 목록</h2>
-          <p style="font-size: 13.5px; color: #64748b;">진료실에서 요약 완료 후 넘어온 환자입니다. 수납 시 복약 및 다음 예약을 확인하고 발송하세요.</p>
+          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 환자 리포트 발송 및 이력</h2>
+          <p style="font-size: 13.5px; color: #64748b;">진료실에서 전달된 환자 목록입니다. 발송 완료된 환자도 언제든 내용을 다시 열람할 수 있습니다.</p>
         </div>
-        <button class="quick-chip-btn" onclick="loadDeskQueue()">🔄 새로고침</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <!-- 기간 필터 탭 -->
+          <div style="display: flex; background: #f1f5f9; padding: 3px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <button class="quick-chip-btn filter-btn active" id="filterAll" onclick="setFilter('all')">전체</button>
+            <button class="quick-chip-btn filter-btn" id="filterToday" onclick="setFilter('today')">오늘</button>
+            <button class="quick-chip-btn filter-btn" id="filterWeek" onclick="setFilter('week')">이번 주</button>
+            <button class="quick-chip-btn filter-btn" id="filterMonth" onclick="setFilter('month')">이번 달</button>
+          </div>
+          <button class="quick-chip-btn" onclick="loadDeskQueue()" style="padding: 7px 12px; font-weight: 800;">🔄 새로고침</button>
+        </div>
       </div>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th style="width: 15%;">접수시각</th>
-              <th style="width: 25%;">환자명</th>
-              <th style="width: 30%;">전화번호</th>
-              <th style="width: 30%; text-align: center;">작업</th>
+              <th style="width: 14%;">접수시각</th>
+              <th style="width: 22%;">환자명</th>
+              <th style="width: 24%;">전화번호</th>
+              <th style="width: 18%; text-align: center;">발송 상태</th>
+              <th style="width: 22%; text-align: center;">작업</th>
             </tr>
           </thead>
           <tbody id="deskTableBody">
@@ -415,6 +425,7 @@
   <script>
     let activeQueueIndex = -1;
     let deskQueueData = [];
+    let currentFilter = 'all';
 
     // 현재 병원 ID 식별
     function getHospitalId() {
@@ -428,12 +439,19 @@
       return 'default';
     }
 
+    function setFilter(filterType) {
+      currentFilter = filterType;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('filter' + filterType.charAt(0).toUpperCase() + filterType.slice(1));
+      if (activeBtn) activeBtn.classList.add('active');
+      renderDeskTable();
+    }
+
     // 🌟 서버 클라우드와 로컬 저장소를 동시에 조회 및 실시간 동기화
     async function loadDeskQueue() {
-      const tbody = document.getElementById('deskTableBody');
       const hospId = getHospitalId();
 
-      // 1. 서버 API(/api/desk-queue)에서 다른 진료실 PC가 보낸 환자 목록 가져오기 (캐시 방지 타임스탬프)
+      // 1. 서버 API(/api/desk-queue)에서 대기 환자 목록 가져오기
       try {
         const res = await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}&_t=${Date.now()}`, {
           cache: 'no-store'
@@ -441,23 +459,64 @@
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.queue)) {
-            // 해당 병원 클라우드 대기열 기준으로 100% 동기화
-            deskQueueData = data.queue;
+            // 기존 발송완료된 로컬 이력과 서버의 신규 대기 항목 병합
+            const localSaved = JSON.parse(localStorage.getItem(`todak_desk_queue_${hospId}`) || '[]');
+            const localSentMap = {};
+            localSaved.forEach(item => {
+              if (item.status === 'sent') localSentMap[item.id] = item;
+            });
+
+            // 서버에서 온 항목 중 이미 로컬에서 발송완료된 것은 상태 유지
+            const merged = data.queue.map(item => {
+              if (localSentMap[item.id]) {
+                return localSentMap[item.id];
+              }
+              return { ...item, status: item.status || 'pending', timestamp: item.timestamp || Date.now() };
+            });
+
+            // 로컬에만 있는 발송완료 내역도 보존
+            localSaved.forEach(item => {
+              if (item.status === 'sent' && !merged.find(m => m.id === item.id)) {
+                merged.push(item);
+              }
+            });
+
+            deskQueueData = merged;
             localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
           }
         }
       } catch (err) {
-        // 서버 오프라인 시 해당 병원 로컬스토리지 백업 활용
         deskQueueData = JSON.parse(localStorage.getItem(`todak_desk_queue_${hospId}`) || '[]');
       }
 
-      if (!deskQueueData || deskQueueData.length === 0) {
+      renderDeskTable();
+    }
+
+    function renderDeskTable() {
+      const tbody = document.getElementById('deskTableBody');
+      if (!tbody) return;
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const weekStart = todayStart - (now.getDay() * 24 * 60 * 60 * 1000);
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+      // 필터링 적용
+      const filtered = deskQueueData.filter(item => {
+        const t = item.timestamp || Date.now();
+        if (currentFilter === 'today') return t >= todayStart;
+        if (currentFilter === 'week') return t >= weekStart;
+        if (currentFilter === 'month') return t >= monthStart;
+        return true;
+      });
+
+      if (!filtered || filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="4" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+            <td colspan="5" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
               <span style="font-size: 32px; display: block; margin-bottom: 8px;">📭</span>
-              현재 대기 중인 환자가 없습니다.<br>
-              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 여기에 나타납니다.
+              해당 기간의 환자 리포트 내역이 없습니다.<br>
+              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.
             </td>
           </tr>
         `;
@@ -465,16 +524,31 @@
       }
 
       tbody.innerHTML = '';
-      deskQueueData.forEach((item, idx) => {
+      filtered.forEach((item, idx) => {
+        const originalIndex = deskQueueData.findIndex(d => d.id === item.id);
+        const isSent = item.status === 'sent';
         const tr = document.createElement('tr');
+        if (isSent) tr.style.background = '#f8fafc';
+
         tr.innerHTML = `
           <td style="color: #64748b; font-size: 13px; font-weight: 600;">${item.createdAt || '방금'}</td>
           <td><strong>${item.patientName}</strong></td>
           <td style="color: #334155;">${item.phone}</td>
           <td style="text-align: center;">
-            <button class="btn-open-setting" onclick="openDeskModal(${idx})">
-              ⚙️ 복약/다음 예약 설정 및 발송
-            </button>
+            ${isSent 
+              ? `<span style="background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>` 
+              : `<span style="background: #fef3c7; color: #b45309; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 발송 대기</span>`
+            }
+          </td>
+          <td style="text-align: center;">
+            ${isSent
+              ? `<button class="btn-open-setting" style="background: #ffffff; color: #0284c7; border: 1.5px solid #0284c7;" onclick="openDeskModal(${originalIndex})">
+                  🔍 발송 내용 확인
+                </button>`
+              : `<button class="btn-open-setting" onclick="openDeskModal(${originalIndex})">
+                  ⚙️ 복약/예약 확인 및 발송
+                </button>`
+            }
           </td>
         `;
         tbody.appendChild(tr);
@@ -486,7 +560,21 @@
       const item = deskQueueData[idx];
       if (!item) return;
 
-      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 및 발송`;
+      const isSent = item.status === 'sent';
+      const sendBtn = document.querySelector('.btn-send-final');
+      if (sendBtn) {
+        if (isSent) {
+          sendBtn.innerText = '🔁 이미 발송된 리포트 (필요 시 알림톡 재발송)';
+          sendBtn.style.background = '#e2e8f0';
+          sendBtn.style.color = '#334155';
+        } else {
+          sendBtn.innerText = '📲 확인 완료 & 환자 카카오 알림톡 발송';
+          sendBtn.style.background = '#fee500';
+          sendBtn.style.color = '#191919';
+        }
+      }
+
+      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 ${isSent ? '(발송완료)' : ''}`;
       document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
@@ -571,7 +659,6 @@
         return;
       }
 
-      // 🌟 초경량 URL 토큰 및 reportUrl 생성 (환자 스마트폰 열람 시 100% 즉시 렌더링)
       function toBase64Url(obj) {
         const jsonStr = JSON.stringify(obj);
         const bytes = new TextEncoder().encode(jsonStr);
@@ -580,7 +667,6 @@
         return btoa(binStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       }
 
-      // 병원명/원장명 로그인 정보 반영
       let currentHosp = '길동이의원';
       let currentDoc = '홍길동';
       let hospId = '';
@@ -613,7 +699,6 @@
         naverReviewUrl: naverUrl
       };
 
-      // 서버(/api/report)에 리포트 백업 저장
       try {
         await fetch('/api/report', {
           method: 'POST',
@@ -656,19 +741,17 @@
 
         alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
 
-        // 🌟 서버 클라우드 대기열에서도 발송 완료된 환자 삭제
-        try {
-          const hospId = getHospitalId();
-          await fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}&id=${encodeURIComponent(item.id)}`, {
-            method: 'DELETE'
-          });
-        } catch (delErr) { }
+        // 🌟 목록에서 삭제하지 않고 'status: sent'로 상태만 변경하여 영구 보존!
+        item.status = 'sent';
+        item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        item.medication = finalMed;
+        item.nextDate = finalNextDate;
+        item.nextNotice = finalNotice;
 
-        deskQueueData.splice(activeQueueIndex, 1);
         const hospId = getHospitalId();
         localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
         document.getElementById('deskModalOverlay').style.display = 'none';
-        loadDeskQueue();
+        renderDeskTable();
       } catch (e) {
         alert("발송 오류: " + e.message);
       }
@@ -698,10 +781,9 @@
       `;
     }
 
-    // 🌟 초기 1회 로드 및 3초마다 실시간 자동 갱신 (진료실 PC에서 보낸 환자 3초 내 자동 표시)
     renderDeskHeader();
     loadDeskQueue();
-    setInterval(loadDeskQueue, 3500);
+    setInterval(loadDeskQueue, 4000);
   </script>
 </body>
 

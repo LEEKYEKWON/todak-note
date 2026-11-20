@@ -1,24 +1,31 @@
-// Vercel Serverless: 회원가입, 로그인 및 병원 프로필 클라우드 동기화 API
-const fs = require('fs');
-const path = require('path');
+// Vercel Serverless: 회원가입, 로그인 및 병원 프로필 클라우드 동기화 API - Supabase 영구 연동
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fabzvobawvtsdprixmyf.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+
+async function supabaseQuery(endpoint, options = {}) {
+  const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': options.prefer || 'return=representation',
+    ...(options.headers || {})
+  };
+
+  try {
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      const errText = await res.text();
+      return { ok: false, status: res.status, error: errText };
+    }
+    const data = await res.json();
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 global._usersCache = global._usersCache || {};
-const USERS_FILE = path.join('/tmp', 'todak_users.json');
-
-function loadUsers() {
-  try {
-    if (fs.existsSync(USERS_FILE)) {
-      const data = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-      Object.assign(global._usersCache, data);
-    }
-  } catch (e) { }
-}
-
-function saveUsers() {
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(global._usersCache), 'utf-8');
-  } catch (e) { }
-}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,8 +36,6 @@ module.exports = async (req, res) => {
     res.status(204).end();
     return;
   }
-
-  loadUsers();
 
   const action = req.query.action || req.body?.action;
 
@@ -53,9 +58,26 @@ module.exports = async (req, res) => {
       joinedAt: new Date().toISOString()
     };
 
-    global._usersCache[cleanEmail] = newUser;
-    saveUsers();
+    // Supabase users 테이블에 저장 (없으면 insert, 있으면 upsert)
+    try {
+      await supabaseQuery('users', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: password,
+          doctor_name: newUser.doctorName,
+          hospital_name: newUser.hospitalName,
+          phone: newUser.phone,
+          plan: newUser.plan,
+          updated_at: new Date().toISOString()
+        })
+      });
+    } catch (dbErr) {
+      console.warn('Supabase users signup error:', dbErr);
+    }
 
+    global._usersCache[cleanEmail] = newUser;
     res.status(200).json({ success: true, user: newUser });
     return;
   }
@@ -69,7 +91,29 @@ module.exports = async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = global._usersCache[cleanEmail];
+    let user = global._usersCache[cleanEmail];
+
+    // Supabase DB에서 최신 회원정보 조회
+    try {
+      const dbRes = await supabaseQuery(`users?email=eq.${encodeURIComponent(cleanEmail)}&select=*`);
+      if (dbRes.ok && Array.isArray(dbRes.data) && dbRes.data.length > 0) {
+        const row = dbRes.data[0];
+        user = {
+          email: row.email,
+          password: row.password,
+          doctorName: row.doctor_name || '원장',
+          hospitalName: row.hospital_name || '',
+          phone: row.phone || '',
+          plan: row.plan || 'Pro',
+          naverReviewUrl: row.naver_review_url || '',
+          logoUrl: row.logo_url || '',
+          joinedAt: row.created_at
+        };
+        global._usersCache[cleanEmail] = user;
+      }
+    } catch (e) {
+      console.warn('Supabase login check failed:', e);
+    }
 
     if (!user) {
       res.status(404).json({ error: '등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.' });
@@ -102,7 +146,25 @@ module.exports = async (req, res) => {
     if (naverReviewUrl !== undefined) global._usersCache[cleanEmail].naverReviewUrl = naverReviewUrl;
     if (logoUrl !== undefined) global._usersCache[cleanEmail].logoUrl = logoUrl;
 
-    saveUsers();
+    // Supabase users 테이블 업데이트 동기화
+    try {
+      const updateData = {
+        updated_at: new Date().toISOString()
+      };
+      if (hospitalName) updateData.hospital_name = hospitalName;
+      if (doctorName) updateData.doctor_name = doctorName;
+      if (phone) updateData.phone = phone;
+      if (naverReviewUrl !== undefined) updateData.naver_review_url = naverReviewUrl;
+      if (logoUrl !== undefined) updateData.logo_url = logoUrl;
+
+      await supabaseQuery(`users?email=eq.${encodeURIComponent(cleanEmail)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updateData)
+      });
+    } catch (e) {
+      console.warn('Supabase users profile update error:', e);
+    }
+
     res.status(200).json({ success: true, user: global._usersCache[cleanEmail] });
     return;
   }
@@ -111,17 +173,43 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     if (action === 'reset_all') {
       global._usersCache = {};
-      saveUsers();
-      res.status(200).json({ success: true, message: '서버의 모든 회원 계정이 완전히 삭제/초기화되었습니다.' });
+      res.status(200).json({ success: true, message: '서버의 모든 회원 계정 캐시가 초기화되었습니다.' });
       return;
     }
 
     const email = (req.query.email || '').trim().toLowerCase();
-    if (!email || !global._usersCache[email]) {
-      res.status(404).json({ error: 'User not found' });
+    if (!email) {
+      res.status(400).json({ error: 'Email parameter required' });
       return;
     }
-    res.status(200).json({ success: true, user: global._usersCache[email] });
+
+    try {
+      const dbRes = await supabaseQuery(`users?email=eq.${encodeURIComponent(email)}&select=*`);
+      if (dbRes.ok && Array.isArray(dbRes.data) && dbRes.data.length > 0) {
+        const row = dbRes.data[0];
+        const user = {
+          email: row.email,
+          password: row.password,
+          doctorName: row.doctor_name || '원장',
+          hospitalName: row.hospital_name || '',
+          phone: row.phone || '',
+          plan: row.plan || 'Pro',
+          naverReviewUrl: row.naver_review_url || '',
+          logoUrl: row.logo_url || '',
+          joinedAt: row.created_at
+        };
+        global._usersCache[email] = user;
+        res.status(200).json({ success: true, user });
+        return;
+      }
+    } catch (e) {}
+
+    if (global._usersCache[email]) {
+      res.status(200).json({ success: true, user: global._usersCache[email] });
+      return;
+    }
+
+    res.status(404).json({ error: 'User not found' });
     return;
   }
 
