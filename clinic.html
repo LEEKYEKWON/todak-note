@@ -1542,21 +1542,39 @@
       if (modal) modal.style.display = 'none';
     }
 
-    function confirmProUpgrade() {
+    async function confirmProUpgrade() {
+      const upgradeBtn = document.querySelector('.btn-modal-upgrade');
+      if (upgradeBtn) {
+        upgradeBtn.textContent = '⏳ 업그레이드 처리 중...';
+        upgradeBtn.disabled = true;
+      }
+
       let user = { hospitalName: '길동이의원', doctorName: '홍길동' };
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try { user = JSON.parse(userStr); } catch (e) { }
       }
-      user.plan = 'pro';
-      localStorage.setItem('todak_current_user', JSON.stringify(user));
-      if (user.email) {
-        localStorage.setItem('todak_user_' + user.email, JSON.stringify(user));
+
+      try {
+        if (window.TodakDB && user.email) {
+          // 🌟 Supabase DB users 테이블에 plan: 'Pro' 영구 업데이트
+          user = await TodakDB.updatePlan(user.email, 'Pro');
+        } else {
+          user.plan = 'Pro';
+          localStorage.setItem('todak_current_user', JSON.stringify(user));
+        }
+
+        closeProModal();
+        renderHospitalHeader();
+        alert("🎉 축하합니다! [고급형 Pro]로 업그레이드되었습니다.\n경영 대시보드로 이동합니다.");
+        window.location.href = 'admin.html';
+      } catch (err) {
+        alert("업그레이드 실패: " + err.message);
+        if (upgradeBtn) {
+          upgradeBtn.textContent = '고급형 Pro로 업그레이드';
+          upgradeBtn.disabled = false;
+        }
       }
-      closeProModal();
-      renderHospitalHeader();
-      alert("🎉 축하합니다! [고급형 Pro]로 업그레이드되었습니다.\n경영 대시보드로 이동합니다.");
-      window.location.href = 'admin.html';
     }
 
     function handleUpgradePlan() {

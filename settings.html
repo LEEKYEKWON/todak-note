@@ -738,15 +738,21 @@
       }
     }
 
-    function upgradeToPro() {
+    async function upgradeToPro() {
       if (confirm('고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n월 50,000원 추가 (월 89,000원 ➔ 월 139,000원)\n- 원장님 환자 재방문 통계 대시보드 즉시 활성화\n- 병원 전용 CI 로고 브랜딩 기능 제공')) {
-        currentUser.plan = 'Pro';
-        localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
-        if (currentUser.email) {
-          localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
+        try {
+          if (window.TodakDB && currentUser && currentUser.email) {
+            currentUser = await TodakDB.updatePlan(currentUser.email, 'Pro');
+          } else {
+            currentUser.plan = 'Pro';
+            localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+          }
+          renderPlanInfo();
+          showToast('🎉 고급형(Pro)으로 업그레이드 완료! 대시보드가 활성화되었습니다.');
+          alert('🎉 [업그레이드 완료]\n고급형(Pro) 플랜으로 정상 변경되었습니다.\n경영 대시보드 및 병원 로고 탑재가 활성화됩니다.');
+        } catch (err) {
+          alert('업그레이드 실패: ' + err.message);
         }
-        renderPlanInfo();
-        showToast('🎉 고급형(Pro)으로 업그레이드 완료! 대시보드가 활성화되었습니다.');
       }
     }
 
