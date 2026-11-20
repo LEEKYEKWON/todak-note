@@ -276,83 +276,34 @@
       const hospitalName = document.getElementById('signupHospitalName').value.trim();
       const phone = document.getElementById('signupPhone').value.trim();
 
-      const userData = {
-        action: 'signup',
-        email,
-        password,
-        doctorName,
-        hospitalName,
-        phone,
-        plan: currentPlan === 'standard' ? 'Standard' : 'Pro'
-      };
-
-      // 1) Supabase DB 및 서버 API로 회원 등록
-      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+      const btn = document.querySelector('.btn-submit');
+      const originalText = btn.textContent;
+      btn.textContent = '⏳ 회원 등록 처리 중...';
+      btn.disabled = true;
 
       try {
-        // A. Supabase DB(users 테이블)에 직접 영구 저장 (100% 클라이언트 직접 통신)
-        const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({
-            email: email.toLowerCase(),
-            password: password,
-            doctor_name: doctorName,
-            hospital_name: hospitalName,
-            phone: phone,
-            plan: currentPlan === 'standard' ? 'Standard' : 'Pro'
-          })
+        const user = await TodakDB.signUp({
+          email,
+          password,
+          doctorName,
+          hospitalName,
+          phone,
+          plan: currentPlan === 'standard' ? 'Standard' : 'Pro'
         });
 
-        if (!dbRes.ok) {
-          const dbErr = await dbRes.json();
-          // 이미 존재하는 계정(409)인 경우 안내
-          if (dbRes.status === 409 || dbErr.code === '23505') {
-            alert('이미 등록된 이메일 주소입니다. 로그인해 주세요!');
-            window.location.href = 'login.html';
-            return;
-          }
-          throw new Error(dbErr.message || 'DB 등록 실패');
-        }
+        localStorage.setItem('todak_current_user', JSON.stringify(user));
+        localStorage.removeItem('todak_desk_queue');
 
-        // B. 병원 브랜딩(hospitals)에도 등록
-        await fetch(`${SUPABASE_URL}/rest/v1/hospitals`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({
-            hospital_name: hospitalName,
-            updated_at: new Date().toISOString()
-          })
-        }).catch(() => {});
-
+        alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n회원가입이 완료되어 진료실 프로그램으로 즉시 입장합니다.`);
+        window.location.href = 'clinic.html';
       } catch (err) {
-        console.warn("DB 등록 에러:", err);
-        alert('회원가입 처리 중 오류가 발생했습니다: ' + err.message);
-        return;
+        alert(err.message || '회원가입 처리 중 오류가 발생했습니다.');
+        btn.textContent = originalText;
+        btn.disabled = false;
       }
-
-      // 2) 브라우저 로컬스토리지에 회원 정보 및 로그인 세션 저장
-      localStorage.setItem('todak_user_' + email, JSON.stringify(userData));
-      localStorage.setItem('todak_current_user', JSON.stringify(userData));
-
-      // 3) 신규 회원이므로 이전 병원의 대기열 로컬 캐시 초기화
-      localStorage.removeItem('todak_desk_queue');
-
-      alert(`🎉 환영합니다, ${hospitalName} ${doctorName}님!\n회원가입이 완료되어 진료실 프로그램으로 즉시 입장합니다.`);
-      window.location.href = 'clinic.html';
     }
   </script>
+  <script src="todak-db.js"></script>
 </body>
 
 </html>

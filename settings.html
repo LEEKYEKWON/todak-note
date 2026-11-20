@@ -540,59 +540,19 @@
 
   <div id="toast" class="toast">저장되었습니다.</div>
 
+  <script src="todak-db.js"></script>
   <script>
     // 현재 로그인된 유저 데이터 불러오기
     let currentUser = null;
 
     async function loadUserData() {
-      try {
-        const stored = localStorage.getItem('todak_current_user');
-        if (stored) {
-          currentUser = JSON.parse(stored);
-        }
-      } catch (e) {
-        console.error(e);
-      }
+      // 🌟 Supabase DB를 단일 진실의 원천으로 프로필 로드
+      currentUser = await TodakDB.getCurrentUserProfile();
 
       if (!currentUser) {
-        currentUser = {
-          email: 'doctor@hospital.com',
-          doctorName: '홍길동 원장',
-          hospitalName: '길동이의원',
-          phone: '010-9344-2378',
-          plan: 'Pro',
-          naverReviewUrl: ''
-        };
-      }
-
-      // 🌟 Supabase DB(users)에서 최신 프로필 정보 실시간 조회하여 로컬 덮어쓰기
-      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
-
-      if (currentUser && currentUser.email) {
-        try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(currentUser.email.toLowerCase())}&select=*`, {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
-          });
-          if (res.ok) {
-            const list = await res.json();
-            if (Array.isArray(list) && list.length > 0) {
-              const row = list[0];
-              currentUser.hospitalName = row.hospital_name || currentUser.hospitalName;
-              currentUser.doctorName = row.doctor_name || currentUser.doctorName;
-              currentUser.phone = row.phone || currentUser.phone;
-              currentUser.naverReviewUrl = row.naver_review_url || currentUser.naverReviewUrl;
-              currentUser.logoUrl = row.logo_url || currentUser.logoUrl;
-              localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
-              localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
-            }
-          }
-        } catch (netErr) {
-          console.warn("최신 프로필 Supabase 동기화 실패 (로컬 유지):", netErr);
-        }
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
       }
 
       renderProfile();
@@ -732,79 +692,50 @@
 
     async function handleSaveProfile(e) {
       e.preventDefault();
-      currentUser.hospitalName = document.getElementById('inputHospitalName').value.trim();
-      currentUser.doctorName = document.getElementById('inputDoctorName').value.trim();
-      currentUser.phone = document.getElementById('inputPhone').value.trim();
-      currentUser.naverReviewUrl = document.getElementById('inputNaverReviewUrl').value.trim();
+      const hospitalName = document.getElementById('inputHospitalName').value.trim();
+      const doctorName = document.getElementById('inputDoctorName').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const naverReviewUrl = document.getElementById('inputNaverReviewUrl').value.trim();
+      const logoUrl = currentUser.logoUrl || '';
 
-      // 로컬스토리지 갱신
-      localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
-      if (currentUser.email) {
-        localStorage.setItem('todak_user_' + currentUser.email, JSON.stringify(currentUser));
-      }
-
-      // 🌟 Supabase DB(users 및 hospitals)에 직접 영구 저장 (중간 서버리스 함수 안 거치고 즉시 통신)
-      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+      const saveBtn = document.querySelector('.save-btn');
+      const originalText = saveBtn.textContent;
+      saveBtn.textContent = '⏳ 저장 중...';
+      saveBtn.disabled = true;
 
       try {
-        // 1. users 테이블 업데이트
-        await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(currentUser.email.toLowerCase())}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            hospital_name: currentUser.hospitalName,
-            doctor_name: currentUser.doctorName,
-            phone: currentUser.phone,
-            naver_review_url: currentUser.naverReviewUrl,
-            logo_url: currentUser.logoUrl || '',
-            updated_at: new Date().toISOString()
-          })
+        // 🌟 단일 진실의 원천: TodakDB를 통해 Supabase DB에 100% 영구 저장
+        currentUser = await TodakDB.updateProfile({
+          email: currentUser.email,
+          hospitalName,
+          doctorName,
+          phone,
+          naverReviewUrl,
+          logoUrl
         });
 
-        // 2. hospitals 테이블 동기화
-        await fetch(`${SUPABASE_URL}/rest/v1/hospitals`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates,return=representation'
-          },
-          body: JSON.stringify({
-            hospital_name: currentUser.hospitalName,
-            logo_url: currentUser.logoUrl || '',
-            naver_review_url: currentUser.naverReviewUrl || '',
-            updated_at: new Date().toISOString()
-          })
-        }).catch(() => {});
-
-      } catch (err) {
-        console.warn("DB 직접 동기화 실패:", err);
-      }
-
-      // 버튼 텍스트 및 초록색 변경으로 즉각적인 저장 완료 피드백
-      const saveBtn = document.querySelector('.save-btn');
-      if (saveBtn) {
-        const originalText = saveBtn.textContent;
+        // 성공 UI 피드백
         saveBtn.textContent = '✅ 수정사항 저장 완료!';
         saveBtn.style.setProperty('background', '#16a34a', 'important');
         saveBtn.style.setProperty('color', '#ffffff', 'important');
+        saveBtn.disabled = false;
+
         setTimeout(() => {
           saveBtn.textContent = originalText;
           saveBtn.style.removeProperty('background');
           saveBtn.style.removeProperty('color');
         }, 3000);
-      }
 
-      showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
-      setTimeout(() => {
-        alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 안전하게 영구 저장되었습니다!');
-      }, 50);
+        showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
+        setTimeout(() => {
+          alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 Supabase DB에 안전하게 영구 저장되었습니다!\n어떤 기기에서 접속하셔도 동일하게 유지됩니다.');
+        }, 50);
+
+      } catch (err) {
+        alert('저장 실패: ' + (err.message || '네트워크 오류'));
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+      }
     }
 
     function upgradeToPro() {

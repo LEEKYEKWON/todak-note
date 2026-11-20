@@ -170,94 +170,28 @@
     </div>
   </div>
 
+  <script src="todak-db.js"></script>
   <script>
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      // 1) Supabase DB에서 최신 회원정보 직접 조회 (어떤 기기든 100% 실시간 연동)
-      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+      const submitBtn = document.querySelector('.btn-submit');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = '⏳ 로그인 확인 중...';
+      submitBtn.disabled = true;
 
-      let loggedUser = null;
       try {
-        const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email.toLowerCase())}&select=*`, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
-        });
-        if (dbRes.ok) {
-          const list = await dbRes.json();
-          if (Array.isArray(list) && list.length > 0) {
-            const row = list[0];
-            if (row.password !== password) {
-              alert('비밀번호가 일치하지 않습니다.');
-              return;
-            }
-            loggedUser = {
-              email: row.email,
-              password: row.password,
-              doctorName: row.doctor_name || '원장',
-              hospitalName: row.hospital_name || '',
-              phone: row.phone || '',
-              plan: row.plan || 'Pro',
-              naverReviewUrl: row.naver_review_url || '',
-              logoUrl: row.logo_url || '',
-              joinedAt: row.created_at
-            };
-          }
-        }
-      } catch (cloudErr) {
-        console.warn("Supabase 직접 조회 실패, 로컬 캐시 조회:", cloudErr);
+        const user = await TodakDB.signIn({ email, password });
+        localStorage.setItem('todak_current_user', JSON.stringify(user));
+        alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
+        window.location.href = 'clinic.html';
+      } catch (err) {
+        alert(err.message || '로그인에 실패했습니다.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
-
-      // 2) 서버에 없거나 오프라인일 경우 로컬스토리지 조회
-      if (!loggedUser) {
-        const savedUserStr = localStorage.getItem('todak_user_' + email);
-        if (savedUserStr) {
-          const user = JSON.parse(savedUserStr);
-          if (user.password === password) {
-            loggedUser = user;
-          } else {
-            alert('비밀번호가 일치하지 않습니다.');
-            return;
-          }
-        }
-      }
-
-      // 3) 그래도 없으면 데모 계정 체크 또는 가입 안내
-      if (!loggedUser) {
-        if (email === 'doctor@hospital.com') {
-          loggedUser = {
-            email,
-            doctorName: '홍길동',
-            hospitalName: '길동이의원',
-            plan: 'Pro'
-          };
-        } else {
-          alert('등록되지 않은 이메일 주소이거나 비밀번호가 일치하지 않습니다.\n회원가입을 먼저 진행해 주세요.');
-          window.location.href = 'signup.html';
-          return;
-        }
-      }
-
-      // 이전 로그인 사용자와 다르면 이전 대기열 캐시 초기화
-      const prevUserStr = localStorage.getItem('todak_current_user');
-      if (prevUserStr) {
-        try {
-          const prevUser = JSON.parse(prevUserStr);
-          if (prevUser.email !== loggedUser.email) {
-            localStorage.removeItem('todak_desk_queue');
-          }
-        } catch (e) { }
-      }
-
-      localStorage.setItem('todak_user_' + loggedUser.email, JSON.stringify(loggedUser));
-      localStorage.setItem('todak_current_user', JSON.stringify(loggedUser));
-      alert(`🎉 환영합니다, ${loggedUser.hospitalName} ${loggedUser.doctorName}님!\n진료실 프로그램으로 입장합니다.`);
-      window.location.href = 'clinic.html';
     }
   </script>
 </body>

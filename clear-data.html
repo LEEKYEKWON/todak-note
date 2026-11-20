@@ -65,7 +65,7 @@
 
   <script>
     async function executeFullReset() {
-      if (!confirm("정말로 모든 테스트 계정과 환자 대기열 데이터를 삭제하시겠습니까?")) return;
+      if (!confirm("정말로 모든 테스트 계정과 환자 대기열 데이터를 삭제하시겠습니까?\nSupabase DB의 회원 데이터도 함께 정리됩니다.")) return;
 
       const log = document.getElementById('statusLog');
       log.style.display = 'block';
@@ -76,24 +76,40 @@
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && (key.startsWith('todak_') || key.startsWith('openai_'))) {
-          // OpenAI API 키는 보존하고 싶을 수 있으므로 체크 (필요시 포함)
           if (key === 'openai_api_key' || key === 'todak_openai_key') continue;
           keysToRemove.push(key);
         }
       }
       keysToRemove.forEach(k => localStorage.removeItem(k));
-      log.innerHTML += '✅ 내 브라우저 로컬 데이터 삭제 완료!<br>⏳ 2. 서버 클라우드 계정 및 대기열 비우는 중...<br>';
+      log.innerHTML += '✅ 내 브라우저 로컬 데이터 삭제 완료!<br>⏳ 2. Supabase DB 및 서버 비우는 중...<br>';
 
-      // 2. 서버 클라우드 초기화 API 호출
+      // 2. Supabase DB users 테이블 비우기
+      const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/users?email=neq.system_keep`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        log.innerHTML += '✅ Supabase DB 회원 데이터 삭제 완료!<br>';
+      } catch (e) {
+        log.innerHTML += '⚠️ Supabase 회원 삭제 건너뜀: ' + e.message + '<br>';
+      }
+
+      // 3. 서버 클라우드 초기화 API 호출
       try {
         await fetch('/api/auth?action=reset_all');
         await fetch('/api/desk-queue?action=reset_all');
-        log.innerHTML += '✅ 서버 클라우드 회원 및 대기열 완전 초기화 완료!<br><br>🎉 <strong>전체 데이터가 100% 깨끗해졌습니다!</strong><br>잠시 후 로그인 페이지로 이동합니다...';
+        log.innerHTML += '✅ 서버 캐시 및 대기열 완전 초기화 완료!<br><br>🎉 <strong>전체 데이터가 100% 깨끗해졌습니다!</strong><br>잠시 후 로그인 페이지로 이동합니다...';
         setTimeout(() => {
           window.location.href = 'login.html';
         }, 1500);
       } catch (err) {
-        log.innerHTML += `⚠️ 서버 호출 완료 (로컬 삭제 성공): ${err.message}<br><a href="login.html" style="color:#38bdf8;">로그인 화면으로 이동</a>`;
+        log.innerHTML += `⚠️ 서버 호출 완료: ${err.message}<br><a href="login.html" style="color:#38bdf8;">로그인 화면으로 이동</a>`;
       }
     }
   </script>
