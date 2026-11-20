@@ -59,8 +59,9 @@ module.exports = async (req, res) => {
     };
 
     // Supabase users 테이블에 저장 (없으면 insert, 있으면 upsert)
+    let dbInsertError = null;
     try {
-      await supabaseQuery('users', {
+      const dbInsertRes = await supabaseQuery('users', {
         method: 'POST',
         headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
@@ -73,8 +74,17 @@ module.exports = async (req, res) => {
           updated_at: new Date().toISOString()
         })
       });
+      if (!dbInsertRes.ok) {
+        dbInsertError = dbInsertRes.error || dbInsertRes.status;
+      }
     } catch (dbErr) {
+      dbInsertError = dbErr.message;
       console.warn('Supabase users signup error:', dbErr);
+    }
+
+    if (dbInsertError) {
+      res.status(500).json({ error: 'DB 회원 등록 실패: ' + JSON.stringify(dbInsertError) });
+      return;
     }
 
     global._usersCache[cleanEmail] = newUser;
@@ -93,7 +103,8 @@ module.exports = async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     let user = global._usersCache[cleanEmail];
 
-    // Supabase DB에서 최신 회원정보 조회
+    // 1) Supabase DB에서 최신 회원정보 조회
+    let dbError = null;
     try {
       const dbRes = await supabaseQuery(`users?email=eq.${encodeURIComponent(cleanEmail)}&select=*`);
       if (dbRes.ok && Array.isArray(dbRes.data) && dbRes.data.length > 0) {
@@ -110,13 +121,18 @@ module.exports = async (req, res) => {
           joinedAt: row.created_at
         };
         global._usersCache[cleanEmail] = user;
+      } else if (!dbRes.ok) {
+        dbError = dbRes.error || dbRes.status;
       }
     } catch (e) {
+      dbError = e.message;
       console.warn('Supabase login check failed:', e);
     }
 
     if (!user) {
-      res.status(401).json({ error: '등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.' });
+      res.status(401).json({ 
+        error: `등록되지 않은 이메일 주소입니다. 회원가입을 먼저 진행해 주세요.${dbError ? ' (DB 응답: ' + JSON.stringify(dbError) + ')' : ''}` 
+      });
       return;
     }
 

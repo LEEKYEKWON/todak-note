@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>토닥토닥노트 - 원장님 로그인</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -15,6 +17,7 @@
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
       word-break: keep-all;
     }
+
     body {
       background-color: #0b0f19;
       color: #f1f5f9;
@@ -40,6 +43,7 @@
       text-align: center;
       margin-bottom: 32px;
     }
+
     .brand-logo {
       width: 56px;
       height: 56px;
@@ -48,6 +52,7 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
+
     .brand-title {
       font-size: 24px;
       font-weight: 900;
@@ -55,6 +60,7 @@
       letter-spacing: -0.5px;
       margin-bottom: 6px;
     }
+
     .brand-sub {
       font-size: 14px;
       color: #94a3b8;
@@ -63,6 +69,7 @@
     .form-group {
       margin-bottom: 20px;
     }
+
     .form-label {
       display: block;
       font-size: 13.5px;
@@ -70,6 +77,7 @@
       color: #cbd5e1;
       margin-bottom: 8px;
     }
+
     .form-input {
       width: 100%;
       padding: 13px 16px;
@@ -81,6 +89,7 @@
       outline: none;
       transition: all 0.2s;
     }
+
     .form-input:focus {
       border-color: #38bdf8;
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
@@ -100,6 +109,7 @@
       box-shadow: 0 4px 18px rgba(254, 229, 0, 0.3);
       transition: all 0.2s;
     }
+
     .btn-submit:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(254, 229, 0, 0.45);
@@ -111,17 +121,20 @@
       font-size: 13.5px;
       color: #94a3b8;
     }
+
     .auth-footer a {
       color: #38bdf8;
       text-decoration: none;
       font-weight: 700;
       margin-left: 6px;
     }
+
     .auth-footer a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
+
 <body>
 
   <div class="login-card">
@@ -151,7 +164,8 @@
       아직 계정이 없으신가요?
       <a href="signup.html">회원가입하기</a>
       <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1);">
-        <a href="clear-data.html" style="color: #f87171; font-size: 12px; font-weight: normal;">🧹 테스트 데이터 및 계정 완전 초기화</a>
+        <a href="clear-data.html" style="color: #f87171; font-size: 12px; font-weight: normal;">🧹 테스트 데이터 및 계정 완전
+          초기화</a>
       </div>
     </div>
   </div>
@@ -219,7 +233,7 @@
           if (prevUser.email !== loggedUser.email) {
             localStorage.removeItem('todak_desk_queue');
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       localStorage.setItem('todak_user_' + loggedUser.email, JSON.stringify(loggedUser));
@@ -229,5 +243,5 @@
     }
   </script>
 </body>
-</html>
 
+</html>

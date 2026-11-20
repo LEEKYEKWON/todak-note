@@ -7,7 +7,8 @@
   <title>토닥토닥노트 - 마이페이지 및 구독 관리</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
   <style>
     * {
@@ -346,14 +347,17 @@
       .form-grid {
         grid-template-columns: 1fr;
       }
+
       .form-group.full {
         grid-column: span 1;
       }
+
       .plan-info-box {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
       }
+
       .upgrade-banner {
         flex-direction: column;
         align-items: flex-start;
@@ -421,31 +425,42 @@
           <div class="form-group full">
             <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
               <span>🖼️ 우리 병원 전용 로고 등록 (고급형 Pro 전용 혜택)</span>
-              <span id="logoPlanHint" style="font-size: 11.5px; color: #0284c7; font-weight: 700;">⭐ 환자 진료 리포트에 자동 탑재</span>
+              <span id="logoPlanHint" style="font-size: 11.5px; color: #0284c7; font-weight: 700;">⭐ 환자 진료 리포트에 자동
+                탑재</span>
             </label>
-            <div style="display: flex; align-items: center; gap: 16px; margin-top: 6px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 14px 18px;">
-              <div id="logoPreviewBox" style="width: 72px; height: 72px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+            <div
+              style="display: flex; align-items: center; gap: 16px; margin-top: 6px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 14px 18px;">
+              <div id="logoPreviewBox"
+                style="width: 72px; height: 72px; border-radius: 10px; background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
                 <span id="logoPreviewPlaceholder" style="font-size: 28px;">🏥</span>
-                <img id="logoPreviewImg" src="" alt="로고 미리보기" style="display: none; width: 100%; height: 100%; object-fit: contain;">
+                <img id="logoPreviewImg" src="" alt="로고 미리보기"
+                  style="display: none; width: 100%; height: 100%; object-fit: contain;">
               </div>
               <div style="flex: 1;">
-                <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+                <input type="file" id="logoFileInput" accept="image/*" style="display: none;"
+                  onchange="handleLogoUpload(event)">
                 <div style="display: flex; gap: 8px;">
-                  <button type="button" class="btn" style="background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" onclick="document.getElementById('logoFileInput').click()">
+                  <button type="button" class="btn"
+                    style="background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;"
+                    onclick="document.getElementById('logoFileInput').click()">
                     📁 로고 이미지 선택 (PNG, JPG)
                   </button>
-                  <button type="button" id="btnDeleteLogo" class="btn" style="display: none; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;" onclick="handleDeleteLogo()">
+                  <button type="button" id="btnDeleteLogo" class="btn"
+                    style="display: none; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;"
+                    onclick="handleDeleteLogo()">
                     삭제
                   </button>
                 </div>
-                <p class="form-helper" style="margin-top: 6px;">권장: 가로형 투명 PNG 또는 흰색 배경 이미지 (등록 즉시 환자 수신 리포트 상단에 전용 로고가 표기됩니다)</p>
+                <p class="form-helper" style="margin-top: 6px;">권장: 가로형 투명 PNG 또는 흰색 배경 이미지 (등록 즉시 환자 수신 리포트 상단에 전용 로고가
+                  표기됩니다)</p>
               </div>
             </div>
           </div>
 
           <div class="form-group full">
             <label class="form-label">네이버 플레이스 링크 (선택 사항)</label>
-            <input type="url" id="inputNaverReviewUrl" class="form-input" placeholder="https://m.place.naver.com/hospital/...">
+            <input type="url" id="inputNaverReviewUrl" class="form-input"
+              placeholder="https://m.place.naver.com/hospital/...">
             <p class="form-helper">입력하시면 환자 진료 리포트 하단의 [네이버 영수증 리뷰 남기기] 버튼 클릭 시 우리 병원 플레이스로 즉시 이동합니다.</p>
           </div>
         </div>
@@ -496,21 +511,26 @@
       </div>
 
       <!-- 결제 카드 등록 / 관리 영역 (포트원 V2 + 토스페이먼츠 정기결제 연동) -->
-      <div style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 14px; border: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+      <div
+        style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 14px; border: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
         <div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <div style="font-size: 15px; font-weight: 800; color: #0f172a;">💳 매월 정기결제 카드 관리</div>
-            <span id="billingCardBadge" style="background: #e2e8f0; color: #475569; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">카드 미등록</span>
+            <span id="billingCardBadge"
+              style="background: #e2e8f0; color: #475569; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">카드
+              미등록</span>
           </div>
           <div id="billingCardDesc" style="font-size: 13px; color: #64748b; margin-top: 4px;">
             등록된 카드로 매달 정기구독 요금이 안전하게 자동 결제됩니다. (토스페이먼츠 보안 연동)
           </div>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button type="button" id="btnRegisterCard" class="upgrade-btn" style="padding: 10px 18px; font-size: 13.5px;" onclick="handleOpenPortOneBilling()">
+          <button type="button" id="btnRegisterCard" class="upgrade-btn" style="padding: 10px 18px; font-size: 13.5px;"
+            onclick="handleOpenPortOneBilling()">
             💳 결제 카드 등록 / 변경
           </button>
-          <button type="button" id="btnTestPayNow" class="nav-btn secondary" style="font-size: 13px; display: none;" onclick="handleTestPayCurrentPlan()">
+          <button type="button" id="btnTestPayNow" class="nav-btn secondary" style="font-size: 13px; display: none;"
+            onclick="handleTestPayCurrentPlan()">
             ⚡ 지금 1회 즉시 결제 테스트
           </button>
         </div>
@@ -611,7 +631,7 @@
       }
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         const base64 = event.target.result;
         currentUser.logoUrl = base64;
         renderLogoUI();
@@ -711,8 +731,9 @@
       }
 
       // 서버 클라우드에도 저장
+      let serverSyncError = null;
       try {
-        await fetch('/api/auth?action=update_profile', {
+        const authRes = await fetch('/api/auth?action=update_profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -725,6 +746,10 @@
             logoUrl: currentUser.logoUrl || ''
           })
         });
+        const authData = await authRes.json();
+        if (!authRes.ok || authData.error) {
+          serverSyncError = authData.error || authRes.status;
+        }
 
         // 🌟 병원명 기반 브랜딩(로고/네이버링크) 독립 API에도 즉시 동기화
         await fetch('/api/hosp-brand', {
@@ -737,6 +762,7 @@
           })
         });
       } catch (err) {
+        serverSyncError = err.message;
         console.warn("프로필 서버 동기화 실패:", err);
       }
 
@@ -757,7 +783,11 @@
       showToast('✅ 병원 정보가 성공적으로 저장되었습니다!');
       // alert는 브라우저 UI 렌더링을 일시 중단시키므로, 약간의 딜레이를 주어 버튼 색 변경이 눈에 먼저 보이게 처리
       setTimeout(() => {
-        alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 안전하게 영구 저장되었습니다!');
+        if (serverSyncError) {
+          alert(`⚠️ [로컬 저장 완료 / 서버 경고]\n내 컴퓨터에는 저장되었으나 클라우드 서버 동기화에 지연이 있습니다.\n(${serverSyncError})`);
+        } else {
+          alert('🎉 [저장 완료]\n병원 프로필, 로고 및 네이버 플레이스 정보가 안전하게 영구 저장되었습니다!');
+        }
       }, 50);
     }
 
@@ -880,4 +910,3 @@
 </body>
 
 </html>
-
