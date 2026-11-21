@@ -509,23 +509,28 @@
           <button type="button" class="upgrade-btn" onclick="upgradeToPro()">
             고급형 Pro로 업그레이드
           </button>
-          <button type="button" onclick="handleCancelSubscription()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+          <button type="button" onclick="handleCancelSubscription()"
+            style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
             구독 해지
           </button>
         </div>
       </div>
 
       <!-- 고급형(Pro) 사용자에게 보이는 기본형 다운그레이드 / 구독 관리 배너 -->
-      <div id="downgradeBanner" style="display: none; margin-top: 16px; padding: 18px 20px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div id="downgradeBanner"
+        style="display: none; margin-top: 16px; padding: 18px 20px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div>
           <div style="font-size: 14.5px; font-weight: 800; color: #334155;">플랜 변경 및 구독 관리</div>
-          <div style="font-size: 12.5px; color: #64748b; margin-top: 2px;">이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(월 89,000원)으로 자동 전환됩니다.</div>
+          <div style="font-size: 12.5px; color: #64748b; margin-top: 2px;">이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(월
+            89,000원)으로 자동 전환됩니다.</div>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button type="button" onclick="downgradeToStandard()" style="background: white; color: #475569; border: 1.5px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+          <button type="button" onclick="downgradeToStandard()"
+            style="background: white; color: #475569; border: 1.5px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
             기본형(Standard)으로 변경
           </button>
-          <button type="button" onclick="handleCancelSubscription()" style="background: white; color: #ef4444; border: 1.5px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+          <button type="button" onclick="handleCancelSubscription()"
+            style="background: white; color: #ef4444; border: 1.5px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
             구독 해지
           </button>
         </div>
@@ -661,9 +666,29 @@
       }
     }
 
+    // 플랜별 가격 헬퍼 (얼리버드 vs 정가 동적 판별)
+    function getPlanPricing() {
+      // 선착순 얼리버드 50명 가입자 여부 판별 (기본값: 현재 얼리버드 진행 중)
+      const isEarlyBird = currentUser.isEarlyBird !== false;
+      const stdPrice = isEarlyBird ? 89000 : 149000;
+      const proPrice = isEarlyBird ? 139000 : 199000;
+      const priceDiff = proPrice - stdPrice; // 얼리버드 50,000원, 정가 50,000원
+      return {
+        isEarlyBird,
+        stdPrice,
+        proPrice,
+        priceDiff,
+        stdPriceText: `월 ${stdPrice.toLocaleString()}원`,
+        proPriceText: `월 ${proPrice.toLocaleString()}원`,
+        priceLabel: isEarlyBird ? '(얼리버드 특가 적용)' : '(정가 적용)'
+      };
+    }
+
     function renderPlanInfo() {
       const isPro = (currentUser.plan || 'Pro').toLowerCase() === 'pro';
       const isPendingStandard = isPro && currentUser.pendingPlan === 'Standard';
+      const pricing = getPlanPricing();
+
       const badge = document.getElementById('planBadge');
       const planNameEl = document.getElementById('displayPlanName');
       const planPriceEl = document.getElementById('displayPlanPrice');
@@ -712,7 +737,7 @@
           badge.textContent = '⭐ 고급형 Pro 이용중';
           planNameEl.textContent = '고급형 (Pro)';
         }
-        planPriceEl.textContent = '월 139,000원';
+        planPriceEl.textContent = `${pricing.proPriceText} ${pricing.priceLabel}`;
         upgradeBanner.style.display = 'none';
         if (downgradeBanner) downgradeBanner.style.display = 'flex';
 
@@ -722,7 +747,7 @@
         const downgradeBtn = downgradeBanner.querySelector('button');
         if (isPendingStandard) {
           if (bannerTitle) bannerTitle.textContent = '플랜 변경 예약 완료 (기본형 전환 예정)';
-          if (bannerDesc) bannerDesc.textContent = `${currentUser.pendingDate || '다음 결제일'}까지 고급형 Pro 혜택을 온전히 이용하실 수 있습니다.`;
+          if (bannerDesc) bannerDesc.textContent = `${currentUser.pendingDate || '다음 결제일'}까지 고급형 Pro 혜택을 온전히 이용하실 수 있습니다. 다음 결제일부터 ${pricing.stdPriceText}으로 자동 전환됩니다.`;
           if (downgradeBtn) {
             downgradeBtn.textContent = '↩️ 전환 취소 (고급형 계속 유지)';
             downgradeBtn.style.color = '#0284c7';
@@ -730,7 +755,7 @@
           }
         } else {
           if (bannerTitle) bannerTitle.textContent = '플랜 변경 및 구독 관리';
-          if (bannerDesc) bannerDesc.textContent = '이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(월 89,000원)으로 자동 전환됩니다.';
+          if (bannerDesc) bannerDesc.textContent = `이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(${pricing.stdPriceText})으로 자동 전환됩니다.`;
           if (downgradeBtn) {
             downgradeBtn.textContent = '기본형(Standard)으로 변경';
             downgradeBtn.style.color = '#475569';
@@ -748,7 +773,7 @@
         badge.className = 'card-badge badge-std';
         badge.textContent = '🟢 기본형 Standard 이용중';
         planNameEl.textContent = '기본형 (Standard)';
-        planPriceEl.textContent = '월 89,000원';
+        planPriceEl.textContent = `${pricing.stdPriceText} ${pricing.priceLabel}`;
         upgradeBanner.style.display = 'flex';
         if (downgradeBanner) downgradeBanner.style.display = 'none';
 
@@ -814,13 +839,14 @@
     }
 
     async function upgradeToPro() {
+      const pricing = getPlanPricing();
       // 🌟 일할 계산 차액 계산 (예: 결제일 기준 남은 일수 비율)
       const now = new Date();
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       const remainingDays = Math.max(1, lastDay - now.getDate());
-      const dailyDiff = Math.round((50000 / lastDay) * remainingDays);
+      const dailyDiff = Math.round((pricing.priceDiff / lastDay) * remainingDays);
 
-      if (confirm(`고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n• 이번 달 남은 기간(${remainingDays}일) 일할 추가 결제액: 약 ${dailyDiff.toLocaleString()}원\n• 혜택: 병원 경영 대시보드 즉시 활성화 & 리포트 전용 로고 탑재\n• 다음 정기 결제일부터는 월 139,000원이 정상 청구됩니다.`)) {
+      if (confirm(`고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n• 이번 달 남은 기간(${remainingDays}일) 일할 추가 결제액: 약 ${dailyDiff.toLocaleString()}원\n• 혜택: 병원 경영 대시보드 즉시 활성화 & 리포트 전용 로고 탑재\n• 다음 정기 결제일부터는 ${pricing.proPriceText}이 정상 청구됩니다.`)) {
         try {
           if (window.TodakDB && currentUser && currentUser.email) {
             currentUser = await TodakDB.updatePlan(currentUser.email, 'Pro');
@@ -840,6 +866,7 @@
     // 🌟 고급형(Pro)에서 기본형(Standard)으로 플랜 다운그레이드 (방법 A 적용)
     async function downgradeToStandard() {
       const isPending = currentUser.pendingPlan === 'Standard';
+      const pricing = getPlanPricing();
 
       // 1) 이미 예약되어 있는 상태에서 취소(되돌리기)를 누른 경우
       if (isPending) {
@@ -875,7 +902,7 @@
       const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
       const targetDateStr = `${nextMonth.getMonth() + 1}월 ${nextMonth.getDate()}일`;
 
-      if (confirm(`기본형(Standard) 플랜으로 변경하시겠습니까?\n\n• 이번 달 결제 주기까지는 이미 결제하신 [고급형 Pro] 혜택(경영 대시보드 및 로고)을 끝까지 정상 이용하실 수 있습니다.\n• 다음 결제일(${targetDateStr})부터 기본형 요금(월 89,000원)으로 자동 결제 및 전환됩니다.`)) {
+      if (confirm(`기본형(Standard) 플랜으로 변경하시겠습니까?\n\n• 이번 달 결제 주기까지는 이미 결제하신 [고급형 Pro] 혜택(경영 대시보드 및 로고)을 끝까지 정상 이용하실 수 있습니다.\n• 다음 결제일(${targetDateStr})부터 기본형 요금(${pricing.stdPriceText})으로 자동 결제 및 전환됩니다.`)) {
         try {
           currentUser.plan = 'Pro'; // 이번 달은 고급형 Pro 유지!
           currentUser.pendingPlan = 'Standard';
@@ -899,7 +926,7 @@
 
           renderPlanInfo();
           showToast('🟢 기본형(Standard)으로 변경 예약되었습니다.');
-          alert(`[플랜 변경 예약 완료]\n기본형(Standard) 플랜으로 정상 변경 예약되었습니다.\n\n${targetDateStr}까지는 이미 결제하신 고급형 Pro 기능(경영 대시보드 포함)을 온전히 이용하실 수 있으며, 결제일부터 기본형(월 89,000원)으로 전환됩니다.`);
+          alert(`[플랜 변경 예약 완료]\n기본형(Standard) 플랜으로 정상 변경 예약되었습니다.\n\n${targetDateStr}까지는 이미 결제하신 고급형 Pro 기능(경영 대시보드 포함)을 온전히 이용하실 수 있으며, 결제일부터 기본형(${pricing.stdPriceText})으로 전환됩니다.`);
         } catch (err) {
           alert('플랜 변경 실패: ' + err.message);
         }
