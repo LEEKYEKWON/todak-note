@@ -450,6 +450,8 @@
               email: row.email,
               phone: row.phone || '-',
               plan: row.plan || 'Pro',
+              pendingPlan: row.pending_plan || '',
+              pendingDate: row.pending_date || '',
               joinedAt: row.created_at
             }));
           }
@@ -539,6 +541,7 @@
       hospitals.forEach((h, idx) => {
         const isPro = (h.plan || 'Pro').toLowerCase() === 'pro';
         const planPrice = isPro ? 139000 : 89000;
+        const isPendingStd = isPro && h.pendingPlan === 'Standard';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -548,11 +551,11 @@
           <td>${h.phone || '-'}</td>
           <td>
             <span class="badge-plan ${isPro ? 'pro' : 'std'}">
-              ${isPro ? '⭐ 고급형 Pro' : '🟢 기본형 Standard'}
+              ${isPro ? (isPendingStd ? `⭐ Pro (${h.pendingDate || '다음 결제일'} 기본형 예정)` : '⭐ 고급형 Pro') : '🟢 기본형 Standard'}
             </span>
           </td>
           <td><strong>${planPrice.toLocaleString()}원</strong></td>
-          <td><span class="status-active">정상 이용중</span></td>
+          <td><span class="status-active">${isPendingStd ? '전환 예약됨' : '정상 이용중'}</span></td>
           <td>
             <button class="btn-action" onclick="togglePlan('${h.email}', '${h.plan}')">
               플랜전환

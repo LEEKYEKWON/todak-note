@@ -159,6 +159,10 @@ const TodakDB = {
       hospitalName: row.hospital_name || row.hospitalName || '우리병원',
       phone: row.phone || '',
       plan: row.plan || 'Pro',
+      pendingPlan: row.pending_plan || row.pendingPlan || '',
+      pendingDate: row.pending_date || row.pendingDate || '',
+      billingKey: row.billing_key || row.billingKey || '',
+      billingRegisteredAt: row.billing_registered_at || row.billingRegisteredAt || '',
       naverReviewUrl: row.naver_review_url || row.naverReviewUrl || '',
       logoUrl: row.logo_url || row.logoUrl || '',
       joinedAt: row.created_at || row.joinedAt

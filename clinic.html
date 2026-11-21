@@ -1487,6 +1487,7 @@
       }
 
       const isPro = user.plan && user.plan.toLowerCase() === 'pro';
+      const isPendingStandard = isPro && user.pendingPlan === 'Standard';
 
       // 기본형/고급형 모두 '병원 경영 대시보드' 버튼 노출 (클릭 시 권한 분기)
       if (adminBtn) {
@@ -1496,10 +1497,11 @@
       // 좌측 상단 병원명 표시
       if (badgeArea) {
         if (isPro) {
+          const subText = isPendingStandard ? `${user.pendingDate || '다음 결제일'} 기본형 전환 예정` : '고급형 Pro';
           badgeArea.innerHTML = `
             <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 6px;">
               ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
-              🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>
+              🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">${subText}</span>
             </span>
           `;
         } else {

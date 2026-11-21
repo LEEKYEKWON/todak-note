@@ -663,6 +663,7 @@
 
     function renderPlanInfo() {
       const isPro = (currentUser.plan || 'Pro').toLowerCase() === 'pro';
+      const isPendingStandard = isPro && currentUser.pendingPlan === 'Standard';
       const badge = document.getElementById('planBadge');
       const planNameEl = document.getElementById('displayPlanName');
       const planPriceEl = document.getElementById('displayPlanPrice');
@@ -703,15 +704,43 @@
 
       if (isPro) {
         badge.className = 'card-badge badge-pro';
-        badge.textContent = '⭐ 고급형 Pro 이용중';
-        planNameEl.textContent = '고급형 (Pro)';
+        if (isPendingStandard) {
+          const pDate = currentUser.pendingDate ? ` (${currentUser.pendingDate} 기본형 전환 예정)` : ' (다음 결제일 기본형 전환 예정)';
+          badge.textContent = `⭐ 고급형 Pro 이용중${pDate}`;
+          planNameEl.textContent = `고급형 (Pro) - 전환 예약됨`;
+        } else {
+          badge.textContent = '⭐ 고급형 Pro 이용중';
+          planNameEl.textContent = '고급형 (Pro)';
+        }
         planPriceEl.textContent = '월 139,000원';
         upgradeBanner.style.display = 'none';
         if (downgradeBanner) downgradeBanner.style.display = 'flex';
 
+        // 전환 예약 상태일 때 배너 UI 갱신
+        const bannerTitle = downgradeBanner.querySelector('div div:first-child');
+        const bannerDesc = downgradeBanner.querySelector('div div:last-child');
+        const downgradeBtn = downgradeBanner.querySelector('button');
+        if (isPendingStandard) {
+          if (bannerTitle) bannerTitle.textContent = '플랜 변경 예약 완료 (기본형 전환 예정)';
+          if (bannerDesc) bannerDesc.textContent = `${currentUser.pendingDate || '다음 결제일'}까지 고급형 Pro 혜택을 온전히 이용하실 수 있습니다.`;
+          if (downgradeBtn) {
+            downgradeBtn.textContent = '↩️ 전환 취소 (고급형 계속 유지)';
+            downgradeBtn.style.color = '#0284c7';
+            downgradeBtn.style.borderColor = '#0284c7';
+          }
+        } else {
+          if (bannerTitle) bannerTitle.textContent = '플랜 변경 및 구독 관리';
+          if (bannerDesc) bannerDesc.textContent = '이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(월 89,000원)으로 자동 전환됩니다.';
+          if (downgradeBtn) {
+            downgradeBtn.textContent = '기본형(Standard)으로 변경';
+            downgradeBtn.style.color = '#475569';
+            downgradeBtn.style.borderColor = '#cbd5e1';
+          }
+        }
+
         featuresEl.innerHTML = `
           <li>기본형의 모든 기능 포함</li>
-          <li>병원 경영 통계 대시보드</li>
+          <li>병원 경영 통계 대시보드 (전환일까지 정상 이용)</li>
           <li>재방문일 카카오톡 자동 안내 (노쇼 방지)</li>
           <li>환자 수신 리포트 내 우리 병원 전용 로고 탑재</li>
         `;
@@ -806,19 +835,69 @@
       }
     }
 
-    // 🌟 고급형(Pro)에서 기본형(Standard)으로 플랜 다운그레이드
+    // 🌟 고급형(Pro)에서 기본형(Standard)으로 플랜 다운그레이드 (방법 A 적용)
     async function downgradeToStandard() {
-      if (confirm(`기본형(Standard) 플랜으로 변경하시겠습니까?\n\n• 이번 달 결제 주기까지는 이미 결제하신 [고급형 Pro] 혜택을 끝까지 정상 이용하실 수 있습니다.\n• 다음 결제일부터 기본형 요금(월 89,000원)으로 자동 결제 및 전환됩니다.`)) {
-        try {
-          if (window.TodakDB && currentUser && currentUser.email) {
-            currentUser = await TodakDB.updatePlan(currentUser.email, 'Standard');
-          } else {
-            currentUser.plan = 'Standard';
+      const isPending = currentUser.pendingPlan === 'Standard';
+
+      // 1) 이미 예약되어 있는 상태에서 취소(되돌리기)를 누른 경우
+      if (isPending) {
+        if (confirm('기본형 전환 예약을 취소하고, [고급형 Pro]를 계속 유지하시겠습니까?')) {
+          try {
+            currentUser.pendingPlan = null;
+            currentUser.pendingDate = null;
             localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+
+            await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(currentUser.email.toLowerCase())}`, {
+              method: 'PATCH',
+              headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ pending_plan: null, pending_date: null, updated_at: new Date().toISOString() })
+            });
+
+            renderPlanInfo();
+            showToast('⭐ 고급형 Pro 유지가 정상 확인되었습니다.');
+            alert('[전환 취소 완료]\n고급형(Pro) 플랜이 계속 유지됩니다.');
+          } catch (e) {
+            alert('취소 실패: ' + e.message);
           }
+        }
+        return;
+      }
+
+      // 2) 신규 기본형 전환 예약
+      // 다음 달 1일(결제일) 계산
+      const now = new Date();
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const targetDateStr = `${nextMonth.getMonth() + 1}월 ${nextMonth.getDate()}일`;
+
+      if (confirm(`기본형(Standard) 플랜으로 변경하시겠습니까?\n\n• 이번 달 결제 주기까지는 이미 결제하신 [고급형 Pro] 혜택(경영 대시보드 및 로고)을 끝까지 정상 이용하실 수 있습니다.\n• 다음 결제일(${targetDateStr})부터 기본형 요금(월 89,000원)으로 자동 결제 및 전환됩니다.`)) {
+        try {
+          currentUser.plan = 'Pro'; // 이번 달은 고급형 Pro 유지!
+          currentUser.pendingPlan = 'Standard';
+          currentUser.pendingDate = targetDateStr;
+          localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+
+          await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(currentUser.email.toLowerCase())}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              plan: 'Pro',
+              pending_plan: 'Standard',
+              pending_date: targetDateStr,
+              updated_at: new Date().toISOString()
+            })
+          });
+
           renderPlanInfo();
-          showToast('🟢 기본형(Standard)으로 변경되었습니다.');
-          alert('[플랜 변경 완료]\n기본형(Standard) 플랜으로 정상 변경되었습니다.\n\n이번 결제 주기까지는 고급형 Pro 기능을 끝까지 이용하실 수 있으며, 다음 결제일부터 기본형(월 89,000원)으로 자동 청구됩니다.');
+          showToast('🟢 기본형(Standard)으로 변경 예약되었습니다.');
+          alert(`[플랜 변경 예약 완료]\n기본형(Standard) 플랜으로 정상 변경 예약되었습니다.\n\n${targetDateStr}까지는 이미 결제하신 고급형 Pro 기능(경영 대시보드 포함)을 온전히 이용하실 수 있으며, 결제일부터 기본형(월 89,000원)으로 전환됩니다.`);
         } catch (err) {
           alert('플랜 변경 실패: ' + err.message);
         }
