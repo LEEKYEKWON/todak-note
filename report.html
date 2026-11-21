@@ -605,6 +605,13 @@
       const hospClean = (data.hospitalName || '').replace(/🏥\s*/g, '').trim();
       const patientName = data.patientName || '환자 님';
 
+      // 🛡️ 중복 카운팅 방지: 같은 리포트 ID에서 동일한 액션(열람/공유/리뷰)은 1회만 DB에 기록
+      const sessionActionKey = `todak_log_${actionType}_${reportId || patientName}`;
+      if (sessionStorage.getItem(sessionActionKey)) {
+        return; // 이미 기록됨
+      }
+      sessionStorage.setItem(sessionActionKey, 'true');
+
       try {
         const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';

@@ -491,14 +491,14 @@
             <span class="roi-sub-label" id="roiSubLabel">월 13.9만원 투자 대비 효과</span>
           </div>
           <div class="roi-bottom-row">
-            <span class="roi-detail-tag" id="roiDetailTag">영수증 리뷰 0건 발생 환산</span>
+            <span class="roi-detail-tag" id="roiDetailTag">영수증 리뷰 버튼 0건 클릭 발생 환산</span>
             <div class="roi-value-text" id="roiValueText">약 0원 상당</div>
           </div>
         </div>
 
-        <h4 style="font-size:14px; color:#475569; margin-bottom:12px; font-weight:700;">실시간 환자 반응 로그 (최근)</h4>
+        <h4 style="font-size:14px; color:#475569; margin-bottom:12px; font-weight:700;">실시간 환자 반응 로그 (최근 30건)</h4>
 
-        <div id="reviewFeedList">
+        <div id="reviewFeedList" style="max-height: 480px; overflow-y: auto; padding-right: 6px;">
           <div class="review-feed-item">
             <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
             <div class="feed-content" style="color:#94a3b8;">
@@ -593,11 +593,18 @@
         if (valWeeklyEl) valWeeklyEl.textContent = totalCount;
 
         // 실시간 공유 및 리뷰 통계 계산 (실제 DB 로그 집계)
-        const shareLogs = logs.filter(l => l.action_type === 'share');
-        const reviewLogs = logs.filter(l => l.action_type === 'review');
-        const shareCount = shareLogs.length;
+        // 🌟 환자당/리포트당 중복 클릭 필터링하여 고유(Unique) 반응 수 집계
+        const uniqueShareKeys = new Set();
+        const uniqueReviewKeys = new Set();
+        logs.forEach(l => {
+          const key = (l.report_id && l.report_id !== 'null' && l.report_id !== 'undefined') ? l.report_id : (l.patient_name || 'unknown');
+          if (l.action_type === 'share') uniqueShareKeys.add(key);
+          if (l.action_type === 'review') uniqueReviewKeys.add(key);
+        });
+
+        const shareCount = uniqueShareKeys.size;
         const shareRate = totalCount > 0 ? ((shareCount / totalCount) * 100).toFixed(1) : '0.0';
-        const reviewCount = reviewLogs.length;
+        const reviewCount = uniqueReviewKeys.size;
         const reviewRate = totalCount > 0 ? ((reviewCount / totalCount) * 100).toFixed(1) : '0.0';
 
         const valShareEl = document.getElementById('valShareCount');
@@ -625,7 +632,7 @@
         const roiSub = document.getElementById('roiSubLabel');
 
         if (badgeRoi) badgeRoi.textContent = `ROI ${roiPercent}% 달성`;
-        if (roiDetail) roiDetail.textContent = `영수증 리뷰 ${reviewCount}건 발생 환산`;
+        if (roiDetail) roiDetail.textContent = `영수증 리뷰 버튼 ${reviewCount}건 클릭 발생 환산`;
         if (roiValue) roiValue.textContent = `약 ${marketingValue.toLocaleString()}원 상당`;
         if (roiSub) roiSub.textContent = `월 ${priceInManwon}만원 투자 대비 효과`;
 
@@ -677,12 +684,12 @@
           }
         }
 
-        // 3. 실시간 환자 반응 로그 갱신 (DB 로그 기반 실제 활동 표시)
+        // 3. 실시간 환자 반응 로그 갱신 (DB 로그 기반 실제 활동 표시 - 최근 30건 스크롤 지원)
         const feedList = document.getElementById('reviewFeedList');
         if (feedList) {
           if (logs.length > 0) {
             feedList.innerHTML = '';
-            logs.slice(0, 5).forEach(log => {
+            logs.slice(0, 30).forEach(log => {
               const pName = log.patient_name || '환자 님';
               const logTime = log.created_at ? new Date(log.created_at) : new Date();
               const timeStr = `${logTime.getHours().toString().padStart(2, '0')}:${logTime.getMinutes().toString().padStart(2, '0')}`;

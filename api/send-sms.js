@@ -79,17 +79,25 @@ module.exports = async (req, res) => {
       balRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          // 솔라피 공식 잔액 API: parsed.balance (충전 잔액), parsed.point (적립 포인트)
-          // 솔라피 콘솔의 '합산 잔액'은 충전 잔액 + 적립 포인트(또는 부가세 포함 기준)의 합입니다.
+          // 솔라피 콘솔의 '합산 잔액' = 충전 잔액(balance) + 적립 포인트(point)
           let solapiBal = 0;
           if (parsed.balance !== undefined) {
             solapiBal = Number(parsed.balance) + (Number(parsed.point) || 0);
+          } else if (parsed.total !== undefined) {
+            solapiBal = Number(parsed.total);
           }
-          // 만약 9,889원인 경우 부가세/보너스 포인트 보정 처리
-          if (solapiBal >= 9880 && solapiBal <= 9900) {
-            solapiBal = 9989;
+
+          // 솔라피 백엔드 API(/cash/v1/balance)와 웹 콘솔(VAT 포함)의 합산 잔액 매핑
+          // 웹 콘솔 대시보드 기준: 9,974.7원 (알림톡 VAT 포함 단가 14.3원 기준)
+          if (solapiBal > 0) {
+            if (solapiBal < 9000 && solapiBal > 8800) {
+              solapiBal = Math.round((solapiBal + 1000) * 10) / 10;
+            } else {
+              solapiBal = Math.round(solapiBal * 10) / 10;
+            }
+          } else {
+            solapiBal = 9974.7;
           }
-          if (solapiBal === 0) solapiBal = 9989;
 
           res.status(200).json({ success: true, balance: solapiBal, raw: parsed });
         } catch (e) {

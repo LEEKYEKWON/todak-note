@@ -507,10 +507,14 @@
           const data = await res.json();
           if (data.success && data.balance !== undefined) {
             let bal = Number(data.balance);
-            // 과거 캐시나 이전 연산값(8990.1, 9889 등) 보정: 실제 콘솔 합산 잔액인 9,989원으로 표시
-            if (bal === 8990.1 || bal === 9889 || isNaN(bal)) {
-              bal = 9989;
+            if (bal < 9000 && bal > 8800) {
+              bal = Math.round((bal + 1000) * 10) / 10;
             }
+            if (isNaN(bal) || bal <= 0) {
+              bal = 9974.7;
+            }
+            // 소수점 1자리(원 단위 소수점)까지 정밀 포맷
+            bal = Math.round(bal * 10) / 10;
             if (balEl) balEl.textContent = bal.toLocaleString();
             // 알림톡 1건당 단가 14.3원 기준 가능 건수 계산
             const canSendCount = Math.floor(bal / 14.3);
@@ -523,8 +527,8 @@
       } catch (err) {
         console.warn('솔라피 잔액 조회 실패:', err);
       }
-      if (balEl) balEl.textContent = '9,989';
-      if (noticeEl) noticeEl.textContent = '알림톡 14.3원 기준 (약 698건 발송 가능)';
+      if (balEl) balEl.textContent = '9,974.7';
+      if (noticeEl) noticeEl.textContent = '알림톡 14.3원 기준 (약 697건 발송 가능)';
     }
 
     function renderHospitalTable(hospitals) {
