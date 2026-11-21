@@ -395,28 +395,70 @@
       <div class="modal-right">
         <div class="phone-mockup">
           <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 10px;">
-            <span style="font-size: 11px; color: #0284c7; font-weight: 800;">🏥 안심 진료노트</span>
+            <span style="font-size: 11px; color: #0284c7; font-weight: 800;" id="phoneHospTag">🏥 안심 진료노트</span>
             <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;" id="phonePatientName">김영희 님
+            </div>
+            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;" id="phoneTodayDate"></div>
+          </div>
+
+          <!-- 1. 요약 -->
+          <div
+            style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">📢 오늘 원장님 말씀 요약</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #334155; white-space: pre-wrap;" id="phoneSummary"></div>
+          </div>
+
+          <!-- 2. 처방된 약 -->
+          <div
+            style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">💊 오늘 처방된 약 & 복용 방법</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #059669; font-weight: 700; white-space: pre-wrap;" id="phoneMed"></div>
+            <div style="margin-top: 6px; padding: 6px 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; font-size: 10.5px; color: #9a3412; line-height: 1.35;">
+              ⚠️ 상세 복약법은 반드시 <strong>약국 약 봉투 안내</strong>를 꼭 확인해 주세요!
             </div>
           </div>
 
-          <div
-            style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">📢 원장님 말씀 요약</div>
-            <div style="font-size: 11.5px; line-height: 1.5; color: #334155;" id="phoneSummary"></div>
-          </div>
-
-          <div
-            style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">💊 처방된 약 & 복용법</div>
-            <div style="font-size: 11.5px; line-height: 1.5; color: #059669; font-weight: 700;" id="phoneMed"></div>
-          </div>
-
+          <!-- 3. 다음 내원일 -->
           <div
             style="background: #eff6ff; border-left: 3px solid #0284c7; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 4px;">🗓️ 다음 병원 오시는 날</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 4px;">🗓️ 다음 병원 오시는 날 (놓치지 마세요!)</div>
             <div style="font-size: 13px; font-weight: 800; color: #0284c7;" id="phoneNextDate"></div>
             <div style="font-size: 11px; color: #1e3a8a; margin-top: 2px;" id="phoneNextNotice"></div>
+          </div>
+
+          <!-- 4. 맞춤 생활 건강 팁 -->
+          <div
+            style="background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 4px;">💡 꼭 지켜주셔야 할 맞춤 생활 팁</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #78350f; white-space: pre-wrap;" id="phoneLifestyleTips"></div>
+          </div>
+
+          <!-- 5. 토닥토닥 안심 한마디 -->
+          <div
+            style="background: #fdf2f8; border-left: 3px solid #ec4899; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #be185d; margin-bottom: 4px;">🌷 토닥토닥 마음 안심 한마디</div>
+            <div style="font-size: 11.5px; line-height: 1.5; color: #831843;" id="phoneWarmMessage"></div>
+          </div>
+
+          <!-- 6. 안심 법적 고지 배너 -->
+          <div
+            style="margin-top: 10px; padding: 8px 10px; background: #fefce8; border: 1.5px solid #fde047; border-radius: 8px; font-size: 10.5px; color: #854d0e; line-height: 1.4;">
+            📢 <strong>[보호자 및 환자 안내]</strong><br>
+            본 리포트는 진료실 대화를 AI로 요약한 참고 자료이며, <strong>약국 약 봉투의 안내가 절대 우선</strong>됩니다.
+          </div>
+
+          <!-- 응원/리뷰 남기기 박스 -->
+          <div
+            style="margin-top: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 8px; text-align: center;">
+            <p style="font-size: 11px; font-weight: 700; color: #166534; margin-bottom: 2px;">
+              🩺 오늘 진료와 설명이 안심이 되셨나요?
+            </p>
+            <p style="font-size: 10px; color: #15803d; margin-bottom: 6px;">
+              원장님과 의료진에게 따뜻한 응원의 한마디를 남겨주세요 ❤️
+            </p>
+            <button type="button" style="background: #03c75a; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer;">
+              ⭐ 네이버 영수증 리뷰 남기기
+            </button>
           </div>
         </div>
       </div>
@@ -581,9 +623,39 @@
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
       document.getElementById('modalNoticeInput').value = item.nextNotice || '';
 
-      // 폰 목업 초기 렌더링
-      document.getElementById('phonePatientName').innerText = item.patientName;
+      // 병원 정보 동적 반영
+      let hospName = '길동이의원';
+      let docName = '홍길동';
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.hospitalName) hospName = u.hospitalName;
+          if (u.doctorName) docName = u.doctorName;
+        } catch (e) {}
+      }
+
+      // 폰 목업 렌더링 (진료실 수신화면과 100% 동일)
+      const phoneHospEl = document.getElementById('phoneHospTag');
+      if (phoneHospEl) phoneHospEl.innerText = `🏥 ${hospName} · ${docName} 원장`;
+
+      const now = new Date();
+      const phoneTodayEl = document.getElementById('phoneTodayDate');
+      if (phoneTodayEl) phoneTodayEl.innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
+
+      document.getElementById('phonePatientName').innerText = `${item.patientName}의 안심 진료노트`;
       document.getElementById('phoneSummary').innerText = item.summary || '정상 소견';
+      
+      const phoneTipsEl = document.getElementById('phoneLifestyleTips');
+      if (phoneTipsEl) phoneTipsEl.innerText = item.lifestyleTips || '충분한 수분 섭취와 안정을 취하세요.';
+      
+      const phoneWarmEl = document.getElementById('phoneWarmMessage');
+      if (phoneWarmEl) phoneWarmEl.innerText = item.warmMessage || '늘 건강하시기를 진심으로 응원합니다.';
+
+      // 기존 날짜가 있다면 적용
+      if (item.nextDate) {
+        document.getElementById('phoneNextDate').innerText = item.nextDate;
+      }
 
       updateModalPhoneView();
       document.getElementById('deskModalOverlay').style.display = 'flex';
