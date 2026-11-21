@@ -266,6 +266,27 @@
       background: #fedc00;
       transform: translateY(-1px);
     }
+
+    .btn-send-final:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid rgba(0, 0, 0, 0.2);
+      border-top-color: #191919;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
   </style>
 </head>
 
@@ -732,6 +753,15 @@
         return;
       }
 
+      // ⏳ 발송 중 상태 UI 즉시 피드백 (중복 클릭 방지 & 로딩 스피너)
+      const sendBtn = document.querySelector('.btn-send-final');
+      const originalBtnText = sendBtn ? sendBtn.innerHTML : '';
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = `<span class="spinner-icon"></span>📲 카카오 알림톡 발송 중입니다... 잠시만 기다려 주세요`;
+        sendBtn.style.background = '#fef08a';
+      }
+
       function toBase64Url(obj) {
         const jsonStr = JSON.stringify(obj);
         const bytes = new TextEncoder().encode(jsonStr);
@@ -839,6 +869,12 @@
         renderDeskTable();
       } catch (e) {
         alert("발송 오류: " + e.message);
+      } finally {
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = originalBtnText || '📲 확인 완료 & 환자 카카오 알림톡 발송';
+          sendBtn.style.background = '#fee500';
+        }
       }
     }
 
