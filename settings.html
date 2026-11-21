@@ -776,7 +776,7 @@
       saveBtn.disabled = true;
 
       try {
-        // 🌟 단일 진실의 원천: TodakDB를 통해 Supabase DB에 100% 영구 저장 (현재 plan 유지)
+        // 🌟 단일 진실의 원천: TodakDB를 통해 Supabase DB에 100% 영구 저장 (현재 plan 및 전환예약 상태 유지)
         currentUser = await TodakDB.updateProfile({
           email: currentUser.email,
           hospitalName,
@@ -784,7 +784,9 @@
           phone,
           naverReviewUrl,
           logoUrl,
-          plan: currentPlan
+          plan: currentPlan,
+          pendingPlan: currentUser.pendingPlan || null,
+          pendingDate: currentUser.pendingDate || null
         });
 
         // 성공 UI 피드백

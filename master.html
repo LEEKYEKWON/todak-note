@@ -444,16 +444,33 @@
         if (res.ok) {
           const list = await res.json();
           if (Array.isArray(list)) {
-            hospitals = list.map(row => ({
-              hospitalName: row.hospital_name || '병원명 미입력',
-              doctorName: row.doctor_name || '원장',
-              email: row.email,
-              phone: row.phone || '-',
-              plan: row.plan || 'Pro',
-              pendingPlan: row.pending_plan || '',
-              pendingDate: row.pending_date || '',
-              joinedAt: row.created_at
-            }));
+            // 현재 로그인된 사용자의 로컬 상태도 보조 대조 (pendingPlan 등 최신 반영)
+            let localUser = null;
+            try {
+              const uStr = localStorage.getItem('todak_current_user');
+              if (uStr) localUser = JSON.parse(uStr);
+            } catch (e) {}
+
+            hospitals = list.map(row => {
+              let pPlan = row.pending_plan || '';
+              let pDate = row.pending_date || '';
+
+              if (localUser && localUser.email && row.email && localUser.email.toLowerCase() === row.email.toLowerCase()) {
+                if (localUser.pendingPlan !== undefined) pPlan = localUser.pendingPlan;
+                if (localUser.pendingDate !== undefined) pDate = localUser.pendingDate;
+              }
+
+              return {
+                hospitalName: row.hospital_name || '병원명 미입력',
+                doctorName: row.doctor_name || '원장',
+                email: row.email,
+                phone: row.phone || '-',
+                plan: row.plan || 'Pro',
+                pendingPlan: pPlan,
+                pendingDate: pDate,
+                joinedAt: row.created_at
+              };
+            });
           }
         }
       } catch (e) {
