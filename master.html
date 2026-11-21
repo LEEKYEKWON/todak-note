@@ -443,26 +443,14 @@
         if (res.ok) {
           const list = await res.json();
           if (Array.isArray(list)) {
-            let localUser = null;
-            try {
-              const uStr = localStorage.getItem('todak_current_user');
-              if (uStr) localUser = JSON.parse(uStr);
-            } catch (e) {}
-
-            hospitals = list.map(row => {
-              let planVal = row.plan || 'Pro';
-              if (localUser && localUser.email && row.email && localUser.email.toLowerCase() === row.email.toLowerCase()) {
-                if (localUser.plan) planVal = localUser.plan;
-              }
-              return {
-                hospitalName: row.hospital_name || '병원명 미입력',
-                doctorName: row.doctor_name || '원장',
-                email: row.email,
-                phone: row.phone || '-',
-                plan: planVal,
-                joinedAt: row.created_at
-              };
-            });
+            hospitals = list.map(row => ({
+              hospitalName: row.hospital_name || '병원명 미입력',
+              doctorName: row.doctor_name || '원장',
+              email: row.email,
+              phone: row.phone || '-',
+              plan: row.plan || 'Pro',
+              joinedAt: row.created_at
+            }));
           }
         }
       } catch (e) {
