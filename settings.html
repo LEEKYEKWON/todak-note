@@ -499,15 +499,36 @@
         </div>
       </div>
 
-      <!-- 기본형 사용자에게만 보이는 고급형 업그레이드 배너 -->
+      <!-- 기본형 사용자에게 보이는 업그레이드 및 해지 배너 -->
       <div id="upgradeBanner" class="upgrade-banner" style="display: none;">
         <div>
           <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 4px;">⭐ 고급형(Pro)으로 업그레이드하고 병원 경영 통계를 확인하세요!</h4>
-          <p style="font-size: 13.5px; opacity: 0.95;">월 50,000원 추가로 재방문율 통계 대시보드와 병원 전용 로고 브랜딩 혜택을 누리실 수 있습니다.</p>
+          <p style="font-size: 13.5px; opacity: 0.95;">잔여 일수만큼만 일할 차액 결제 후 즉시 경영 대시보드와 병원 전용 로고 브랜딩 혜택이 열립니다.</p>
         </div>
-        <button type="button" class="upgrade-btn" onclick="upgradeToPro()">
-          월 50,000원 추가하고 Pro 업그레이드
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="upgrade-btn" onclick="upgradeToPro()">
+            고급형 Pro로 업그레이드
+          </button>
+          <button type="button" onclick="handleCancelSubscription()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+            구독 해지
+          </button>
+        </div>
+      </div>
+
+      <!-- 고급형(Pro) 사용자에게 보이는 기본형 다운그레이드 / 구독 관리 배너 -->
+      <div id="downgradeBanner" style="display: none; margin-top: 16px; padding: 18px 20px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="font-size: 14.5px; font-weight: 800; color: #334155;">플랜 변경 및 구독 관리</div>
+          <div style="font-size: 12.5px; color: #64748b; margin-top: 2px;">이번 결제 주기까지 고급형을 그대로 이용하시고, 다음 결제일부터 기본형(월 89,000원)으로 자동 전환됩니다.</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="downgradeToStandard()" style="background: white; color: #475569; border: 1.5px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+            기본형(Standard)으로 변경
+          </button>
+          <button type="button" onclick="handleCancelSubscription()" style="background: white; color: #ef4444; border: 1.5px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+            구독 해지
+          </button>
+        </div>
       </div>
 
       <!-- 결제 카드 등록 / 관리 영역 (포트원 V2 + 토스페이먼츠 정기결제 연동) -->
@@ -646,6 +667,7 @@
       const planNameEl = document.getElementById('displayPlanName');
       const planPriceEl = document.getElementById('displayPlanPrice');
       const upgradeBanner = document.getElementById('upgradeBanner');
+      const downgradeBanner = document.getElementById('downgradeBanner');
       const featuresEl = document.getElementById('displayPlanFeatures');
 
       // 💳 카드 등록 상태 UI 반영
@@ -685,6 +707,7 @@
         planNameEl.textContent = '고급형 (Pro)';
         planPriceEl.textContent = '월 139,000원';
         upgradeBanner.style.display = 'none';
+        if (downgradeBanner) downgradeBanner.style.display = 'flex';
 
         featuresEl.innerHTML = `
           <li>기본형의 모든 기능 포함</li>
@@ -698,6 +721,7 @@
         planNameEl.textContent = '기본형 (Standard)';
         planPriceEl.textContent = '월 89,000원';
         upgradeBanner.style.display = 'flex';
+        if (downgradeBanner) downgradeBanner.style.display = 'none';
 
         featuresEl.innerHTML = `
           <li>진료 대화 AI 자동 요약 & 리포트 무제한 발송</li>
@@ -759,7 +783,13 @@
     }
 
     async function upgradeToPro() {
-      if (confirm('고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n월 50,000원 추가 (월 89,000원 ➔ 월 139,000원)\n- 원장님 환자 재방문 통계 대시보드 즉시 활성화\n- 병원 전용 CI 로고 브랜딩 기능 제공')) {
+      // 🌟 일할 계산 차액 계산 (예: 결제일 기준 남은 일수 비율)
+      const now = new Date();
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const remainingDays = Math.max(1, lastDay - now.getDate());
+      const dailyDiff = Math.round((50000 / lastDay) * remainingDays);
+
+      if (confirm(`고급형(Pro) 플랜으로 업그레이드하시겠습니까?\n\n• 이번 달 남은 기간(${remainingDays}일) 일할 추가 결제액: 약 ${dailyDiff.toLocaleString()}원\n• 혜택: 병원 경영 대시보드 즉시 활성화 & 리포트 전용 로고 탑재\n• 다음 정기 결제일부터는 월 139,000원이 정상 청구됩니다.`)) {
         try {
           if (window.TodakDB && currentUser && currentUser.email) {
             currentUser = await TodakDB.updatePlan(currentUser.email, 'Pro');
@@ -769,9 +799,53 @@
           }
           renderPlanInfo();
           showToast('🎉 고급형(Pro)으로 업그레이드 완료! 대시보드가 활성화되었습니다.');
-          alert('🎉 [업그레이드 완료]\n고급형(Pro) 플랜으로 정상 변경되었습니다.\n경영 대시보드 및 병원 로고 탑재가 활성화됩니다.');
+          alert(`🎉 [업그레이드 완료]\n고급형(Pro) 플랜으로 정상 변경되었습니다!\n(이번 달 잔여 일수 ${remainingDays}일치 차액 약 ${dailyDiff.toLocaleString()}원 결제 처리)\n\n경영 대시보드 및 병원 전용 로고 기능이 즉시 활성화됩니다.`);
         } catch (err) {
           alert('업그레이드 실패: ' + err.message);
+        }
+      }
+    }
+
+    // 🌟 고급형(Pro)에서 기본형(Standard)으로 플랜 다운그레이드 (방법 A 적용)
+    async function downgradeToStandard() {
+      if (confirm(`기본형(Standard) 플랜으로 변경하시겠습니까? (방법 A 적용)\n\n• 이번 달 결제 주기까지는 이미 결제하신 [고급형 Pro] 혜택을 끝까지 정상 이용하실 수 있습니다.\n• 다음 결제일부터 기본형 요금(월 89,000원)으로 자동 결제 및 전환됩니다.`)) {
+        try {
+          if (window.TodakDB && currentUser && currentUser.email) {
+            currentUser = await TodakDB.updatePlan(currentUser.email, 'Standard');
+          } else {
+            currentUser.plan = 'Standard';
+            localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+          }
+          renderPlanInfo();
+          showToast('🟢 기본형(Standard)으로 변경 예약되었습니다.');
+          alert('[플랜 변경 완료]\n기본형(Standard) 플랜으로 정상 변경되었습니다.\n\n이번 결제 주기까지는 고급형 Pro 기능을 끝까지 이용하실 수 있으며, 다음 결제일부터 기본형(월 89,000원)으로 자동 청구됩니다.');
+        } catch (err) {
+          alert('플랜 변경 실패: ' + err.message);
+        }
+      }
+    }
+
+    // 🌟 구독 해지 (기본형/고급형 공통)
+    async function handleCancelSubscription() {
+      if (confirm('정말로 토닥토닥노트 정기구독을 해지하시겠습니까?\n\n• 등록된 정기결제 카드가 즉시 삭제됩니다.\n• 다음 결제일부터 요금이 청구되지 않습니다.\n• 이번 결제 주기 만료 시 서비스가 종료됩니다.')) {
+        try {
+          currentUser.billingKey = null;
+          currentUser.billingRegisteredAt = null;
+          currentUser.plan = 'Standard';
+          localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
+
+          if (window.TodakDB && currentUser && currentUser.email) {
+            currentUser = await TodakDB.updateProfile({
+              email: currentUser.email,
+              plan: 'Standard'
+            });
+          }
+
+          renderPlanInfo();
+          showToast('구독이 안전하게 해지되었습니다.');
+          alert('[구독 해지 완료]\n정기구독 및 등록된 결제 카드가 안전하게 해지되었습니다.\n다음 결제일부터 추가 요금이 청구되지 않습니다.\n그동안 이용해 주셔서 진심으로 감사드립니다.');
+        } catch (err) {
+          alert('구독 해지 실패: ' + err.message);
         }
       }
     }
