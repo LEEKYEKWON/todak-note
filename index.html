@@ -1118,8 +1118,9 @@
       <span>토닥토닥노트</span>
     </a>
     <div class="nav-links">
-      <a href="#process">3단계 프로세스</a>
       <a href="#features">주요 기능</a>
+      <a href="#process">3단계 프로세스</a>
+      <a href="#mockup-section">실제 서비스 화면</a>
       <a href="#pricing">얼리버드 요금제</a>
       <a href="login.html" style="color: #cbd5e1; text-decoration: none; font-weight: 700;">🔑 로그인</a>
       <a href="signup.html" class="btn-cta-nav"
@@ -1140,71 +1141,46 @@
       진료 중 단축키 <strong>[F9]</strong>만 누르면 끝!<br>
       원장님의 진료 대화를 AI가 알기 쉬운 맞춤 리포트로 요약하여 환자 카카오톡으로 자동 발송합니다.
     </p>
+    <div class="hero-btn-group" style="margin-bottom: 10px;">
+      <a href="signup.html" class="btn-hero-primary" style="text-decoration: none;">지금 무료 체험 시작하기</a>
+      <a href="#features" class="btn-hero-secondary" style="text-decoration: none;">서비스 자세히 보기</a>
+    </div>
+  </section>
 
-    <!-- 대시보드 및 프로그램 프리뷰 목업 (탭 전환 & 클릭 확대 라이트박스) -->
-    <div class="hero-mockup-wrapper">
-      <div class="mockup-header-bar">
-        <div class="mockup-header-left">
-          <div class="dot dot-red"></div>
-          <div class="dot dot-yellow"></div>
-          <div class="dot dot-green"></div>
-          <span style="font-size: 12.5px; color: #94a3b8; margin-left: 6px; font-weight: 600;">todaknote.com - 실제 서비스
-            화면</span>
-        </div>
-        <!-- 4개 탭 버튼 -->
-        <div class="mockup-tabs">
-          <button type="button" class="mockup-tab-btn active" onclick="switchPreview(0, this)">
-            🩺 1. 진료실 자동화
-          </button>
-          <button type="button" class="mockup-tab-btn" onclick="switchPreview(1, this)">
-            📊 2. 병원 대시보드
-          </button>
-          <button type="button" class="mockup-tab-btn" onclick="switchPreview(2, this)">
-            📱 3. 환자 알림톡 리포트
-          </button>
-          <button type="button" class="mockup-tab-btn" onclick="switchPreview(3, this)">
-            ⭐ 4. 바이럴 & 찐리뷰
-          </button>
-        </div>
+  <!-- 1. 주요 기능 (3대 핵심 혜택 섹션) -->
+  <section class="features-section" id="features">
+    <div class="section-eyebrow">WHY TODAKNOTE?</div>
+    <h2 class="section-heading">진료 시간을 뺏지 않고 감동 리포트와 마케팅을 한번에!</h2>
+
+    <div class="feature-grid">
+      <!-- 1 -->
+      <div class="feature-box">
+        <div class="feature-icon">🎙️</div>
+        <h3 class="feature-title">단축키 [F9] 하나로 끝</h3>
+        <p class="feature-desc">
+          진료 시작과 끝에 F9만 누르면 AI가 음성을 받아적고 환자 눈높이로 알기 쉽게 요약/정리합니다.(확인 후 카톡 발송)
+        </p>
       </div>
-
-      <!-- 이미지 슬라이드 영역 (클릭 시 확대) -->
-      <div class="mockup-inner" onclick="openLightboxFromActive()" title="클릭하면 크게 확대됩니다">
-        <!-- 슬라이드 1: 진료실 프로그램 -->
-        <div class="preview-slide active" data-caption="[진료실 화면] 단축키 [F9] 하나로 실시간 자동 타이핑 및 환자 맞춤 요약 리포트 생성">
-          <img src="preview_clinic.jpg" alt="진료실 프로그램 실제 화면" class="preview-img">
-        </div>
-        <!-- 슬라이드 2: 병원 경영 대시보드 -->
-        <div class="preview-slide" data-caption="[병원 경영 대시보드] 환자 재방문(Follow-up) 케어 현황 및 네이버 플레이스 찐리뷰 분석">
-          <img src="preview_dashboard.jpg" alt="병원 경영 대시보드 실제 화면" class="preview-img">
-        </div>
-        <!-- 슬라이드 3: 환자 카톡 리포트 1 -->
-        <div class="preview-slide" data-caption="[환자 카톡 리포트] 쉬운 말 진료 요약, 올바른 복약 안내, 다음 내원일 스마트 알림">
-          <img src="preview_report1.jpg" alt="환자 수신 모바일 리포트" class="preview-img" style="max-height: 520px;">
-        </div>
-        <!-- 슬라이드 4: 환자 카톡 리포트 2 (공유 & 리뷰) -->
-        <div class="preview-slide" data-caption="[바이럴 & 찐리뷰] 가족 안심 공유하기 및 네이버 영수증 찐리뷰 원클릭 연동">
-          <img src="preview_report2.jpg" alt="환자 수신 모바일 리포트 하단 바이럴 리뷰" class="preview-img" style="max-height: 520px;">
-        </div>
-
-        <!-- 돋보기 안내 배지 -->
-        <div class="zoom-hint-pill">
-          🔍 클릭하여 크게 보기
-        </div>
+      <!-- 2 -->
+      <div class="feature-box">
+        <div class="feature-icon">📱</div>
+        <h3 class="feature-title">카톡으로 받는 감동 리포트</h3>
+        <p class="feature-desc">
+          환자와 보호자가 스마트폰에서 진료 내용, 처방약 복용법, 재방문 일자를 큰 글씨로 다시 확인할 수 있어 환자 만족도가 매우 높습니다.
+        </p>
+      </div>
+      <!-- 3 -->
+      <div class="feature-box">
+        <div class="feature-icon">⭐</div>
+        <h3 class="feature-title">네이버 영수증 리뷰 폭발</h3>
+        <p class="feature-desc">
+          리포트 하단의 감사 리뷰 유도 버튼을 통해, 위험한 가짜 리뷰가 아닌 실제 우리 병원에서 진료를 받은 환자의 찐 네이버 플레이스 별점 5개 리뷰가 등록됩니다.
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- 이미지 크게 보기 라이트박스 모달 -->
-  <div id="imageLightbox" class="lightbox-modal" onclick="closeLightbox(event)">
-    <div class="lightbox-content-wrapper" onclick="event.stopPropagation()">
-      <button type="button" class="lightbox-close-btn" onclick="closeLightbox(event)" title="닫기 (ESC)">✕</button>
-      <img id="lightboxImg" src="" alt="확대 이미지" class="lightbox-img">
-      <div id="lightboxCaption" class="lightbox-caption"></div>
-    </div>
-  </div>
-
-  <!-- 우리 병원 매출 프로세스 섹션 (인스타형 카드 캐러셀) -->
+  <!-- 2. 우리 병원 매출 3단계 프로세스 섹션 (인스타형 카드 캐러셀) -->
   <section class="process-section" id="process">
     <div class="process-badge">⚡ AUTOMATIC GROWTH SYSTEM</div>
     <h2 class="process-headline">
@@ -1320,38 +1296,75 @@
     </div>
   </section>
 
-  <!-- 3대 핵심 혜택 섹션 -->
-  <section class="features-section" id="features">
-    <div class="section-eyebrow">WHY TODAKNOTE?</div>
-    <h2 class="section-heading">진료 시간을 뺏지 않고 감동 리포트와 마케팅을 한번에!</h2>
+  <!-- 3. 실제 서비스 화면 섹션 (목업 브라우저 탭 & 확대 라이트박스) -->
+  <section class="mockup-section" id="mockup-section" style="padding: 90px 24px 80px; max-width: 1200px; margin: 0 auto; text-align: center;">
+    <div class="section-eyebrow">LIVE PRODUCT PREVIEW</div>
+    <h2 class="section-heading" style="margin-bottom: 16px;">백문이 불여일견, 실제 서비스 화면을 직접 확인하세요</h2>
+    <p class="process-sub" style="margin-bottom: 40px;">
+      복잡한 설치 없이 브라우저에서 바로 동작하는 직관적인 UI!<br>
+      원하시는 탭을 클릭하여 각 화면을 구경하고, 이미지를 클릭해 크게 확대해보세요.
+    </p>
 
-    <div class="feature-grid">
-      <!-- 1 -->
-      <div class="feature-box">
-        <div class="feature-icon">🎙️</div>
-        <h3 class="feature-title">단축키 [F9] 하나로 끝</h3>
-        <p class="feature-desc">
-          진료 시작과 끝에 F9만 누르면 AI가 음성을 받아적고 환자 눈높이로 알기 쉽게 요약/정리합니다.(확인 후 카톡 발송)
-        </p>
+    <div class="hero-mockup-wrapper" style="margin: 0 auto;">
+      <div class="mockup-header-bar">
+        <div class="mockup-header-left">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <span style="font-size: 12.5px; color: #94a3b8; margin-left: 6px; font-weight: 600;">todaknote.com - 실제 서비스 화면</span>
+        </div>
+        <!-- 4개 탭 버튼 -->
+        <div class="mockup-tabs">
+          <button type="button" class="mockup-tab-btn active" onclick="switchPreview(0, this)">
+            🩺 1. 진료실 자동화
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(1, this)">
+            📊 2. 병원 대시보드
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(2, this)">
+            📱 3. 환자 알림톡 리포트
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(3, this)">
+            ⭐ 4. 바이럴 & 찐리뷰
+          </button>
+        </div>
       </div>
-      <!-- 2 -->
-      <div class="feature-box">
-        <div class="feature-icon">📱</div>
-        <h3 class="feature-title">카톡으로 받는 감동 리포트</h3>
-        <p class="feature-desc">
-          환자와 보호자가 스마트폰에서 진료 내용, 처방약 복용법, 재방문 일자를 큰 글씨로 다시 확인할 수 있어 환자 만족도가 매우 높습니다.
-        </p>
-      </div>
-      <!-- 3 -->
-      <div class="feature-box">
-        <div class="feature-icon">⭐</div>
-        <h3 class="feature-title">네이버 영수증 리뷰 폭발</h3>
-        <p class="feature-desc">
-          리포트 하단의 감사 리뷰 유도 버튼을 통해, 위험한 가짜 리뷰가 아닌 실제 우리 병원에서 진료를 받은 환자의 찐 네이버 플레이스 별점 5개 리뷰가 등록됩니다.
-        </p>
+
+      <!-- 이미지 슬라이드 영역 (클릭 시 확대) -->
+      <div class="mockup-inner" onclick="openLightboxFromActive()" title="클릭하면 크게 확대됩니다">
+        <!-- 슬라이드 1: 진료실 프로그램 -->
+        <div class="preview-slide active" data-caption="[진료실 화면] 단축키 [F9] 하나로 실시간 자동 타이핑 및 환자 맞춤 요약 리포트 생성">
+          <img src="preview_clinic.jpg" alt="진료실 프로그램 실제 화면" class="preview-img">
+        </div>
+        <!-- 슬라이드 2: 병원 경영 대시보드 -->
+        <div class="preview-slide" data-caption="[병원 경영 대시보드] 환자 재방문(Follow-up) 케어 현황 및 네이버 플레이스 찐리뷰 분석">
+          <img src="preview_dashboard.jpg" alt="병원 경영 대시보드 실제 화면" class="preview-img">
+        </div>
+        <!-- 슬라이드 3: 환자 카톡 리포트 1 -->
+        <div class="preview-slide" data-caption="[환자 카톡 리포트] 쉬운 말 진료 요약, 올바른 복약 안내, 다음 내원일 스마트 알림">
+          <img src="preview_report1.jpg" alt="환자 수신 모바일 리포트" class="preview-img" style="max-height: 520px;">
+        </div>
+        <!-- 슬라이드 4: 환자 카톡 리포트 2 (공유 & 리뷰) -->
+        <div class="preview-slide" data-caption="[바이럴 & 찐리뷰] 가족 안심 공유하기 및 네이버 영수증 찐리뷰 원클릭 연동">
+          <img src="preview_report2.jpg" alt="환자 수신 모바일 리포트 하단 바이럴 리뷰" class="preview-img" style="max-height: 520px;">
+        </div>
+
+        <!-- 돋보기 안내 배지 -->
+        <div class="zoom-hint-pill">
+          🔍 클릭하여 크게 보기
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- 이미지 크게 보기 라이트박스 모달 -->
+  <div id="imageLightbox" class="lightbox-modal" onclick="closeLightbox(event)">
+    <div class="lightbox-content-wrapper" onclick="event.stopPropagation()">
+      <button type="button" class="lightbox-close-btn" onclick="closeLightbox(event)" title="닫기 (ESC)">✕</button>
+      <img id="lightboxImg" src="" alt="확대 이미지" class="lightbox-img">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
 
   <!-- 요금제 섹션 -->
   <section class="pricing-section" id="pricing">
