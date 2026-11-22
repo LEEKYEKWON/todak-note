@@ -190,12 +190,12 @@
       border-color: rgba(255, 255, 255, 0.3);
     }
 
-    /* 목업 프리뷰 래퍼 (중앙 로고 유지) */
+    /* 목업 프리뷰 래퍼 (탭 & 라이트박스) */
     .hero-mockup-wrapper {
-      max-width: 1000px;
+      max-width: 1040px;
       width: 100%;
       background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 20px;
       box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
       overflow: hidden;
@@ -204,8 +204,16 @@
 
     .mockup-header-bar {
       background: #1a2234;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mockup-header-left {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -229,22 +237,182 @@
       background: #10b981;
     }
 
+    /* 탭 버튼 스타일 */
+    .mockup-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mockup-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mockup-tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mockup-tab-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+    }
+
     .mockup-inner {
-      padding: 50px 24px;
-      background: #0f172a;
+      position: relative;
+      background: #0b0f19;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      min-height: 420px;
+      cursor: pointer;
+      overflow: hidden;
     }
 
-    .mockup-inner img {
-      width: 120px;
-      height: 120px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 255, 255, 0.12);
+    .preview-slide {
+      display: none;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .preview-slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .preview-img {
+      width: 100%;
+      height: auto;
+      max-height: 560px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mockup-inner:hover .preview-img {
+      transform: scale(1.015);
+    }
+
+    /* 이미지 위 클릭 확대 안내 오버레이 */
+    .zoom-hint-pill {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      transition: all 0.2s;
+    }
+
+    .mockup-inner:hover .zoom-hint-pill {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+
+    /* 이미지 라이트박스 모달 */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: zoom-out;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .lightbox-modal.show {
+      display: flex;
+    }
+
+    .lightbox-content-wrapper {
+      position: relative;
+      max-width: 95vw;
+      max-height: 92vh;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 84vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+    }
+
+    .lightbox-caption {
+      margin-top: 14px;
+      color: #e2e8f0;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 6px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lightbox-close-btn {
+      position: absolute;
+      top: -46px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .lightbox-close-btn:hover {
+      background: rgba(239, 68, 68, 0.8);
     }
 
     /* 우리 병원 매출 프로세스 섹션 & 캐러셀 */
@@ -855,6 +1023,61 @@
         border-radius: 14px;
       }
 
+      .mockup-header-bar {
+        padding: 10px 14px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .mockup-header-left {
+        justify-content: center;
+      }
+
+      .mockup-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+        justify-content: flex-start;
+      }
+
+      .mockup-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .mockup-tab-btn {
+        font-size: 11.5px;
+        padding: 6px 10px;
+        flex-shrink: 0;
+      }
+
+      .mockup-inner {
+        min-height: 240px;
+        padding: 12px 6px;
+      }
+
+      .zoom-hint-pill {
+        bottom: 12px;
+        right: 12px;
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+
+      .lightbox-modal {
+        padding: 12px;
+      }
+
+      .lightbox-caption {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .lightbox-close-btn {
+        top: -38px;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+
       .modal-content {
         padding: 30px 22px;
       }
@@ -893,20 +1116,67 @@
       원장님의 진료 대화를 AI가 알기 쉬운 맞춤 리포트로 요약하여 환자 카카오톡으로 자동 발송합니다.
     </p>
 
-    <!-- 대시보드 및 프로그램 프리뷰 목업 (중앙 로고 유지 - 배포 후 캡처 이미지로 교체 가능) -->
+    <!-- 대시보드 및 프로그램 프리뷰 목업 (탭 전환 & 클릭 확대 라이트박스) -->
     <div class="hero-mockup-wrapper">
       <div class="mockup-header-bar">
-        <div class="dot dot-red"></div>
-        <div class="dot dot-yellow"></div>
-        <div class="dot dot-green"></div>
-        <span style="font-size: 12px; color: #94a3b8; margin-left: 8px;">todaknote.com - 진료실 프로그램 & 원장님 대시보드</span>
+        <div class="mockup-header-left">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <span style="font-size: 12.5px; color: #94a3b8; margin-left: 6px; font-weight: 600;">todaknote.com - 실제 서비스 화면</span>
+        </div>
+        <!-- 4개 탭 버튼 -->
+        <div class="mockup-tabs">
+          <button type="button" class="mockup-tab-btn active" onclick="switchPreview(0, this)">
+            🩺 1. 진료실 자동화
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(1, this)">
+            📊 2. 병원 대시보드
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(2, this)">
+            📱 3. 환자 알림톡 리포트
+          </button>
+          <button type="button" class="mockup-tab-btn" onclick="switchPreview(3, this)">
+            ⭐ 4. 바이럴 & 찐리뷰
+          </button>
+        </div>
       </div>
-      <div class="mockup-inner">
-        <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
-        <div style="font-size: 14.5px; color: #cbd5e1; font-weight: 700;">의사와 환자를 잇는 가장 따뜻한 AI 케어 솔루션</div>
+
+      <!-- 이미지 슬라이드 영역 (클릭 시 확대) -->
+      <div class="mockup-inner" onclick="openLightboxFromActive()" title="클릭하면 크게 확대됩니다">
+        <!-- 슬라이드 1: 진료실 프로그램 -->
+        <div class="preview-slide active" data-caption="[진료실 화면] 단축키 [F9] 하나로 실시간 자동 타이핑 및 환자 맞춤 요약 리포트 생성">
+          <img src="preview_clinic.jpg" alt="진료실 프로그램 실제 화면" class="preview-img">
+        </div>
+        <!-- 슬라이드 2: 병원 경영 대시보드 -->
+        <div class="preview-slide" data-caption="[병원 경영 대시보드] 환자 재방문(Follow-up) 케어 현황 및 네이버 플레이스 찐리뷰 분석">
+          <img src="preview_dashboard.jpg" alt="병원 경영 대시보드 실제 화면" class="preview-img">
+        </div>
+        <!-- 슬라이드 3: 환자 카톡 리포트 1 -->
+        <div class="preview-slide" data-caption="[환자 카톡 리포트] 쉬운 말 진료 요약, 올바른 복약 안내, 다음 내원일 스마트 알림">
+          <img src="preview_report1.jpg" alt="환자 수신 모바일 리포트" class="preview-img" style="max-height: 520px;">
+        </div>
+        <!-- 슬라이드 4: 환자 카톡 리포트 2 (공유 & 리뷰) -->
+        <div class="preview-slide" data-caption="[바이럴 & 찐리뷰] 가족 안심 공유하기 및 네이버 영수증 찐리뷰 원클릭 연동">
+          <img src="preview_report2.jpg" alt="환자 수신 모바일 리포트 하단 바이럴 리뷰" class="preview-img" style="max-height: 520px;">
+        </div>
+
+        <!-- 돋보기 안내 배지 -->
+        <div class="zoom-hint-pill">
+          🔍 클릭하여 크게 보기
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- 이미지 크게 보기 라이트박스 모달 -->
+  <div id="imageLightbox" class="lightbox-modal" onclick="closeLightbox(event)">
+    <div class="lightbox-content-wrapper" onclick="event.stopPropagation()">
+      <button type="button" class="lightbox-close-btn" onclick="closeLightbox(event)" title="닫기 (ESC)">✕</button>
+      <img id="lightboxImg" src="" alt="확대 이미지" class="lightbox-img">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
 
   <!-- 우리 병원 매출 프로세스 섹션 (인스타형 카드 캐러셀) -->
   <section class="process-section" id="process">
@@ -1167,6 +1437,57 @@
   </footer>
 
   <script>
+    // 목업 탭 전환
+    function switchPreview(index, btnEl) {
+      const slides = document.querySelectorAll('.preview-slide');
+      const tabs = document.querySelectorAll('.mockup-tab-btn');
+      slides.forEach((slide, idx) => {
+        if (idx === index) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+      tabs.forEach((tab, idx) => {
+        if (idx === index) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+    }
+
+    // 클릭 시 현재 활성화된 슬라이드 확대 (Lightbox)
+    function openLightboxFromActive() {
+      const activeSlide = document.querySelector('.preview-slide.active');
+      if (!activeSlide) return;
+      const img = activeSlide.querySelector('img');
+      const caption = activeSlide.getAttribute('data-caption') || '';
+      if (!img) return;
+
+      const modal = document.getElementById('imageLightbox');
+      const lbImg = document.getElementById('lightboxImg');
+      const lbCaption = document.getElementById('lightboxCaption');
+      lbImg.src = img.src;
+      lbCaption.textContent = caption;
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e) e.stopPropagation();
+      const modal = document.getElementById('imageLightbox');
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    // ESC 키 누르면 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+
     function openApplyModal(plan) {
       if (plan) document.getElementById('applyPlan').value = plan;
       document.getElementById('applyModal').style.display = 'flex';
