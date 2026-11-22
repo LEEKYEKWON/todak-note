@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="todak-db.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -453,23 +452,38 @@
             } catch (e) {}
 
             hospitals = list.map(row => {
-              // DB의 row.plan 또는 todak-db.js normalizeUser 규칙으로 pendingPlan/pendingDate 파싱
+              // Supabase 정식 컬럼(pending_plan, pending_date) 직접 매핑
               let bPlan = row.plan || 'Pro';
               let pPlan = row.pending_plan || '';
               let pDate = row.pending_date || '';
 
-              if (bPlan.includes('|PENDING:')) {
-                const parts = bPlan.split('|PENDING:');
-                bPlan = parts[0] || 'Pro';
-                const pParts = (parts[1] || '').split(':');
-                pPlan = pParts[0] || '';
-                pDate = pParts[1] || '';
-              }
+              // 날짜 도래 시 자동 전환 체크
+              if (pPlan && pDate) {
+                let targetYear = new Date().getFullYear();
+                let targetMonth = null;
+                let targetDay = null;
 
-              // 로컬스토리지 대조
-              if (localUser && localUser.email && row.email && localUser.email.toLowerCase() === row.email.toLowerCase()) {
-                if (localUser.pendingPlan !== undefined && localUser.pendingPlan) pPlan = localUser.pendingPlan;
-                if (localUser.pendingDate !== undefined && localUser.pendingDate) pDate = localUser.pendingDate;
+                if (pDate.includes('-')) {
+                  const parts = pDate.split('-');
+                  targetYear = parseInt(parts[0], 10);
+                  targetMonth = parseInt(parts[1], 10) - 1;
+                  targetDay = parseInt(parts[2], 10);
+                } else if (pDate.includes('월')) {
+                  const mMatch = pDate.match(/(\d+)월\s*(\d+)일/);
+                  if (mMatch) {
+                    targetMonth = parseInt(mMatch[1], 10) - 1;
+                    targetDay = parseInt(mMatch[2], 10);
+                  }
+                }
+
+                if (targetMonth !== null && targetDay !== null) {
+                  const targetDate = new Date(targetYear, targetMonth, targetDay, 0, 0, 0);
+                  if (new Date() >= targetDate) {
+                    bPlan = pPlan;
+                    pPlan = '';
+                    pDate = '';
+                  }
+                }
               }
 
               return {

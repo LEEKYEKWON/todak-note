@@ -65,7 +65,7 @@ const TodakDB = {
     return this.normalizeUser(row);
   },
 
-  // 3. 현재 로그인된 사용자 최신 프로필 DB에서 불러오기
+  // 3. 현재 로그인된 사용자 최신 프로필 DB에서 불러오기 (날짜 도래 시 자동 전환 검사 포함)
   async getCurrentUserProfile() {
     const userStr = localStorage.getItem('todak_current_user');
     if (!userStr) return null;
@@ -84,7 +84,11 @@ const TodakDB = {
       if (res.ok) {
         const list = await res.json();
         if (Array.isArray(list) && list.length > 0) {
-          const fresh = this.normalizeUser(list[0]);
+          let fresh = this.normalizeUser(list[0]);
+
+          // 🌟 [자동 전환 엔진] 만약 오늘 날짜가 전환 예정일(pending_date)에 도달했거나 지났다면 자동으로 기본형으로 영구 전환
+          fresh = await this.checkAndExecuteAutoTransition(fresh);
+
           localStorage.setItem('todak_current_user', JSON.stringify(fresh));
           return fresh;
         }
@@ -95,7 +99,51 @@ const TodakDB = {
     return localUser;
   },
 
-  // 4. 프로필 정보 영구 수정 (병원명, 원장명, 로고, 네이버링크, 요금제 플랜 등)
+  // 🌟 결제일 도래 시 자동 전환 실행 엔진 (12월 1일이 되면 자동으로 Standard로 영구 전환)
+  async checkAndExecuteAutoTransition(user) {
+    if (!user || !user.email || !user.pendingPlan || !user.pendingDate) {
+      return user;
+    }
+
+    // 날짜 파싱 (예: "2026-12-01" 또는 "12월 1일")
+    let targetYear = new Date().getFullYear();
+    let targetMonth = null;
+    let targetDay = null;
+
+    if (user.pendingDate.includes('-')) {
+      const parts = user.pendingDate.split('-');
+      targetYear = parseInt(parts[0], 10);
+      targetMonth = parseInt(parts[1], 10) - 1;
+      targetDay = parseInt(parts[2], 10);
+    } else if (user.pendingDate.includes('월')) {
+      const mMatch = user.pendingDate.match(/(\d+)월\s*(\d+)일/);
+      if (mMatch) {
+        targetMonth = parseInt(mMatch[1], 10) - 1;
+        targetDay = parseInt(mMatch[2], 10);
+      }
+    }
+
+    if (targetMonth !== null && targetDay !== null) {
+      const targetDate = new Date(targetYear, targetMonth, targetDay, 0, 0, 0);
+      const now = new Date();
+
+      // 오늘 날짜가 예약일을 지났거나 도래한 경우 실제 전환 DB 반영
+      if (now >= targetDate) {
+        console.log(`[AutoTransition] 전환 예정일(${user.pendingDate}) 도래 -> ${user.pendingPlan} 플랜으로 자동 전환 실행`);
+        const switched = await this.updateProfile({
+          email: user.email,
+          plan: user.pendingPlan,
+          pendingPlan: null,
+          pendingDate: null
+        });
+        return switched;
+      }
+    }
+
+    return user;
+  },
+
+  // 4. 프로필 정보 영구 수정 (정식 DB 컬럼: plan, pending_plan, pending_date 정석 연동)
   async updateProfile({ email, hospitalName, doctorName, phone, naverReviewUrl, logoUrl, plan, pendingPlan, pendingDate }) {
     if (!email) {
       const userStr = localStorage.getItem('todak_current_user');
@@ -112,38 +160,13 @@ const TodakDB = {
     if (phone !== undefined) updateBody.phone = phone.trim();
     if (naverReviewUrl !== undefined) updateBody.naver_review_url = naverReviewUrl.trim();
     if (logoUrl !== undefined) updateBody.logo_url = logoUrl;
+    if (plan !== undefined) updateBody.plan = plan;
 
-    // 예약 플랜(pendingPlan, pendingDate) 보존 로직
-    let pPlan = pendingPlan;
-    let pDate = pendingDate;
+    // Supabase 정식 컬럼에 정확하게 반영 (null 전달 시 null로 DB 업데이트)
+    if (pendingPlan !== undefined) updateBody.pending_plan = pendingPlan;
+    if (pendingDate !== undefined) updateBody.pending_date = pendingDate;
 
-    // 만약 전달받지 못했다면 현재 로컬스토리지 값 유지
-    if (pPlan === undefined || pDate === undefined) {
-      const uStr = localStorage.getItem('todak_current_user');
-      if (uStr) {
-        try {
-          const u = JSON.parse(uStr);
-          if (pPlan === undefined) pPlan = u.pendingPlan;
-          if (pDate === undefined) pDate = u.pendingDate;
-        } catch(e) {}
-      }
-    }
-
-    // 기본 플랜명 결정 (Pro 또는 Standard)
-    let basePlan = (plan !== undefined) ? plan : 'Pro';
-    // 만약 기존 plan에 직렬화된 문자열이 들어있었다면 기본 플랜 추출
-    if (basePlan.includes('|PENDING:')) {
-      basePlan = basePlan.split('|')[0];
-    }
-
-    // 🌟 핵심: DB의 plan 컬럼에 예약 상태를 영구 보존 인코딩 ("Pro|PENDING:Standard:12월 1일")
-    if (pPlan && pDate) {
-      updateBody.plan = `${basePlan}|PENDING:${pPlan}:${pDate}`;
-    } else {
-      updateBody.plan = basePlan;
-    }
-
-    let res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
       method: 'PATCH',
       headers: {
         'apikey': SUPABASE_KEY,
@@ -183,30 +206,17 @@ const TodakDB = {
     return await this.updateProfile({ email, plan: newPlan, pendingPlan, pendingDate });
   },
 
-  // 규격 통일 헬퍼
+  // 규격 통일 헬퍼 (DB 컬럼 값 그대로 정규화)
   normalizeUser(row) {
     if (!row) return null;
-    let plan = row.plan || 'Pro';
-    let pendingPlan = row.pending_plan || row.pendingPlan || '';
-    let pendingDate = row.pending_date || row.pendingDate || '';
-
-    // plan 컬럼에 직렬화된 예약 플랜 정보 파싱 ("Pro|PENDING:Standard:12월 1일")
-    if (plan.includes('|PENDING:')) {
-      const parts = plan.split('|PENDING:');
-      plan = parts[0] || 'Pro';
-      const pParts = (parts[1] || '').split(':');
-      pendingPlan = pParts[0] || '';
-      pendingDate = pParts[1] || '';
-    }
-
     return {
       email: row.email,
       doctorName: row.doctor_name || row.doctorName || '원장',
       hospitalName: row.hospital_name || row.hospitalName || '우리병원',
       phone: row.phone || '',
-      plan: plan,
-      pendingPlan: pendingPlan,
-      pendingDate: pendingDate,
+      plan: row.plan || 'Pro',
+      pendingPlan: row.pending_plan || '',
+      pendingDate: row.pending_date || '',
       billingKey: row.billing_key || row.billingKey || '',
       billingRegisteredAt: row.billing_registered_at || row.billingRegisteredAt || '',
       naverReviewUrl: row.naver_review_url || row.naverReviewUrl || '',
