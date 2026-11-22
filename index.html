@@ -280,7 +280,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 420px;
+      min-height: 380px;
       cursor: pointer;
       overflow: hidden;
     }
@@ -298,18 +298,30 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.99); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.99);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
+    /* 목업 내부에서는 진료실/대시보드가 좁게 갇혀있음 */
     .preview-img {
       width: 100%;
       height: auto;
-      max-height: 560px;
+      max-height: 440px;
       object-fit: contain;
       display: block;
       margin: 0 auto;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .preview-img.mobile-style {
+      max-height: 480px;
     }
 
     .mockup-inner:hover .preview-img {
@@ -349,12 +361,12 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(10px);
+      background: rgba(5, 8, 15, 0.94);
+      backdrop-filter: blur(12px);
       z-index: 9999;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
       cursor: zoom-out;
       animation: fadeIn 0.2s ease-out;
     }
@@ -365,20 +377,30 @@
 
     .lightbox-content-wrapper {
       position: relative;
-      max-width: 95vw;
-      max-height: 92vh;
+      max-width: 96vw;
+      width: 100%;
+      max-height: 94vh;
       cursor: default;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
 
     .lightbox-img {
-      max-width: 100%;
-      max-height: 84vh;
+      max-width: 95vw;
+      max-height: 85vh;
+      width: auto;
+      height: auto;
       object-fit: contain;
       border-radius: 12px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+    }
+
+    /* 가로형 와이드 이미지(진료실, 대시보드)는 화면 너비에 맞춰 1400px까지 압도적으로 꽉 차게 확대! */
+    .lightbox-img.wide-view {
+      width: 94vw;
+      max-width: 1400px;
     }
 
     .lightbox-caption {
@@ -1001,11 +1023,13 @@
         -webkit-overflow-scrolling: touch;
         gap: 16px;
         padding-bottom: 16px;
-        scrollbar-width: none; /* Firefox */
+        scrollbar-width: none;
+        /* Firefox */
       }
 
       .process-cards::-webkit-scrollbar {
-        display: none; /* Chrome, Safari */
+        display: none;
+        /* Chrome, Safari */
       }
 
       .process-card {
@@ -1098,7 +1122,8 @@
       <a href="#features">주요 기능</a>
       <a href="#pricing">얼리버드 요금제</a>
       <a href="login.html" style="color: #cbd5e1; text-decoration: none; font-weight: 700;">🔑 로그인</a>
-      <a href="signup.html" class="btn-cta-nav" style="text-decoration: none; color: #111827 !important; font-weight: 900;">얼리버드 가입</a>
+      <a href="signup.html" class="btn-cta-nav"
+        style="text-decoration: none; color: #111827 !important; font-weight: 900;">얼리버드 가입</a>
     </div>
   </nav>
 
@@ -1123,7 +1148,8 @@
           <div class="dot dot-red"></div>
           <div class="dot dot-yellow"></div>
           <div class="dot dot-green"></div>
-          <span style="font-size: 12.5px; color: #94a3b8; margin-left: 6px; font-weight: 600;">todaknote.com - 실제 서비스 화면</span>
+          <span style="font-size: 12.5px; color: #94a3b8; margin-left: 6px; font-weight: 600;">todaknote.com - 실제 서비스
+            화면</span>
         </div>
         <!-- 4개 탭 버튼 -->
         <div class="mockup-tabs">
@@ -1331,7 +1357,8 @@
   <section class="pricing-section" id="pricing">
     <div class="section-eyebrow" style="text-align: center;">PRICING PLAN</div>
     <h2 class="section-heading" style="margin-bottom: 12px;">합리적인 비용으로 병원 가치를 극대화하세요</h2>
-    <p style="text-align: center; color: #38bdf8; font-size: 19px; font-weight: 800; margin-bottom: 48px; letter-spacing: -0.5px; text-shadow: 0 0 16px rgba(56, 189, 248, 0.4);">
+    <p
+      style="text-align: center; color: #38bdf8; font-size: 19px; font-weight: 800; margin-bottom: 48px; letter-spacing: -0.5px; text-shadow: 0 0 16px rgba(56, 189, 248, 0.4);">
       🚨 얼리버드 50명 마감 시 정가로 인상되오니, 특가 표기 중 빠른 신청 바랍니다.
     </p>
 
@@ -1353,7 +1380,8 @@
           <li>가족에게 리포트 공유 가능 (바이럴 홍보)</li>
           <li>네이버 영수증 리뷰 원클릭 연동</li>
         </ul>
-        <a href="signup.html?plan=standard" class="btn-cta-nav" style="width: 100%; text-align: center; text-decoration: none; padding: 13px; color: #111827 !important; font-weight: 800; display: block; border-radius: 10px;">
+        <a href="signup.html?plan=standard" class="btn-cta-nav"
+          style="width: 100%; text-align: center; text-decoration: none; padding: 13px; color: #111827 !important; font-weight: 800; display: block; border-radius: 10px;">
           기본형 얼리버드 선택하기
         </a>
       </div>
@@ -1376,7 +1404,8 @@
           <li><strong>재방문일 카카오톡 자동 안내 (노쇼 방지)</strong></li>
           <li><strong>환자 수신 리포트 내 우리 병원 전용 로고 탑재</strong></li>
         </ul>
-        <a href="signup.html?plan=pro" class="btn-cta-nav" style="width: 100%; text-align: center; text-decoration: none; padding: 13px; background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: white !important; font-weight: 800; display: block; border-radius: 10px;">
+        <a href="signup.html?plan=pro" class="btn-cta-nav"
+          style="width: 100%; text-align: center; text-decoration: none; padding: 13px; background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: white !important; font-weight: 800; display: block; border-radius: 10px;">
           고급형 Pro 얼리버드 선택하기
         </a>
       </div>
@@ -1424,14 +1453,17 @@
   <!-- 푸터 -->
   <footer>
     <div style="margin-bottom: 18px; display: flex; justify-content: center; gap: 20px; font-weight: 600;">
-      <a href="terms.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">서비스 이용약관</a>
+      <a href="terms.html" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;"
+        onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">서비스 이용약관</a>
       <span style="color: rgba(255,255,255,0.2);">|</span>
-      <a href="privacy.html" style="color: #38bdf8; text-decoration: none; font-weight: 700; transition: color 0.2s;" onmouseover="this.style.color='#7dd3fc'" onmouseout="this.style.color='#38bdf8'">개인정보처리방침</a>
+      <a href="privacy.html" style="color: #38bdf8; text-decoration: none; font-weight: 700; transition: color 0.2s;"
+        onmouseover="this.style.color='#7dd3fc'" onmouseout="this.style.color='#38bdf8'">개인정보처리방침</a>
     </div>
     <p>
       <strong>상호명:</strong> 그래비템 | <strong>대표자:</strong> 이계권 | <strong>사업자등록번호:</strong> 687-17-02555<br>
       <strong>사업장 주소:</strong> 서울특별시 구로구 중앙로15길 125, 201동 201호<br>
-      <strong>서비스명:</strong> 토닥토닥노트 (AI 진료실 요약 솔루션) | <strong>고객지원:</strong> 010-9344-2378 | <strong>이메일:</strong> hayabusak@hotmail.com<br>
+      <strong>서비스명:</strong> 토닥토닥노트 (AI 진료실 요약 솔루션) | <strong>고객지원:</strong> 010-9344-2378 | <strong>이메일:</strong>
+      hayabusak@hotmail.com<br>
       © 2026 GRAVITEM. All rights reserved.
     </p>
   </footer>
@@ -1470,6 +1502,14 @@
       const lbCaption = document.getElementById('lightboxCaption');
       lbImg.src = img.src;
       lbCaption.textContent = caption;
+
+      // 진료실, 대시보드 같은 가로형 와이드 이미지는 wide-view 클래스를 추가하여 넓게 확대
+      if (img.src.includes('preview_clinic') || img.src.includes('preview_dashboard')) {
+        lbImg.classList.add('wide-view');
+      } else {
+        lbImg.classList.remove('wide-view');
+      }
+
       modal.classList.add('show');
       document.body.style.overflow = 'hidden';
     }
