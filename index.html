@@ -171,23 +171,26 @@
     }
 
     .btn-hero-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: #e2e8f0;
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #3c1e1e;
+      background: linear-gradient(135deg, rgba(254, 229, 0, 0.15) 0%, rgba(250, 204, 21, 0.05) 100%);
+      color: #fee500;
+      border: 1px solid rgba(254, 229, 0, 0.35);
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 16px 30px;
       border-radius: 12px;
       text-decoration: none;
       transition: all 0.2s;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
     }
 
     .btn-hero-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(254, 229, 0, 0.22);
+      border-color: rgba(254, 229, 0, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(254, 229, 0, 0.2);
     }
 
     /* 목업 프리뷰 래퍼 (탭 & 라이트박스) */
@@ -1143,7 +1146,12 @@
     </p>
     <div class="hero-btn-group" style="margin-bottom: 10px;">
       <a href="signup.html" class="btn-hero-primary" style="text-decoration: none;">지금 무료 체험 시작하기</a>
-      <a href="#features" class="btn-hero-secondary" style="text-decoration: none;">서비스 자세히 보기</a>
+      <a href="http://pf.kakao.com/_axkexeX/chat" target="_blank" rel="noopener noreferrer" class="btn-hero-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fee500" style="flex-shrink: 0;">
+          <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.828 1.838 5.308 4.618 6.697l-1.173 4.303 4.962-2.71c.516.072 1.047.11 1.593.11 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/>
+        </svg>
+        카톡 문의하기
+      </a>
     </div>
   </section>
 
