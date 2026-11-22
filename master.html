@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="todak-db.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -452,15 +453,23 @@
             } catch (e) {}
 
             hospitals = list.map(row => {
-              // TodakDB.normalizeUser 규격을 적용하여 직렬화된 pending_plan도 완벽 파싱
-              const normalized = window.TodakDB ? window.TodakDB.normalizeUser(row) : null;
-              let pPlan = normalized ? normalized.pendingPlan : (row.pending_plan || '');
-              let pDate = normalized ? normalized.pendingDate : (row.pending_date || '');
-              let bPlan = normalized ? normalized.plan : (row.plan || 'Pro');
+              // DB의 row.plan 또는 todak-db.js normalizeUser 규칙으로 pendingPlan/pendingDate 파싱
+              let bPlan = row.plan || 'Pro';
+              let pPlan = row.pending_plan || '';
+              let pDate = row.pending_date || '';
 
+              if (bPlan.includes('|PENDING:')) {
+                const parts = bPlan.split('|PENDING:');
+                bPlan = parts[0] || 'Pro';
+                const pParts = (parts[1] || '').split(':');
+                pPlan = pParts[0] || '';
+                pDate = pParts[1] || '';
+              }
+
+              // 로컬스토리지 대조
               if (localUser && localUser.email && row.email && localUser.email.toLowerCase() === row.email.toLowerCase()) {
-                if (localUser.pendingPlan !== undefined) pPlan = localUser.pendingPlan;
-                if (localUser.pendingDate !== undefined) pDate = localUser.pendingDate;
+                if (localUser.pendingPlan !== undefined && localUser.pendingPlan) pPlan = localUser.pendingPlan;
+                if (localUser.pendingDate !== undefined && localUser.pendingDate) pDate = localUser.pendingDate;
               }
 
               return {
