@@ -112,54 +112,47 @@ const TodakDB = {
     if (phone !== undefined) updateBody.phone = phone.trim();
     if (naverReviewUrl !== undefined) updateBody.naver_review_url = naverReviewUrl.trim();
     if (logoUrl !== undefined) updateBody.logo_url = logoUrl;
-    if (plan !== undefined) updateBody.plan = plan;
 
-    // 예약 플랜 필드 보존 (undefined가 아닐 때만 갱신, 기존 세션 값 우선 보존)
-    if (pendingPlan !== undefined) {
-      updateBody.pending_plan = pendingPlan;
-    } else {
+    // 예약 플랜(pendingPlan, pendingDate) 보존 로직
+    let pPlan = pendingPlan;
+    let pDate = pendingDate;
+
+    // 만약 전달받지 못했다면 현재 로컬스토리지 값 유지
+    if (pPlan === undefined || pDate === undefined) {
       const uStr = localStorage.getItem('todak_current_user');
       if (uStr) {
         try {
           const u = JSON.parse(uStr);
-          if (u.pendingPlan) updateBody.pending_plan = u.pendingPlan;
-          if (u.pendingDate) updateBody.pending_date = u.pendingDate;
+          if (pPlan === undefined) pPlan = u.pendingPlan;
+          if (pDate === undefined) pDate = u.pendingDate;
         } catch(e) {}
       }
     }
-    if (pendingDate !== undefined) updateBody.pending_date = pendingDate;
 
-    // Supabase DB 테이블 컬럼 미존재 시 오류 방지 처리:
-    // 우선 pending_plan 컬럼 포함 시도 후 실패 시 기본 컬럼만 전송
-    let res = null;
-    try {
-      res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(updateBody)
-      });
-    } catch (e) {}
-
-    if (!res || !res.ok) {
-      // pending_plan 컬럼이 없을 경우 기본 필드만 전송
-      delete updateBody.pending_plan;
-      delete updateBody.pending_date;
-      res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(updateBody)
-      });
+    // 기본 플랜명 결정 (Pro 또는 Standard)
+    let basePlan = (plan !== undefined) ? plan : 'Pro';
+    // 만약 기존 plan에 직렬화된 문자열이 들어있었다면 기본 플랜 추출
+    if (basePlan.includes('|PENDING:')) {
+      basePlan = basePlan.split('|')[0];
     }
+
+    // 🌟 핵심: DB의 plan 컬럼에 예약 상태를 영구 보존 인코딩 ("Pro|PENDING:Standard:12월 1일")
+    if (pPlan && pDate) {
+      updateBody.plan = `${basePlan}|PENDING:${pPlan}:${pDate}`;
+    } else {
+      updateBody.plan = basePlan;
+    }
+
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(updateBody)
+    });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -168,17 +161,10 @@ const TodakDB = {
 
     const data = await res.json();
     const updated = Array.isArray(data) && data.length > 0 ? data[0] : updateBody;
-    
-    // 로컬의 pendingPlan/pendingDate 상태가 유실되지 않도록 병합 보정
-    const localStr = localStorage.getItem('todak_current_user');
-    let localPrev = {};
-    if (localStr) { try { localPrev = JSON.parse(localStr); } catch(e) {} }
 
     const normalized = this.normalizeUser({
       ...updated,
-      email: cleanEmail,
-      pending_plan: updated.pending_plan !== undefined ? updated.pending_plan : localPrev.pendingPlan,
-      pending_date: updated.pending_date !== undefined ? updated.pending_date : localPrev.pendingDate
+      email: cleanEmail
     });
 
     // 브라우저 세션 동기화
@@ -187,27 +173,40 @@ const TodakDB = {
   },
 
   // 5. 플랜 업그레이드 / 전환 (Supabase DB 직접 반영)
-  async updatePlan(email, newPlan) {
+  async updatePlan(email, newPlan, pendingPlan = null, pendingDate = null) {
     if (!email) {
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try { email = JSON.parse(userStr).email; } catch (e) {}
       }
     }
-    return await this.updateProfile({ email, plan: newPlan });
+    return await this.updateProfile({ email, plan: newPlan, pendingPlan, pendingDate });
   },
 
   // 규격 통일 헬퍼
   normalizeUser(row) {
     if (!row) return null;
+    let plan = row.plan || 'Pro';
+    let pendingPlan = row.pending_plan || row.pendingPlan || '';
+    let pendingDate = row.pending_date || row.pendingDate || '';
+
+    // plan 컬럼에 직렬화된 예약 플랜 정보 파싱 ("Pro|PENDING:Standard:12월 1일")
+    if (plan.includes('|PENDING:')) {
+      const parts = plan.split('|PENDING:');
+      plan = parts[0] || 'Pro';
+      const pParts = (parts[1] || '').split(':');
+      pendingPlan = pParts[0] || '';
+      pendingDate = pParts[1] || '';
+    }
+
     return {
       email: row.email,
       doctorName: row.doctor_name || row.doctorName || '원장',
       hospitalName: row.hospital_name || row.hospitalName || '우리병원',
       phone: row.phone || '',
-      plan: row.plan || 'Pro',
-      pendingPlan: row.pending_plan || row.pendingPlan || '',
-      pendingDate: row.pending_date || row.pendingDate || '',
+      plan: plan,
+      pendingPlan: pendingPlan,
+      pendingDate: pendingDate,
       billingKey: row.billing_key || row.billingKey || '',
       billingRegisteredAt: row.billing_registered_at || row.billingRegisteredAt || '',
       naverReviewUrl: row.naver_review_url || row.naverReviewUrl || '',

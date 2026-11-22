@@ -452,8 +452,11 @@
             } catch (e) {}
 
             hospitals = list.map(row => {
-              let pPlan = row.pending_plan || '';
-              let pDate = row.pending_date || '';
+              // TodakDB.normalizeUser 규격을 적용하여 직렬화된 pending_plan도 완벽 파싱
+              const normalized = window.TodakDB ? window.TodakDB.normalizeUser(row) : null;
+              let pPlan = normalized ? normalized.pendingPlan : (row.pending_plan || '');
+              let pDate = normalized ? normalized.pendingDate : (row.pending_date || '');
+              let bPlan = normalized ? normalized.plan : (row.plan || 'Pro');
 
               if (localUser && localUser.email && row.email && localUser.email.toLowerCase() === row.email.toLowerCase()) {
                 if (localUser.pendingPlan !== undefined) pPlan = localUser.pendingPlan;
@@ -465,7 +468,7 @@
                 doctorName: row.doctor_name || '원장',
                 email: row.email,
                 phone: row.phone || '-',
-                plan: row.plan || 'Pro',
+                plan: bPlan,
                 pendingPlan: pPlan,
                 pendingDate: pDate,
                 joinedAt: row.created_at
