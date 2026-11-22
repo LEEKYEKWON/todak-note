@@ -1449,27 +1449,36 @@
 
     // 로그인 회원 정보 및 플랜에 따른 메뉴/헤더 렌더링
     window.addEventListener('DOMContentLoaded', async () => {
+      // 1. 기존 캐시로 즉시 1차 렌더링
       renderHospitalHeader();
-      // 🌟 TodakDB를 통해 Supabase DB의 최신 프로필로 실시간 갱신
+
+      // 2. 🌟 TodakDB를 통해 Supabase DB의 최신 프로필(pendingPlan, pendingDate 등) 실시간 동기화
       if (window.TodakDB) {
-        const freshUser = await TodakDB.getCurrentUserProfile();
-        if (freshUser) {
-          renderHospitalHeader();
+        try {
+          const freshUser = await TodakDB.getCurrentUserProfile();
+          if (freshUser) {
+            renderHospitalHeader(freshUser);
+          }
+        } catch (e) {
+          console.warn('DB 프로필 갱신 실패:', e);
         }
       }
     });
 
-    function renderHospitalHeader() {
+    function renderHospitalHeader(targetUser = null) {
       const userStr = localStorage.getItem('todak_current_user');
       const adminBtn = document.getElementById('btnAdminNav');
       const badgeArea = document.getElementById('headerHospBadgeArea');
 
-      let user = { hospitalName: '길동이의원', doctorName: '홍길동', plan: 'Pro' };
-      if (userStr) {
-        try {
-          const parsed = JSON.parse(userStr);
-          user = Object.assign(user, parsed);
-        } catch (e) { }
+      let user = targetUser;
+      if (!user) {
+        user = { hospitalName: '길동이의원', doctorName: '홍길동', plan: 'Pro' };
+        if (userStr) {
+          try {
+            const parsed = JSON.parse(userStr);
+            user = Object.assign(user, parsed);
+          } catch (e) { }
+        }
       }
 
       const hospTag = document.querySelector('.hospital-tag');
@@ -2375,7 +2384,6 @@
     setTheme(savedTheme);
 
   </script>
-  <script src="todak-db.js"></script>
 </body>
 
 </html>
