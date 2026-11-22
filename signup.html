@@ -291,6 +291,21 @@
           plan: currentPlan === 'standard' ? 'Standard' : 'Pro'
         });
 
+        // 🌟 [실시간 알림] 대표님 네이버 이메일로 신규 회원가입 알림 자동 전송 (비동기)
+        try {
+          fetch('/api/notify-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              doctorName: user.doctorName,
+              hospitalName: user.hospitalName,
+              phone: user.phone,
+              plan: user.plan
+            })
+          }).catch(err => console.warn('가입 알림 전송 예외:', err));
+        } catch (e) { }
+
         localStorage.setItem('todak_current_user', JSON.stringify(user));
         localStorage.removeItem('todak_desk_queue');
 
