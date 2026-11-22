@@ -247,6 +247,219 @@
       border: 2px solid rgba(255, 255, 255, 0.12);
     }
 
+    /* 우리 병원 매출 프로세스 섹션 & 캐러셀 */
+    .process-section {
+      padding: 90px 24px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+
+    .process-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .process-headline {
+      font-size: 34px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -1px;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+
+    .process-headline span {
+      background: linear-gradient(135deg, #38bdf8 0%, #fee500 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .process-sub {
+      font-size: 16.5px;
+      color: #94a3b8;
+      max-width: 720px;
+      margin: 0 auto 44px;
+      line-height: 1.6;
+    }
+
+    .process-carousel-wrapper {
+      position: relative;
+    }
+
+    .process-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      text-align: left;
+    }
+
+    .process-card {
+      background: #131b2e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 32px 26px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .process-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 20px 40px -10px rgba(14, 165, 233, 0.2);
+    }
+
+    .process-card.highlight {
+      border: 1.5px solid rgba(254, 229, 0, 0.4);
+      background: radial-gradient(circle at 100% 0%, rgba(254, 229, 0, 0.08) 0%, #152037 70%);
+      box-shadow: 0 15px 35px -10px rgba(254, 229, 0, 0.15);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .process-card.highlight .step-pill {
+      background: rgba(254, 229, 0, 0.15);
+      color: #fee500;
+      border-color: rgba(254, 229, 0, 0.4);
+    }
+
+    .step-icon-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .step-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+      line-height: 1.35;
+    }
+
+    .step-desc {
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .step-flow-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .step-flow-item {
+      font-size: 13px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 9px 12px;
+      border-radius: 9px;
+      border-left: 3px solid #38bdf8;
+    }
+
+    .process-card.highlight .step-flow-item {
+      border-left-color: #fee500;
+    }
+
+    .step-flow-num {
+      font-weight: 900;
+      color: #38bdf8;
+      font-size: 12px;
+      min-width: 14px;
+    }
+
+    .process-card.highlight .step-flow-num {
+      color: #fee500;
+    }
+
+    .step-point-badge {
+      padding: 9px 12px;
+      border-radius: 9px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px dashed rgba(56, 189, 248, 0.35);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-align: center;
+    }
+
+    .process-card.highlight .step-point-badge {
+      background: rgba(254, 229, 0, 0.08);
+      border-color: rgba(254, 229, 0, 0.4);
+      color: #fee500;
+    }
+
+    .carousel-indicators {
+      display: none;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s;
+    }
+
+    .indicator-dot.active {
+      width: 24px;
+      border-radius: 10px;
+      background: #38bdf8;
+    }
+
     /* 3대 핵심 혜택 섹션 */
     .features-section {
       padding: 110px 24px;
@@ -594,6 +807,50 @@
         grid-template-columns: 1fr;
       }
 
+      /* 모바일 캐러셀 스와이프 스타일 */
+      .process-section {
+        padding: 60px 16px 50px;
+      }
+
+      .process-headline {
+        font-size: 26px;
+      }
+
+      .process-sub {
+        font-size: 14.5px;
+        margin-bottom: 30px;
+      }
+
+      .process-carousel-wrapper {
+        margin: 0 -16px;
+        padding: 0 16px;
+      }
+
+      .process-cards {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 16px;
+        padding-bottom: 16px;
+        scrollbar-width: none; /* Firefox */
+      }
+
+      .process-cards::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+      }
+
+      .process-card {
+        flex: 0 0 85%;
+        max-width: 320px;
+        scroll-snap-align: center;
+        padding: 26px 20px;
+      }
+
+      .carousel-indicators {
+        display: flex;
+      }
+
       .hero-mockup-wrapper {
         border-radius: 14px;
       }
@@ -614,6 +871,7 @@
       <span>토닥토닥노트</span>
     </a>
     <div class="nav-links">
+      <a href="#process">3단계 프로세스</a>
       <a href="#features">주요 기능</a>
       <a href="#pricing">얼리버드 요금제</a>
       <a href="login.html" style="color: #cbd5e1; text-decoration: none; font-weight: 700;">🔑 로그인</a>
@@ -646,6 +904,122 @@
       <div class="mockup-inner">
         <img src="open_book_heart_clean_1794109984125.jpg" alt="토닥토닥노트 로고">
         <div style="font-size: 14.5px; color: #cbd5e1; font-weight: 700;">의사와 환자를 잇는 가장 따뜻한 AI 케어 솔루션</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 우리 병원 매출 프로세스 섹션 (인스타형 카드 캐러셀) -->
+  <section class="process-section" id="process">
+    <div class="process-badge">⚡ AUTOMATIC GROWTH SYSTEM</div>
+    <h2 class="process-headline">
+      우리 병원 매출이 저절로 오르는 <span>3단계 AI 프로세스</span>
+    </h2>
+    <p class="process-sub">
+      원장님은 평소처럼 진료에만 집중하세요.<br>
+      실시간 타이핑부터 환자 감동 리포트, 바이럴 마케팅까지 토닥토닥노트가 알아서 처리합니다.
+    </p>
+
+    <div class="process-carousel-wrapper">
+      <div class="process-cards" id="processCards">
+        <!-- STEP 1 -->
+        <div class="process-card">
+          <div>
+            <div class="card-top-row">
+              <span class="step-pill">STEP 1 · 진료실 자동화</span>
+              <div class="step-icon-circle">🎙️</div>
+            </div>
+            <h3 class="step-title">단축키 하나로 끝나는<br>AI 실시간 자동 차팅</h3>
+            <p class="step-desc">
+              진료 중 모니터 보며 타이핑하느라 환자 눈 맞출 시간도 없으셨나요? 이제 F9만 누르면 AI가 스스로 해결합니다.
+            </p>
+            <ul class="step-flow-list">
+              <li class="step-flow-item">
+                <span class="step-flow-num">1</span>
+                <span><strong>[F9]</strong> 또는 마이크 버튼 클릭으로 간편 시작</span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">2</span>
+                <span>평소처럼 진료 대화 진행 (AI가 실시간 타이핑)</span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">3</span>
+                <span>진료 종료 시 <strong>[F9]</strong> 눌러 즉시 녹음 완료</span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">4</span>
+                <span>AI가 환자 눈높이에 맞춘 <strong>쉬운 말 요약본</strong> 생성</span>
+              </li>
+            </ul>
+          </div>
+          <div class="step-point-badge">
+            💡 진료 중 키보드를 두드릴 필요가 전혀 없습니다!
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="process-card">
+          <div>
+            <div class="card-top-row">
+              <span class="step-pill">STEP 2 · 원클릭 케어</span>
+              <div class="step-icon-circle">💬</div>
+            </div>
+            <h3 class="step-title">데스크와 환자를 잇는<br>1초 알림톡 안심 발송</h3>
+            <p class="step-desc">
+              원장님이 진료실에서 확인 후 즉시 쏘거나 수납 데스크로 넘기면, 환자 스마트폰 카카오톡으로 안심 리포트가 도착합니다.
+            </p>
+            <ul class="step-flow-list">
+              <li class="step-flow-item">
+                <span class="step-flow-num">5</span>
+                <span>원장님 확인 후 <strong>카톡 즉시 발송</strong> 또는 <strong>데스크 전달</strong></span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">5+</span>
+                <span>데스크에서 복약법 및 다음 내원일 입력 후 발송</span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">6</span>
+                <span>환자 카카오톡으로 <strong>정갈한 요약 리포트</strong> 실시간 수신</span>
+              </li>
+            </ul>
+          </div>
+          <div class="step-point-badge">
+            👏 반복되는 전화 문의가 80% 이상 줄어듭니다!
+          </div>
+        </div>
+
+        <!-- STEP 3 (강조) -->
+        <div class="process-card highlight">
+          <div>
+            <div class="card-top-row">
+              <span class="step-pill">STEP 3 · 매출 & 바이럴</span>
+              <div class="step-icon-circle">📈</div>
+            </div>
+            <h3 class="step-title">신규 환자 유입과<br>네이버 찐리뷰 폭발적 증가</h3>
+            <p class="step-desc">
+              별도 마케팅 대행사에 수백만 원 쓰지 마세요. 감동받은 환자가 직접 우리 병원의 홍보대사가 됩니다.
+            </p>
+            <ul class="step-flow-list">
+              <li class="step-flow-item">
+                <span class="step-flow-num">7</span>
+                <span>리포트 내 <strong>[공유하기]</strong>로 가족·지인 단톡방 입소문 전파</span>
+              </li>
+              <li class="step-flow-item">
+                <span class="step-flow-num">8</span>
+                <span><strong>[네이버 리뷰 남기기]</strong> 원클릭으로 별점 5개 찐리뷰 등록</span>
+              </li>
+            </ul>
+          </div>
+          <div class="step-point-badge">
+            🚀 신규 유입 증대 & 플레이스 순위 상승으로 직결!
+          </div>
+        </div>
+      </div>
+
+      <!-- 모바일 인디케이터 도트 -->
+      <div class="carousel-indicators" id="carouselDots">
+        <span class="indicator-dot active"></span>
+        <span class="indicator-dot"></span>
+        <span class="indicator-dot"></span>
       </div>
     </div>
   </section>
@@ -810,6 +1184,26 @@
 
       alert(`🎉 [얼리버드 신청 완료]\n${hosp} ${doc}님, 얼리버드 50명 한정 신청이 정상 접수되었습니다!\n입력하신 연락처(${phone}) 및 이메일(${email})로 서비스 이용 링크를 보내드립니다.`);
       closeApplyModal();
+    }
+    // 모바일 캐러셀 스크롤 시 인디케이터 도트 활성화 연동
+    const processCards = document.getElementById('processCards');
+    const dots = document.querySelectorAll('#carouselDots .indicator-dot');
+    if (processCards && dots.length > 0) {
+      processCards.addEventListener('scroll', () => {
+        const scrollLeft = processCards.scrollLeft;
+        const width = processCards.offsetWidth;
+        const activeIndex = Math.min(
+          dots.length - 1,
+          Math.max(0, Math.round(scrollLeft / (width * 0.75)))
+        );
+        dots.forEach((dot, idx) => {
+          if (idx === activeIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      });
     }
   </script>
 </body>
