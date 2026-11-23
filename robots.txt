@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /master.html
+Disallow: /clinic.html
+Disallow: /desk.html
+Disallow: /clear-data.html
+Disallow: /api/
+
+Sitemap: https://todak-note.vercel.app/sitemap.xml
