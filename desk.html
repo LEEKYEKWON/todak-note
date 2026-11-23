@@ -312,7 +312,15 @@
           <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 환자 리포트 발송 및 이력</h2>
           <p style="font-size: 13.5px; color: #64748b;">진료실에서 전달된 환자 목록입니다. 발송 완료된 환자도 언제든 내용을 다시 열람할 수 있습니다.</p>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <!-- 🔍 실시간 검색창 -->
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
+              style="padding: 7px 12px 7px 32px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 200px; outline: none; background: white; transition: all 0.2s;"
+              oninput="handleSearchInput(event)">
+            <span style="position: absolute; left: 10px; font-size: 13px; color: #94a3b8; pointer-events: none;">🔍</span>
+            <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
+          </div>
           <!-- 기간 필터 탭 -->
           <div style="display: flex; background: #f1f5f9; padding: 3px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <button class="quick-chip-btn filter-btn active" id="filterAll" onclick="setFilter('all')">전체</button>
@@ -328,9 +336,9 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 14%;">접수시각</th>
-              <th style="width: 22%;">환자명</th>
-              <th style="width: 24%;">전화번호</th>
+              <th style="width: 17%;">접수날짜/시각</th>
+              <th style="width: 21%;">환자명</th>
+              <th style="width: 22%;">전화번호</th>
               <th style="width: 18%; text-align: center;">발송 상태</th>
               <th style="width: 22%; text-align: center;">작업</th>
             </tr>
@@ -490,6 +498,50 @@
     let activeQueueIndex = -1;
     let deskQueueData = [];
     let currentFilter = 'all';
+    let searchQuery = '';
+
+    // 실시간 검색 처리
+    function handleSearchInput(e) {
+      searchQuery = (e.target.value || '').trim();
+      const clearBtn = document.getElementById('btnSearchClear');
+      if (clearBtn) {
+        clearBtn.style.display = searchQuery ? 'inline-flex' : 'none';
+      }
+      renderDeskTable();
+    }
+
+    function clearSearch() {
+      const searchInput = document.getElementById('deskSearchInput');
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      const clearBtn = document.getElementById('btnSearchClear');
+      if (clearBtn) clearBtn.style.display = 'none';
+      renderDeskTable();
+    }
+
+    // 날짜/시각 포맷터 헬퍼 (예: "2026.11.23 21:05")
+    function formatDateTime(timestampOrStr) {
+      if (!timestampOrStr) return '-';
+      // 이미 'YYYY.MM.DD HH:mm' 형태인 경우
+      if (typeof timestampOrStr === 'string' && timestampOrStr.includes('.') && timestampOrStr.includes(':')) {
+        return timestampOrStr;
+      }
+      let d = new Date(timestampOrStr);
+      if (isNaN(d.getTime())) {
+        // '오후 09:05' 처럼 시각만 들어있던 구버전 데이터 처리
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}.${mm}.${dd} ${timestampOrStr}`;
+      }
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+    }
 
     // 현재 병원 ID 식별
     function getHospitalId() {
@@ -565,22 +617,36 @@
       const weekStart = todayStart - (now.getDay() * 24 * 60 * 60 * 1000);
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
-      // 필터링 적용
+      // 기간 필터링 및 검색어(환자명/전화번호) 필터링 동시 적용
       const filtered = deskQueueData.filter(item => {
         const t = item.timestamp || Date.now();
-        if (currentFilter === 'today') return t >= todayStart;
-        if (currentFilter === 'week') return t >= weekStart;
-        if (currentFilter === 'month') return t >= monthStart;
+        if (currentFilter === 'today' && t < todayStart) return false;
+        if (currentFilter === 'week' && t < weekStart) return false;
+        if (currentFilter === 'month' && t < monthStart) return false;
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const pName = (item.patientName || '').toLowerCase();
+          const phone = (item.phone || '').replace(/[^0-9]/g, '');
+          const cleanQ = q.replace(/[^0-9]/g, '');
+          const nameMatch = pName.includes(q);
+          const phoneMatch = cleanQ.length > 0 ? phone.includes(cleanQ) : item.phone.includes(q);
+          return nameMatch || phoneMatch;
+        }
+
         return true;
       });
 
       if (!filtered || filtered.length === 0) {
+        const emptyMsg = searchQuery 
+          ? `🔍 "<strong>${escapeHtml(searchQuery)}</strong>" 검색 결과가 없습니다.<br><span style="font-size: 12.5px; color: #94a3b8;">환자명이나 전화번호를 다시 확인해 주세요.</span>`
+          : `해당 기간의 환자 리포트 내역이 없습니다.<br>진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.`;
+
         tbody.innerHTML = `
           <tr>
             <td colspan="5" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
-              <span style="font-size: 32px; display: block; margin-bottom: 8px;">📭</span>
-              해당 기간의 환자 리포트 내역이 없습니다.<br>
-              진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.
+              <span style="font-size: 32px; display: block; margin-bottom: 8px;">${searchQuery ? '🔎' : '📭'}</span>
+              ${emptyMsg}
             </td>
           </tr>
         `;
@@ -594,10 +660,13 @@
         const tr = document.createElement('tr');
         if (isSent) tr.style.background = '#f8fafc';
 
+        // 🌟 접수날짜/시각 완벽 포맷팅
+        const displayDateTime = formatDateTime(item.createdAt || item.timestamp);
+
         tr.innerHTML = `
-          <td style="color: #64748b; font-size: 13px; font-weight: 600;">${item.createdAt || '방금'}</td>
-          <td><strong>${item.patientName}</strong></td>
-          <td style="color: #334155;">${item.phone}</td>
+          <td style="color: #475569; font-size: 13px; font-weight: 600;">${displayDateTime}</td>
+          <td><strong>${highlightSearch(item.patientName, searchQuery)}</strong></td>
+          <td style="color: #334155; font-weight: 600;">${highlightSearch(item.phone, searchQuery)}</td>
           <td style="text-align: center;">
             ${isSent 
               ? `<span style="background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>` 
@@ -617,6 +686,19 @@
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function highlightSearch(text, query) {
+      if (!text) return '';
+      if (!query) return escapeHtml(text);
+      const cleanQ = escapeHtml(query);
+      const regex = new RegExp(`(${cleanQ.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return escapeHtml(text).replace(regex, '<span style="background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 3px; font-weight: 800;">$1</span>');
     }
 
     function openDeskModal(idx) {
