@@ -82,9 +82,9 @@
 
     main {
       flex: 1;
-      max-width: 980px;
+      max-width: 1140px;
       width: 100%;
-      margin: 36px auto;
+      margin: 32px auto;
       padding: 0 20px;
       display: flex;
       flex-direction: column;
@@ -307,13 +307,16 @@
 
   <main>
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 환자 리포트 발송 및 이력</h2>
-          <p style="font-size: 13.5px; color: #64748b;">진료실에서 전달된 환자 목록입니다. 발송 완료된 환자도 언제든 내용을 다시 열람할 수 있습니다.</p>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <!-- 기간 필터 탭 -->
+      <!-- 1행: 타이틀 및 안내 문구 -->
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 환자 리포트 발송 및 이력</h2>
+        <p style="font-size: 13.5px; color: #64748b;">진료실에서 전달된 환자 목록입니다. 발송 완료된 환자도 언제든 내용을 다시 열람할 수 있습니다.</p>
+      </div>
+
+      <!-- 2행: 컨트롤 바 (좌측: 기간 필터 & 새로고침 / 우측 끝: 검색창 완벽 분리) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <!-- 좌측 영역: 기간 필터 탭 & 새로고침 -->
+        <div style="display: flex; gap: 8px; align-items: center;">
           <div style="display: flex; background: #f1f5f9; padding: 3px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <button class="quick-chip-btn filter-btn active" id="filterAll" onclick="setFilter('all')">전체</button>
             <button class="quick-chip-btn filter-btn" id="filterToday" onclick="setFilter('today')">오늘</button>
@@ -321,14 +324,15 @@
             <button class="quick-chip-btn filter-btn" id="filterMonth" onclick="setFilter('month')">이번 달</button>
           </div>
           <button class="quick-chip-btn" onclick="loadDeskQueue()" style="padding: 7px 12px; font-weight: 800;">🔄 새로고침</button>
-          <!-- 🔍 실시간 검색창 (오른쪽 끝 배치) -->
-          <div style="position: relative; display: flex; align-items: center;">
-            <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
-              style="padding: 7px 12px 7px 32px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 210px; outline: none; background: white; transition: all 0.2s;"
-              oninput="handleSearchInput(event)">
-            <span style="position: absolute; left: 10px; font-size: 13px; color: #94a3b8; pointer-events: none;">🔍</span>
-            <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
-          </div>
+        </div>
+
+        <!-- 우측 끝 영역: 🔍 실시간 검색창 -->
+        <div style="position: relative; display: flex; align-items: center;">
+          <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
+            style="padding: 8px 12px 8px 34px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 230px; outline: none; background: white; transition: all 0.2s;"
+            oninput="handleSearchInput(event)">
+          <span style="position: absolute; left: 10px; font-size: 13.5px; color: #94a3b8; pointer-events: none;">🔍</span>
+          <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
         </div>
       </div>
 
