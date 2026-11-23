@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>토닥토닥노트 - 의사를 위한 AI 진료 요약 및 환자 안심 케어 솔루션</title>
+    <link>https://todak-note.vercel.app/</link>
+    <description>진료실 음성 대화 3초 AI 자동 요약, 환자 안심 카카오 알림톡 리포트 발송, 네이버 영수증 리뷰 연동</description>
+    <language>ko-KR</language>
+    <pubDate>Mon, 23 Nov 2026 22:25:00 +0900</pubDate>
+    <lastBuildDate>Mon, 23 Nov 2026 22:25:00 +0900</lastBuildDate>
+    <atom:link href="https://todak-note.vercel.app/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>토닥토닥노트 - 서비스 소개 및 기능 안내</title>
+      <link>https://todak-note.vercel.app/</link>
+      <description>의사를 위한 인공지능 진료 요약 및 환자 안심 케어 리포트 솔루션</description>
+      <pubDate>Mon, 23 Nov 2026 22:25:00 +0900</pubDate>
+      <guid>https://todak-note.vercel.app/</guid>
+    </item>
+  </channel>
+</rss>
