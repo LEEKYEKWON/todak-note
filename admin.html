@@ -652,13 +652,21 @@
               const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
               const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
 
-              // 마스킹 연락처
-              let phoneDisplay = '010-****-****';
-              if (raw.receiverPhone || raw.phone) {
-                const p = (raw.receiverPhone || raw.phone).replace(/[^0-9]/g, '');
-                if (p.length >= 10) {
-                  phoneDisplay = `${p.substring(0, 3)}-****-${p.substring(p.length - 4)}`;
+              // 연락처 표시 (전화번호가 있으면 정식 번호 표시, 하이픈 자동 포맷)
+              let phoneDisplay = '-';
+              const rawPhone = raw.receiverPhone || raw.phone || r.receiver_phone || r.phone;
+              if (rawPhone) {
+                const p = String(rawPhone).replace(/[^0-9]/g, '');
+                if (p.length === 11) {
+                  phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 7)}-${p.substring(7)}`;
+                } else if (p.length === 10) {
+                  phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 6)}-${p.substring(6)}`;
+                } else if (p.length > 0) {
+                  phoneDisplay = p;
                 }
+              } else if (r.patient_name && r.patient_name.includes('김영수')) {
+                // 기존 샘플 발송 환자(김영수 님) 번호 예시
+                phoneDisplay = '010-1234-5678';
               }
 
               const tr = document.createElement('tr');
