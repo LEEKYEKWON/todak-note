@@ -652,7 +652,7 @@
               const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
               const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
 
-              // 연락처 표시 (전화번호가 있으면 정식 번호 표시, 하이픈 자동 포맷)
+              // 연락처 표시 (DB에 저장된 실제 환자 수신 번호 표시, 하이픈 자동 포맷)
               let phoneDisplay = '-';
               const rawPhone = raw.receiverPhone || raw.phone || r.receiver_phone || r.phone;
               if (rawPhone) {
@@ -664,9 +664,6 @@
                 } else if (p.length > 0) {
                   phoneDisplay = p;
                 }
-              } else if (r.patient_name && r.patient_name.includes('김영수')) {
-                // 기존 샘플 발송 환자(김영수 님) 번호 예시
-                phoneDisplay = '010-1234-5678';
               }
 
               const tr = document.createElement('tr');
