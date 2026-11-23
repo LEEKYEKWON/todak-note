@@ -307,20 +307,12 @@
 
   <main>
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
         <div>
           <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">수납 환자 리포트 발송 및 이력</h2>
           <p style="font-size: 13.5px; color: #64748b;">진료실에서 전달된 환자 목록입니다. 발송 완료된 환자도 언제든 내용을 다시 열람할 수 있습니다.</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <!-- 🔍 실시간 검색창 -->
-          <div style="position: relative; display: flex; align-items: center;">
-            <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
-              style="padding: 7px 12px 7px 32px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 200px; outline: none; background: white; transition: all 0.2s;"
-              oninput="handleSearchInput(event)">
-            <span style="position: absolute; left: 10px; font-size: 13px; color: #94a3b8; pointer-events: none;">🔍</span>
-            <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
-          </div>
           <!-- 기간 필터 탭 -->
           <div style="display: flex; background: #f1f5f9; padding: 3px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <button class="quick-chip-btn filter-btn active" id="filterAll" onclick="setFilter('all')">전체</button>
@@ -329,6 +321,14 @@
             <button class="quick-chip-btn filter-btn" id="filterMonth" onclick="setFilter('month')">이번 달</button>
           </div>
           <button class="quick-chip-btn" onclick="loadDeskQueue()" style="padding: 7px 12px; font-weight: 800;">🔄 새로고침</button>
+          <!-- 🔍 실시간 검색창 (오른쪽 끝 배치) -->
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
+              style="padding: 7px 12px 7px 32px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 210px; outline: none; background: white; transition: all 0.2s;"
+              oninput="handleSearchInput(event)">
+            <span style="position: absolute; left: 10px; font-size: 13px; color: #94a3b8; pointer-events: none;">🔍</span>
+            <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
+          </div>
         </div>
       </div>
 
@@ -519,28 +519,52 @@
       renderDeskTable();
     }
 
-    // 날짜/시각 포맷터 헬퍼 (예: "2026.11.23 21:05")
+    // 날짜/시각 포맷터 헬퍼 (날짜와 오전/오후 시각을 2줄로 깔끔하게 분리)
     function formatDateTime(timestampOrStr) {
       if (!timestampOrStr) return '-';
-      // 이미 'YYYY.MM.DD HH:mm' 형태인 경우
-      if (typeof timestampOrStr === 'string' && timestampOrStr.includes('.') && timestampOrStr.includes(':')) {
-        return timestampOrStr;
+
+      let d = null;
+      let timeFallback = '';
+
+      if (typeof timestampOrStr === 'string') {
+        // "2026.11.23 21:05" 형태인 경우 파싱
+        const match = timestampOrStr.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
+        if (match) {
+          d = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10), parseInt(match[4], 10), parseInt(match[5], 10));
+        } else {
+          // "오후 04:09" 같은 한글 시간 문자열이 포함된 경우
+          const parsed = new Date(timestampOrStr);
+          if (!isNaN(parsed.getTime())) {
+            d = parsed;
+          } else {
+            timeFallback = timestampOrStr.replace(/^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}\s*/, '').trim();
+          }
+        }
+      } else {
+        const parsed = new Date(timestampOrStr);
+        if (!isNaN(parsed.getTime())) d = parsed;
       }
-      let d = new Date(timestampOrStr);
-      if (isNaN(d.getTime())) {
-        // '오후 09:05' 처럼 시각만 들어있던 구버전 데이터 처리
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}.${mm}.${dd} ${timestampOrStr}`;
+
+      if (d && !isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? '오후' : '오전';
+        hours = hours % 12;
+        if (hours === 0) hours = 12;
+        const hhStr = String(hours).padStart(2, '0');
+
+        return `<div style="line-height: 1.35;"><span style="font-size: 13px; color: #334155; font-weight: 700;">${yyyy}.${mm}.${dd}</span><br><span style="font-size: 12px; color: #64748b; font-weight: 500;">${ampm} ${hhStr}:${minutes}</span></div>`;
       }
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const hh = String(d.getHours()).padStart(2, '0');
-      const min = String(d.getMinutes()).padStart(2, '0');
-      return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+
+      // 파싱이 어려웠던 경우 폴백
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      return `<div style="line-height: 1.35;"><span style="font-size: 13px; color: #334155; font-weight: 700;">${yyyy}.${mm}.${dd}</span><br><span style="font-size: 12px; color: #64748b; font-weight: 500;">${timeFallback || timestampOrStr}</span></div>`;
     }
 
     // 현재 병원 ID 식별
