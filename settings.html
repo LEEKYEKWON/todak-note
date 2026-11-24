@@ -580,10 +580,10 @@
         <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
           <span>💡</span> 다인 진료실(Multi-Doctor Clinic) 시스템 안내
         </div>
-        <p>• <strong>병원 대표 계정 1개</strong>로 각 진료실 PC에서 로그인 후 해당 진료실 방을 선택하여 진료할 수 있습니다.</p>
+        <p>• <strong>대표원장 계정 비밀번호 노출 방지</strong>: 각 진료실마다 부여된 <strong>[진료실 전용 접속 비밀번호]</strong>만 부원장님께 전달해 주시면 안전하게 로그인할 수 있습니다.</p>
         <p>• 기본 요금제에 <strong>1진료실(메인)과 수납 데스크 1대</strong>가 기본 포함되어 있습니다.</p>
         <p>• 추가 진료실(부원장님) 슬롯은 정가의 50% 반값 특가(<strong id="slotPriceNoticeText" style="color: #0284c7;">기본형 월 74,000원 / 고급형 월 99,000원</strong>)로 무제한 추가하실 수 있습니다.</p>
-        <p>• 부원장님이 교체되거나 퇴사하신 경우, 추가 비용 없이 언제든 <strong style="color: #0284c7;">[원장명 수정]</strong>을 통해 새 원장님 성함으로 변경하여 즉시 재사용하실 수 있습니다.</p>
+        <p>• 부원장님이 교체되거나 퇴사하신 경우, 추가 비용 없이 언제든 <strong style="color: #0284c7;">[수정]</strong>을 통해 새 원장님 성함과 새 접속 비밀번호로 변경하여 즉시 재사용하실 수 있습니다.</p>
       </div>
 
       <!-- 진료실 슬롯 목록 테이블 -->
@@ -593,6 +593,7 @@
             <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 700;">
               <th style="padding: 12px 16px;">진료실 명칭</th>
               <th style="padding: 12px 16px;">담당 원장님</th>
+              <th style="padding: 12px 16px;">진료실 접속 코드 (PIN)</th>
               <th style="padding: 12px 16px;">구분</th>
               <th style="padding: 12px 16px;">월 추가 구독료</th>
               <th style="padding: 12px 16px; text-align: center;">관리</th>
@@ -608,7 +609,7 @@
 
   <!-- 🏥 진료실 슬롯 추가/수정 모달 -->
   <div id="roomModalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px);">
-    <div style="background: white; border-radius: 18px; width: 100%; max-width: 460px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;">
+    <div style="background: white; border-radius: 18px; width: 100%; max-width: 470px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
         <h3 id="roomModalTitle" style="font-size: 18px; font-weight: 800; color: #0f172a;">진료실 슬롯 추가</h3>
         <button type="button" onclick="closeRoomModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
@@ -625,10 +626,20 @@
           <input type="text" id="modalRoomName" class="form-input" required placeholder="예: 2진료실, 소아과 1진료실" style="font-size: 14.5px;">
         </div>
 
-        <div style="margin-bottom: 22px;">
+        <div style="margin-bottom: 16px;">
           <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">담당 원장님 성함</label>
           <input type="text" id="modalDoctorName" class="form-input" required placeholder="예: 이영희 원장, 김철수 부원장" style="font-size: 14.5px;">
           <p class="form-helper" style="margin-top: 5px;">* 환자 카카오 알림톡 발송 시 '🏥 우리병원 [원장명] 드림'으로 정확하게 발송됩니다.</p>
+        </div>
+
+        <div id="modalPinGroup" style="margin-bottom: 22px;">
+          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">
+            🔑 진료실 전용 접속 비밀번호 (부원장 로그인용)
+          </label>
+          <input type="text" id="modalRoomPin" class="form-input" required placeholder="예: 2222 (부원장님께 전달할 접속 비밀번호)" style="font-size: 14.5px; font-weight: 700; border-color: #93c5fd;" maxlength="20">
+          <p class="form-helper" style="margin-top: 5px; color: #0369a1;">
+            * 부원장님은 대표원장 비밀번호 대신 이 접속 코드로 로그인합니다. <strong>(대표원장 개인 비밀번호 완벽 보호)</strong>
+          </p>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -1169,9 +1180,16 @@
           ? '<span style="color: #059669; font-weight: 700;">기본 요금 포함 (0원)</span>'
           : `<span style="color: #0284c7; font-weight: 700;">${pricing.slotPriceText}</span>`;
 
+        const pinDisplay = isMain
+          ? '<span style="color: #64748b; font-size: 12.5px; font-weight: 600;">🔒 대표원장 마스터 비번</span>'
+          : (room.pin
+              ? `<code style="background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1px solid #bae6fd; font-size: 13px;">${room.pin}</code>`
+              : '<span style="color: #f87171; font-size: 12px; font-weight: 700;">⚠️ 미설정 (수정 필요)</span>');
+
         tr.innerHTML = `
           <td style="padding: 14px 16px; font-weight: 800; color: #0f172a;">${room.roomName || `${idx + 1}진료실`}</td>
           <td style="padding: 14px 16px; color: #334155; font-weight: 700;">${room.doctorName || '원장'}</td>
+          <td style="padding: 14px 16px;">${pinDisplay}</td>
           <td style="padding: 14px 16px;">
             <span style="font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; ${badgeStyle}">
               ${badgeText}
@@ -1208,11 +1226,20 @@
       document.getElementById('modalRoomName').value = `${nextNum}진료실`;
       document.getElementById('modalDoctorName').value = '';
 
+      // PIN 필드 초기화 및 활성화
+      const pinGroup = document.getElementById('modalPinGroup');
+      const pinInput = document.getElementById('modalRoomPin');
+      if (pinGroup) pinGroup.style.display = 'block';
+      if (pinInput) {
+        pinInput.value = '';
+        pinInput.required = true;
+      }
+
       const noticeEl = document.getElementById('roomModalPricingNotice');
       noticeEl.innerHTML = `
         <strong>💳 추가 슬롯 요금 안내 (${pricing.planTitle})</strong><br>
         • 진료실 슬롯당 정가의 50% 반값 특가인 <strong>${pricing.slotPriceText}/월</strong>이 추가됩니다.<br>
-        • 추가 시 다음 정기결제일에 기본 요금과 합산하여 자동 결제됩니다.
+        • 부원장님께 대표원장 비밀번호를 알려주실 필요 없이 <strong>진료실 접속 비밀번호</strong>만 알려주시면 됩니다.
       `;
 
       document.getElementById('btnSubmitRoomModal').textContent = '➕ 슬롯 추가하기';
@@ -1220,7 +1247,7 @@
       setTimeout(() => document.getElementById('modalDoctorName').focus(), 100);
     }
 
-    // 🏥 모달 열기 (수정 모드 - 부원장 교체/이름 변경)
+    // 🏥 모달 열기 (수정 모드 - 부원장 교체/이름 변경/접속 PIN 변경)
     function openEditRoomModal(roomId) {
       const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
       const target = rooms.find(r => r.id === roomId);
@@ -1231,11 +1258,30 @@
       document.getElementById('modalRoomName').value = target.roomName || '';
       document.getElementById('modalDoctorName').value = target.doctorName || '';
 
+      const pinGroup = document.getElementById('modalPinGroup');
+      const pinInput = document.getElementById('modalRoomPin');
+
+      if (target.isMain) {
+        // 메인 대표원장 방은 계정 비밀번호 사용
+        if (pinGroup) pinGroup.style.display = 'none';
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.required = false;
+        }
+      } else {
+        // 부원장 방은 PIN 수정 가능
+        if (pinGroup) pinGroup.style.display = 'block';
+        if (pinInput) {
+          pinInput.value = target.pin || '';
+          pinInput.required = true;
+        }
+      }
+
       const noticeEl = document.getElementById('roomModalPricingNotice');
       noticeEl.innerHTML = `
-        <strong>💡 원장님 성함 및 진료실 명칭 변경</strong><br>
-        • 부원장님이 교체되었거나 진료실 명칭을 변경하려는 경우 <strong>추가 비용 없이 무료</strong>로 언제든 수정 가능합니다.<br>
-        • 수정하신 원장님 성함은 환자 알림톡 및 진료 리포트에 즉시 반영됩니다.
+        <strong>💡 원장님 성함 및 진료실 접속 코드 변경</strong><br>
+        • 부원장님이 교체되었거나 접속 비밀번호를 변경하려는 경우 <strong>추가 비용 없이 무료</strong>로 언제든 수정 가능합니다.<br>
+        • 수정하신 원장님 성함과 비밀번호는 즉시 반영됩니다.
       `;
 
       document.getElementById('btnSubmitRoomModal').textContent = '💾 수정사항 저장';
@@ -1254,6 +1300,8 @@
       const roomId = document.getElementById('modalRoomId').value.trim();
       const roomName = document.getElementById('modalRoomName').value.trim();
       const doctorName = document.getElementById('modalDoctorName').value.trim();
+      const pinInput = document.getElementById('modalRoomPin');
+      const pin = pinInput ? pinInput.value.trim() : '';
 
       if (!roomName || !doctorName) {
         alert('진료실 명칭과 담당 원장님 성함을 모두 입력해 주세요.');
@@ -1268,17 +1316,25 @@
       try {
         if (roomId) {
           // 수정 모드
-          await TodakDB.updateClinicRoom(currentUser.email, roomId, { roomName, doctorName });
+          await TodakDB.updateClinicRoom(currentUser.email, roomId, { roomName, doctorName, pin });
           showToast('✅ 진료실 정보가 안전하게 수정되었습니다.');
         } else {
           // 신규 슬롯 추가 모드
+          if (!pin) {
+            alert('부원장님이 로그인할 진료실 전용 접속 비밀번호(4자리 등)를 입력해 주세요.');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            pinInput.focus();
+            return;
+          }
+
           const pricing = getSlotPricing();
-          if (!confirm(`[진료실 슬롯 추가 확인]\n\n• 진료실: ${roomName} (${doctorName})\n• 추가 요금: ${pricing.slotPriceText}/월 (${pricing.planTitle})\n\n슬롯을 추가하시겠습니까?`)) {
+          if (!confirm(`[진료실 슬롯 추가 확인]\n\n• 진료실: ${roomName} (${doctorName})\n• 접속 비밀번호: ${pin}\n• 추가 요금: ${pricing.slotPriceText}/월 (${pricing.planTitle})\n\n슬롯을 추가하시겠습니까?`)) {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             return;
           }
-          await TodakDB.addClinicRoom(currentUser.email, { roomName, doctorName });
+          await TodakDB.addClinicRoom(currentUser.email, { roomName, doctorName, pin });
           showToast('🎉 새 진료실 슬롯이 성공적으로 추가되었습니다!');
         }
 

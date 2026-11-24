@@ -38,7 +38,7 @@ const TodakDB = {
     return this.normalizeUser(user);
   },
 
-  // 2. 로그인 (DB 직접 대조)
+  // 2. 로그인 (대표원장 마스터 비번 또는 진료실별 전용 접속 PIN 대조)
   async signIn({ email, password }) {
     const cleanEmail = email.trim().toLowerCase();
     const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}&select=*`, {
@@ -58,11 +58,35 @@ const TodakDB = {
     }
 
     const row = list[0];
-    if (row.password !== password) {
-      throw new Error('비밀번호가 일치하지 않습니다.');
+    const normalized = this.normalizeUser(row);
+    const rooms = normalized.clinicRooms || [];
+
+    // 1) 대표원장 마스터 비밀번호 대조
+    if (row.password === password) {
+      normalized.isMaster = true;
+      normalized.role = 'owner';
+      // 메인 방 자동 지정
+      const mainRoom = rooms.find(r => r.isMain) || rooms[0];
+      if (mainRoom) {
+        localStorage.setItem('todak_selected_room', JSON.stringify(mainRoom));
+      }
+      return normalized;
     }
 
-    return this.normalizeUser(row);
+    // 2) 진료실별 전용 접속 비밀번호(PIN) 대조 (부원장 로그인)
+    const matchedRoom = rooms.find(r => r.pin && String(r.pin).trim() === String(password).trim());
+    if (matchedRoom) {
+      normalized.isMaster = false;
+      normalized.role = 'doctor';
+      normalized.selectedRoom = matchedRoom;
+      // 🌟 보안 핵심: 부원장 PC 세션에는 대표원장의 마스터 비밀번호를 절대 보관하지 않음!
+      delete normalized.password;
+      // 해당 부원장 진료실로 자동 고정 세팅
+      localStorage.setItem('todak_selected_room', JSON.stringify(matchedRoom));
+      return normalized;
+    }
+
+    throw new Error('비밀번호 또는 진료실 전용 접속 코드가 일치하지 않습니다.');
   },
 
   // 3. 현재 로그인된 사용자 최신 프로필 DB에서 불러오기 (날짜 도래 시 자동 전환 검사 포함)
@@ -208,8 +232,8 @@ const TodakDB = {
   },
 
   // 🏥 6. 다인 진료실(Multi-Doctor) 슬롯 관리 CRUD
-  // 6-1. 진료실 슬롯 추가
-  async addClinicRoom(email, { roomName, doctorName }) {
+  // 6-1. 진료실 슬롯 추가 (진료실 전용 접속 PIN 설정 지원)
+  async addClinicRoom(email, { roomName, doctorName, pin }) {
     const user = await this.getCurrentUserProfile();
     const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
 
@@ -217,11 +241,13 @@ const TodakDB = {
     const nextRoomNum = rooms.length + 1;
     const finalRoomName = (roomName || `${nextRoomNum}진료실`).trim();
     const finalDocName = (doctorName || '부원장').trim();
+    const finalPin = (pin || '').trim();
 
     const newRoom = {
       id: 'room_' + Date.now(),
       roomName: finalRoomName,
       doctorName: finalDocName,
+      pin: finalPin, // 진료실 전용 접속 비밀번호
       isMain: rooms.length === 0, // 첫 번째 방이면 메인
       createdAt: new Date().toISOString()
     };
@@ -231,8 +257,8 @@ const TodakDB = {
     return updatedUser.clinicRooms;
   },
 
-  // 6-2. 진료실 슬롯 수정 (원장님 교체 / 방 이름 변경)
-  async updateClinicRoom(email, roomId, { roomName, doctorName }) {
+  // 6-2. 진료실 슬롯 수정 (원장님 교체 / 방 이름 변경 / 접속 PIN 변경)
+  async updateClinicRoom(email, roomId, { roomName, doctorName, pin }) {
     const user = await this.getCurrentUserProfile();
     const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
     const targetIdx = rooms.findIndex(r => r.id === roomId);
@@ -243,6 +269,7 @@ const TodakDB = {
     const targetRoom = rooms[targetIdx];
     if (roomName !== undefined) targetRoom.roomName = roomName.trim();
     if (doctorName !== undefined) targetRoom.doctorName = doctorName.trim();
+    if (pin !== undefined) targetRoom.pin = pin.trim();
     rooms[targetIdx] = targetRoom;
 
     // 만약 메인 진료실의 원장명이 변경되었다면 대표 원장명(doctor_name)도 동기화
@@ -289,8 +316,15 @@ const TodakDB = {
         roomName: '1진료실',
         doctorName: row.doctor_name || row.doctorName || '원장',
         isMain: true,
+        pin: '',
         createdAt: new Date().toISOString()
       }];
+    } else {
+      // 각 방에 pin 프로퍼티 보장
+      rooms = rooms.map(r => ({
+        ...r,
+        pin: r.pin || ''
+      }));
     }
 
     return {
@@ -298,6 +332,7 @@ const TodakDB = {
       doctorName: row.doctor_name || row.doctorName || '원장',
       hospitalName: row.hospital_name || row.hospitalName || '우리병원',
       phone: row.phone || '',
+      password: row.password || '',
       plan: row.plan || 'Pro',
       pendingPlan: row.pending_plan || '',
       pendingDate: row.pending_date || '',

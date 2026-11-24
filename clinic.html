@@ -1098,7 +1098,7 @@
         title="원장님 경영 대시보드 열기">
         병원 경영 대시보드
       </a>
-      <a href="settings.html" class="dashboard-nav-link" title="병원 프로필 및 구독 요금제 관리">
+      <a href="settings.html" class="dashboard-nav-link" onclick="handleSettingsClick(event)" title="병원 프로필 및 구독 요금제 관리">
         마이페이지
       </a>
       <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
@@ -1523,9 +1523,13 @@
       showToast(`🩺 ${room.roomName} (${room.doctorName})으로 진료실이 설정되었습니다.`);
     }
 
-    // 🏥 페이지 첫 진입 시 진료실이 2개 이상이면 방 선택 모달 띄우기
+    // 🏥 페이지 첫 진입 시 진료실이 2개 이상이면 방 선택 모달 띄우기 (부원장 접속 코드로 로그인한 세션은 자동 스킵)
     function checkRoomSelectionOnLoad(user) {
       if (!user || !Array.isArray(user.clinicRooms) || user.clinicRooms.length <= 1) {
+        return;
+      }
+      // 🌟 진료실 전용 접속 코드로 로그인한 부원장님 세션은 이미 방이 확정되었으므로 선택 모달 생략
+      if (user.isMaster === false && user.selectedRoom) {
         return;
       }
       const savedStr = localStorage.getItem('todak_selected_room');
@@ -1667,12 +1671,15 @@
           ? (isPendingStandard ? `${user.pendingDate || '다음 결제일'} 기본형 전환 예정` : '고급형 Pro')
           : '기본형';
 
+        const isMasterDoctor = user.isMaster !== false;
         const roomBadgeHtml = `
           <span style="background: #ffffff; color: #0284c7; border: 1.5px solid #bae6fd; padding: 4px 10px; border-radius: 14px; font-size: 12.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
             <span>🩺 ${currentRoom.roomName} (${currentRoom.doctorName})</span>
-            <button type="button" onclick="openRoomSelectModal(cachedCurrentUser, true)"
-              style="background: #f0f9ff; border: 1px solid #bfdbfe; color: #0284c7; padding: 1px 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.15s;"
-              title="진료실(원장님) 변경">변경</button>
+            ${isMasterDoctor ? `
+              <button type="button" onclick="openRoomSelectModal(cachedCurrentUser, true)"
+                style="background: #f0f9ff; border: 1px solid #bfdbfe; color: #0284c7; padding: 1px 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.15s;"
+                title="진료실(원장님) 변경">변경</button>
+            ` : ''}
           </span>
         `;
 
@@ -1703,6 +1710,19 @@
       const reportPatientNameEl = document.getElementById('reportPatientName');
       if (reportPatientNameEl) {
         reportPatientNameEl.innerText = `${pDisplayName}의 안심 진료노트`;
+      }
+    }
+
+    // 🔒 마이페이지 클릭 시 부원장 세션 접근 차단
+    function handleSettingsClick(e) {
+      const userStr = localStorage.getItem('todak_current_user');
+      let user = cachedCurrentUser;
+      if (!user && userStr) {
+        try { user = JSON.parse(userStr); } catch (err) {}
+      }
+      if (user && user.isMaster === false) {
+        e.preventDefault();
+        alert('🔒 [대표원장 전용 메뉴]\n\n구독 요금제 및 진료실 슬롯 관리는 대표원장님 전용 권한입니다.\n대표원장 마스터 계정으로 로그인해 주세요.');
       }
     }
 

@@ -745,21 +745,28 @@
       e.preventDefault();
       const inputPass = document.getElementById('inputMasterPassword').value.trim();
 
-      let isCorrect = false;
-      // 1. 현재 사용자 객체 비밀번호 확인
-      if (currentUser && currentUser.password && currentUser.password === inputPass) {
-        isCorrect = true;
-      } else if (currentUser && currentUser.email) {
-        // 2. TodakDB를 통해 DB 실시간 대조
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = '⏳ 인증 중...';
+      submitBtn.disabled = true;
+
+      let isCorrectMaster = false;
+      if (currentUser && currentUser.email) {
         try {
-          await TodakDB.signIn({ email: currentUser.email, password: inputPass });
-          isCorrect = true;
+          const authUser = await TodakDB.signIn({ email: currentUser.email, password: inputPass });
+          // 🌟 반드시 대표원장 마스터 계정으로 인증 성공한 경우에만 잠금 해제! (부원장 방 PIN으로는 해제 불가)
+          if (authUser && authUser.isMaster === true) {
+            isCorrectMaster = true;
+          }
         } catch (authErr) {
-          isCorrect = false;
+          isCorrectMaster = false;
         }
       }
 
-      if (isCorrect) {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+
+      if (isCorrectMaster) {
         isMasterUnlocked = true;
         closeAdminLockModal();
         currentFilterRoomId = pendingUnlockTargetId || 'all';
@@ -767,7 +774,10 @@
         applyDoctorFilter();
         alert('🎉 [대표원장 인증 완료]\n병원 전체 경영 지표 및 모든 진료실 통계가 잠금 해제되었습니다.');
       } else {
-        alert('⚠️ 비밀번호가 일치하지 않습니다.\n병원 전체 경영 지표는 대표원장님만 열람하실 수 있습니다.');
+        alert('⚠️ 대표원장 마스터 비밀번호와 일치하지 않습니다.\n병원 전체 경영 지표는 대표원장님만 열람하실 수 있습니다.');
+        document.getElementById('inputMasterPassword').focus();
+      }
+    }
         document.getElementById('inputMasterPassword').focus();
       }
     }
