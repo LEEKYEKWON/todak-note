@@ -143,8 +143,8 @@ const TodakDB = {
     return user;
   },
 
-  // 4. 프로필 정보 영구 수정 (정식 DB 컬럼: plan, pending_plan, pending_date 정석 연동)
-  async updateProfile({ email, hospitalName, doctorName, phone, naverReviewUrl, logoUrl, plan, pendingPlan, pendingDate }) {
+  // 4. 프로필 정보 영구 수정 (정식 DB 컬럼: plan, pending_plan, pending_date, clinic_rooms 정석 연동)
+  async updateProfile({ email, hospitalName, doctorName, phone, naverReviewUrl, logoUrl, plan, pendingPlan, pendingDate, clinicRooms }) {
     if (!email) {
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
@@ -165,6 +165,7 @@ const TodakDB = {
     // Supabase 정식 컬럼에 정확하게 반영 (null 전달 시 null로 DB 업데이트)
     if (pendingPlan !== undefined) updateBody.pending_plan = pendingPlan;
     if (pendingDate !== undefined) updateBody.pending_date = pendingDate;
+    if (clinicRooms !== undefined) updateBody.clinic_rooms = clinicRooms;
 
     const res = await fetch(`${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(cleanEmail)}`, {
       method: 'PATCH',
@@ -206,9 +207,92 @@ const TodakDB = {
     return await this.updateProfile({ email, plan: newPlan, pendingPlan, pendingDate });
   },
 
+  // 🏥 6. 다인 진료실(Multi-Doctor) 슬롯 관리 CRUD
+  // 6-1. 진료실 슬롯 추가
+  async addClinicRoom(email, { roomName, doctorName }) {
+    const user = await this.getCurrentUserProfile();
+    const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
+    
+    // 자동 기본 방 이름 부여 (예: "2진료실")
+    const nextRoomNum = rooms.length + 1;
+    const finalRoomName = (roomName || `${nextRoomNum}진료실`).trim();
+    const finalDocName = (doctorName || '부원장').trim();
+
+    const newRoom = {
+      id: 'room_' + Date.now(),
+      roomName: finalRoomName,
+      doctorName: finalDocName,
+      isMain: rooms.length === 0, // 첫 번째 방이면 메인
+      createdAt: new Date().toISOString()
+    };
+
+    rooms.push(newRoom);
+    const updatedUser = await this.updateProfile({ email: email || user?.email, clinicRooms: rooms });
+    return updatedUser.clinicRooms;
+  },
+
+  // 6-2. 진료실 슬롯 수정 (원장님 교체 / 방 이름 변경)
+  async updateClinicRoom(email, roomId, { roomName, doctorName }) {
+    const user = await this.getCurrentUserProfile();
+    const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
+    const targetIdx = rooms.findIndex(r => r.id === roomId);
+    if (targetIdx === -1) {
+      throw new Error('해당 진료실을 찾을 수 없습니다.');
+    }
+
+    const targetRoom = rooms[targetIdx];
+    if (roomName !== undefined) targetRoom.roomName = roomName.trim();
+    if (doctorName !== undefined) targetRoom.doctorName = doctorName.trim();
+    rooms[targetIdx] = targetRoom;
+
+    // 만약 메인 진료실의 원장명이 변경되었다면 대표 원장명(doctor_name)도 동기화
+    const updatePayload = { email: email || user?.email, clinicRooms: rooms };
+    if (targetRoom.isMain && doctorName !== undefined) {
+      updatePayload.doctorName = doctorName.trim();
+    }
+
+    const updatedUser = await this.updateProfile(updatePayload);
+    return updatedUser.clinicRooms;
+  },
+
+  // 6-3. 진료실 슬롯 삭제
+  async deleteClinicRoom(email, roomId) {
+    const user = await this.getCurrentUserProfile();
+    const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
+    const target = rooms.find(r => r.id === roomId);
+    if (!target) {
+      throw new Error('해당 진료실을 찾을 수 없습니다.');
+    }
+    if (target.isMain) {
+      throw new Error('기본 메인 진료실은 삭제할 수 없습니다.');
+    }
+
+    const filtered = rooms.filter(r => r.id !== roomId);
+    const updatedUser = await this.updateProfile({ email: email || user?.email, clinicRooms: filtered });
+    return updatedUser.clinicRooms;
+  },
+
   // 규격 통일 헬퍼 (DB 컬럼 값 그대로 정규화)
   normalizeUser(row) {
     if (!row) return null;
+    let rooms = [];
+    if (Array.isArray(row.clinic_rooms)) rooms = row.clinic_rooms;
+    else if (Array.isArray(row.clinicRooms)) rooms = row.clinicRooms;
+    else if (typeof row.clinic_rooms === 'string') {
+      try { rooms = JSON.parse(row.clinic_rooms); } catch (e) {}
+    }
+
+    // 기본 진료실이 하나도 없으면 1진료실 기본 생성
+    if (!rooms || rooms.length === 0) {
+      rooms = [{
+        id: 'room_1',
+        roomName: '1진료실',
+        doctorName: row.doctor_name || row.doctorName || '원장',
+        isMain: true,
+        createdAt: new Date().toISOString()
+      }];
+    }
+
     return {
       email: row.email,
       doctorName: row.doctor_name || row.doctorName || '원장',
@@ -221,7 +305,8 @@ const TodakDB = {
       billingRegisteredAt: row.billing_registered_at || row.billingRegisteredAt || '',
       naverReviewUrl: row.naver_review_url || row.naverReviewUrl || '',
       logoUrl: row.logo_url || row.logoUrl || '',
-      joinedAt: row.created_at || row.joinedAt
+      joinedAt: row.created_at || row.joinedAt,
+      clinicRooms: rooms
     };
   }
 };

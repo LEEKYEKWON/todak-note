@@ -328,8 +328,8 @@
 
         <!-- 우측 끝 영역: 🔍 실시간 검색창 -->
         <div style="position: relative; display: flex; align-items: center;">
-          <input type="text" id="deskSearchInput" placeholder="환자명 또는 전화번호 검색"
-            style="padding: 8px 12px 8px 34px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 230px; outline: none; background: white; transition: all 0.2s;"
+          <input type="text" id="deskSearchInput" placeholder="환자명, 전화번호, 진료실 검색"
+            style="padding: 8px 12px 8px 34px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; width: 240px; outline: none; background: white; transition: all 0.2s;"
             oninput="handleSearchInput(event)">
           <span style="position: absolute; left: 10px; font-size: 13.5px; color: #94a3b8; pointer-events: none;">🔍</span>
           <button id="btnSearchClear" style="display: none; position: absolute; right: 8px; border: none; background: #e2e8f0; color: #475569; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; cursor: pointer; align-items: center; justify-content: center;" onclick="clearSearch()">✕</button>
@@ -340,11 +340,12 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 17%;">접수날짜/시각</th>
-              <th style="width: 21%;">환자명</th>
-              <th style="width: 22%;">전화번호</th>
-              <th style="width: 18%; text-align: center;">발송 상태</th>
-              <th style="width: 22%; text-align: center;">작업</th>
+              <th style="width: 15%;">접수날짜/시각</th>
+              <th style="width: 18%;">진료실 / 담당의</th>
+              <th style="width: 16%;">환자명</th>
+              <th style="width: 17%;">전화번호</th>
+              <th style="width: 15%; text-align: center;">발송 상태</th>
+              <th style="width: 19%; text-align: center;">작업</th>
             </tr>
           </thead>
           <tbody id="deskTableBody">
@@ -645,7 +646,7 @@
       const weekStart = todayStart - (now.getDay() * 24 * 60 * 60 * 1000);
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
-      // 기간 필터링 및 검색어(환자명/전화번호) 필터링 동시 적용
+      // 기간 필터링 및 검색어(환자명/전화번호/진료실/원장명) 필터링 동시 적용
       const filtered = deskQueueData.filter(item => {
         const t = item.timestamp || Date.now();
         if (currentFilter === 'today' && t < todayStart) return false;
@@ -656,10 +657,13 @@
           const q = searchQuery.toLowerCase();
           const pName = (item.patientName || '').toLowerCase();
           const phone = (item.phone || '').replace(/[^0-9]/g, '');
+          const rName = (item.roomName || '').toLowerCase();
+          const dName = (item.doctorName || '').toLowerCase();
           const cleanQ = q.replace(/[^0-9]/g, '');
           const nameMatch = pName.includes(q);
-          const phoneMatch = cleanQ.length > 0 ? phone.includes(cleanQ) : item.phone.includes(q);
-          return nameMatch || phoneMatch;
+          const phoneMatch = cleanQ.length > 0 ? phone.includes(cleanQ) : (item.phone || '').includes(q);
+          const roomMatch = rName.includes(q) || dName.includes(q);
+          return nameMatch || phoneMatch || roomMatch;
         }
 
         return true;
@@ -667,12 +671,12 @@
 
       if (!filtered || filtered.length === 0) {
         const emptyMsg = searchQuery 
-          ? `🔍 "<strong>${escapeHtml(searchQuery)}</strong>" 검색 결과가 없습니다.<br><span style="font-size: 12.5px; color: #94a3b8;">환자명이나 전화번호를 다시 확인해 주세요.</span>`
+          ? `🔍 "<strong>${escapeHtml(searchQuery)}</strong>" 검색 결과가 없습니다.<br><span style="font-size: 12.5px; color: #94a3b8;">환자명, 전화번호 또는 진료실을 다시 확인해 주세요.</span>`
           : `해당 기간의 환자 리포트 내역이 없습니다.<br>진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.`;
 
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+            <td colspan="6" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
               <span style="font-size: 32px; display: block; margin-bottom: 8px;">${searchQuery ? '🔎' : '📭'}</span>
               ${emptyMsg}
             </td>
@@ -691,8 +695,18 @@
         // 🌟 접수날짜/시각 완벽 포맷팅
         const displayDateTime = formatDateTime(item.createdAt || item.timestamp);
 
+        // 🏥 진료실 / 담당 원장 뱃지 포맷팅
+        const roomNameStr = item.roomName || '1진료실';
+        const docNameStr = item.doctorName || '원장';
+        const roomBadgeHtml = `
+          <span style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+            <span>🩺</span> ${highlightSearch(roomNameStr, searchQuery)} (${highlightSearch(docNameStr, searchQuery)})
+          </span>
+        `;
+
         tr.innerHTML = `
           <td style="color: #475569; font-size: 13px; font-weight: 600;">${displayDateTime}</td>
+          <td>${roomBadgeHtml}</td>
           <td><strong>${highlightSearch(item.patientName, searchQuery)}</strong></td>
           <td style="color: #334155; font-weight: 600;">${highlightSearch(item.phone, searchQuery)}</td>
           <td style="text-align: center;">
@@ -748,27 +762,31 @@
         }
       }
 
-      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토 ${isSent ? '(발송완료)' : ''}`;
+      const roomLabel = item.roomName ? ` [${item.roomName} · ${item.doctorName || '원장'}]` : '';
+      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토${roomLabel} ${isSent ? '(발송완료)' : ''}`;
       document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
       document.getElementById('modalNoticeInput').value = item.nextNotice || '';
 
-      // 병원 정보 동적 반영
+      // 병원 및 담당 진료실/원장 정보 동적 반영
       let hospName = '길동이의원';
-      let docName = '홍길동';
+      let docName = item.doctorName || '홍길동';
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
           if (u.hospitalName) hospName = u.hospitalName;
-          if (u.doctorName) docName = u.doctorName;
+          if (!item.doctorName && u.doctorName) docName = u.doctorName;
         } catch (e) {}
       }
 
       // 폰 목업 렌더링 (진료실 수신화면과 100% 동일)
       const phoneHospEl = document.getElementById('phoneHospTag');
-      if (phoneHospEl) phoneHospEl.innerText = `🏥 ${hospName} · ${docName} 원장`;
+      if (phoneHospEl) {
+        const roomDocStr = item.roomName ? `${item.roomName} · ${docName} 원장` : `${docName} 원장`;
+        phoneHospEl.innerText = `🏥 ${hospName} (${roomDocStr})`;
+      }
 
       const now = new Date();
       const phoneTodayEl = document.getElementById('phoneTodayDate');
@@ -897,12 +915,17 @@
         } catch (e) { }
       }
 
+      // 🏥 담당 원장님 성함: 대기열 item.doctorName 우선 바인딩
+      const sendDoctorName = item.doctorName || currentDoc;
+
       const reportId = Date.now().toString();
       const reportData = {
         hospitalName: currentHosp,
         patientName: item.patientName,
         receiverPhone: item.phone,
         phone: item.phone,
+        doctorName: sendDoctorName,
+        roomName: item.roomName || '1진료실',
         diagnosisSummary: item.summary || '',
         medicationGuide: finalMed,
         nextVisitDate: finalNextDate,
@@ -946,7 +969,7 @@
             to: item.phone,
             patientName: item.patientName,
             hospitalName: currentHosp,
-            doctorName: currentDoc,
+            doctorName: sendDoctorName,
             summary: item.summary,
             medication: finalMed,
             nextDate: finalNextDate,

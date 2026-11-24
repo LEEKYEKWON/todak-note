@@ -1429,6 +1429,26 @@
     </div>
   </div>
 
+  <!-- 🏥 진료실(원장님) 선택 모달 (다인 진료실 지원) -->
+  <div id="roomSelectModalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); z-index: 99999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 20px; width: 100%; max-width: 480px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="font-size: 36px; display: block; margin-bottom: 6px;">🩺</span>
+        <h3 style="font-size: 19px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">현재 진료실(원장님)을 선택해 주세요</h3>
+        <p style="font-size: 13px; color: #64748b; line-height: 1.5;">선택하신 원장님 성함으로 환자 카카오 알림톡 및 안심 진료노트가 정확하게 발송됩니다.</p>
+      </div>
+
+      <div id="roomSelectListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; margin-bottom: 18px; padding: 2px;">
+        <!-- 등록된 진료실 방 카드 목록이 렌더링됨 -->
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+        <a href="settings.html" style="font-size: 12.5px; color: #0284c7; text-decoration: none; font-weight: 700;">⚙️ 진료실 슬롯 추가/수정은 마이페이지에서</a>
+        <button type="button" id="btnCancelRoomSelect" onclick="closeRoomSelectModal()" style="display: none; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let isRecording = false;
     let recognition = null;
@@ -1448,22 +1468,155 @@
     document.getElementById('reportTodayDate').innerText = `진료일시: ${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
 
     // 로그인 회원 정보 및 플랜에 따른 메뉴/헤더 렌더링
+    let cachedCurrentUser = null;
+
     window.addEventListener('DOMContentLoaded', async () => {
       // 1. 기존 캐시로 즉시 1차 렌더링
-      renderHospitalHeader();
+      const localStr = localStorage.getItem('todak_current_user');
+      if (localStr) {
+        try { cachedCurrentUser = JSON.parse(localStr); } catch (e) {}
+      }
+      renderHospitalHeader(cachedCurrentUser);
 
-      // 2. 🌟 TodakDB를 통해 Supabase DB의 최신 프로필(pendingPlan, pendingDate 등) 실시간 동기화
+      // 2. 🌟 TodakDB를 통해 Supabase DB의 최신 프로필(pendingPlan, clinicRooms 등) 실시간 동기화
       if (window.TodakDB) {
         try {
           const freshUser = await TodakDB.getCurrentUserProfile();
           if (freshUser) {
+            cachedCurrentUser = freshUser;
             renderHospitalHeader(freshUser);
+            // 진료실 방이 2개 이상일 때 미선택 상태라면 선택 팝업 호출
+            checkRoomSelectionOnLoad(freshUser);
           }
         } catch (e) {
           console.warn('DB 프로필 갱신 실패:', e);
         }
       }
     });
+
+    // 🏥 현재 선택된 진료실 방 획득 (로컬 스토리지 기반 PC 세션)
+    function getCurrentSelectedRoom(user) {
+      const u = user || cachedCurrentUser;
+      const rooms = (u && Array.isArray(u.clinicRooms) && u.clinicRooms.length > 0)
+        ? u.clinicRooms
+        : [{ id: 'room_1', roomName: '1진료실', doctorName: (u && u.doctorName) || '원장', isMain: true }];
+
+      const savedRoomStr = localStorage.getItem('todak_selected_room');
+      if (savedRoomStr) {
+        try {
+          const saved = JSON.parse(savedRoomStr);
+          // 저장된 방 ID가 현재 유저의 방 목록에 여전히 유효한지 검증
+          const matched = rooms.find(r => r.id === saved.id);
+          if (matched) return matched;
+        } catch (e) {}
+      }
+
+      // 없거나 불일치하면 기본 첫 번째 방(메인)
+      return rooms[0];
+    }
+
+    // 🏥 진료실 방 변경 저장
+    function setSelectedRoom(room) {
+      localStorage.setItem('todak_selected_room', JSON.stringify(room));
+      renderHospitalHeader(cachedCurrentUser);
+      closeRoomSelectModal();
+      showToast(`🩺 ${room.roomName} (${room.doctorName})으로 진료실이 설정되었습니다.`);
+    }
+
+    // 🏥 페이지 첫 진입 시 진료실이 2개 이상이면 방 선택 모달 띄우기
+    function checkRoomSelectionOnLoad(user) {
+      if (!user || !Array.isArray(user.clinicRooms) || user.clinicRooms.length <= 1) {
+        return;
+      }
+      const savedStr = localStorage.getItem('todak_selected_room');
+      if (!savedStr) {
+        openRoomSelectModal(user, false);
+      } else {
+        try {
+          const saved = JSON.parse(savedStr);
+          const exists = user.clinicRooms.some(r => r.id === saved.id);
+          if (!exists) {
+            openRoomSelectModal(user, false);
+          }
+        } catch (e) {
+          openRoomSelectModal(user, false);
+        }
+      }
+    }
+
+    // 🏥 진료실 선택 모달 열기
+    function openRoomSelectModal(user, allowClose = false) {
+      const u = user || cachedCurrentUser;
+      const rooms = (u && Array.isArray(u.clinicRooms) && u.clinicRooms.length > 0)
+        ? u.clinicRooms
+        : [{ id: 'room_1', roomName: '1진료실', doctorName: (u && u.doctorName) || '원장', isMain: true }];
+
+      const container = document.getElementById('roomSelectListContainer');
+      const cancelBtn = document.getElementById('btnCancelRoomSelect');
+      if (cancelBtn) cancelBtn.style.display = allowClose ? 'inline-block' : 'none';
+
+      const currentSelected = getCurrentSelectedRoom(u);
+
+      container.innerHTML = '';
+      rooms.forEach((room, idx) => {
+        const isSelected = room.id === currentSelected.id;
+        const card = document.createElement('div');
+        card.style.cssText = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 14px 18px;
+          border-radius: 12px;
+          border: 2px solid ${isSelected ? '#0284c7' : '#e2e8f0'};
+          background: ${isSelected ? '#f0f9ff' : '#ffffff'};
+          cursor: pointer;
+          transition: all 0.2s;
+        `;
+        card.onmouseover = () => {
+          if (!isSelected) {
+            card.style.borderColor = '#93c5fd';
+            card.style.background = '#f8fafc';
+          }
+        };
+        card.onmouseout = () => {
+          if (!isSelected) {
+            card.style.borderColor = '#e2e8f0';
+            card.style.background = '#ffffff';
+          }
+        };
+        card.onclick = () => setSelectedRoom(room);
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: ${isSelected ? '#0284c7' : '#f1f5f9'}; color: ${isSelected ? '#ffffff' : '#0284c7'}; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800;">
+              ${idx + 1}
+            </div>
+            <div>
+              <div style="font-size: 15.5px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                ${room.roomName || `${idx + 1}진료실`}
+                ${room.isMain ? '<span style="font-size: 11px; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 6px; font-weight: 700;">대표원장</span>' : ''}
+              </div>
+              <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 2px;">
+                담당: <strong>${room.doctorName || '원장'}</strong>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center;">
+            ${isSelected
+              ? '<span style="color: #0284c7; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 4px;">✓ 현재 선택됨</span>'
+              : '<button type="button" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">선택하기</button>'
+            }
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('roomSelectModalOverlay').style.display = 'flex';
+    }
+
+    function closeRoomSelectModal() {
+      document.getElementById('roomSelectModalOverlay').style.display = 'none';
+    }
 
     function renderHospitalHeader(targetUser = null) {
       const userStr = localStorage.getItem('todak_current_user');
@@ -1480,18 +1633,23 @@
           } catch (e) { }
         }
       }
+      cachedCurrentUser = user;
+
+      // 🏥 현재 선택된 진료실 방 정보 가져오기
+      const currentRoom = getCurrentSelectedRoom(user);
 
       const hospTag = document.querySelector('.hospital-tag');
       if (hospTag) {
+        const docDisplay = `${currentRoom.roomName} · ${currentRoom.doctorName}`;
         if (user.logoUrl) {
           hospTag.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <img src="${user.logoUrl}" alt="병원로고" style="max-height: 28px; max-width: 90px; object-fit: contain; border-radius: 4px;">
-              <span>🏥 ${user.hospitalName} · ${user.doctorName || '원장'}</span>
+              <span>🏥 ${user.hospitalName} (${docDisplay})</span>
             </div>
           `;
         } else {
-          hospTag.textContent = `🏥 ${user.hospitalName} · ${user.doctorName || '원장'}`;
+          hospTag.textContent = `🏥 ${user.hospitalName} (${docDisplay})`;
         }
       }
 
@@ -1503,21 +1661,35 @@
         adminBtn.style.display = 'flex';
       }
 
-      // 좌측 상단 병원명 표시
+      // 좌측 상단 병원명 및 진료실/원장명 표시 & [진료실 변경] 버튼
       if (badgeArea) {
+        const subText = isPro
+          ? (isPendingStandard ? `${user.pendingDate || '다음 결제일'} 기본형 전환 예정` : '고급형 Pro')
+          : '기본형';
+
+        const roomBadgeHtml = `
+          <span style="background: #ffffff; color: #0284c7; border: 1.5px solid #bae6fd; padding: 4px 10px; border-radius: 14px; font-size: 12.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <span>🩺 ${currentRoom.roomName} (${currentRoom.doctorName})</span>
+            <button type="button" onclick="openRoomSelectModal(cachedCurrentUser, true)"
+              style="background: #f0f9ff; border: 1px solid #bfdbfe; color: #0284c7; padding: 1px 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.15s;"
+              title="진료실(원장님) 변경">변경</button>
+          </span>
+        `;
+
         if (isPro) {
-          const subText = isPendingStandard ? `${user.pendingDate || '다음 결제일'} 기본형 전환 예정` : '고급형 Pro';
           badgeArea.innerHTML = `
             <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 6px;">
               ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
               🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">${subText}</span>
             </span>
+            ${roomBadgeHtml}
           `;
         } else {
           badgeArea.innerHTML = `
             <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700;">
-              🏥 ${user.hospitalName} (기본형)
+              🏥 ${user.hospitalName} (${subText})
             </span>
+            ${roomBadgeHtml}
           `;
         }
       }
@@ -2122,10 +2294,16 @@
       const min = String(now.getMinutes()).padStart(2, '0');
       const formattedDateTime = `${yyyy}.${mm}.${dd} ${hh}:${min}`;
 
+      // 🏥 현재 선택된 진료실 및 담당 원장 정보 바인딩
+      const currentRoom = getCurrentSelectedRoom(cachedCurrentUser);
+
       const queueItem = {
         id: 'desk_' + Date.now(),
         patientName: pDisplayName,
         phone: pPhone,
+        roomId: currentRoom.id,
+        roomName: currentRoom.roomName,
+        doctorName: currentRoom.doctorName,
         summary: parsedResult.summary,
         medication: parsedResult.medication,
         nextDate: parsedResult.nextDate,
@@ -2245,6 +2423,12 @@
         }
       }
 
+      // 🏥 현재 선택된 진료실 및 담당 원장 정보로 정밀 덮어쓰기
+      const currentRoom = getCurrentSelectedRoom(cachedCurrentUser);
+      if (currentRoom && currentRoom.doctorName) {
+        docTitle = currentRoom.doctorName;
+      }
+
       showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
       summaryReviewCard.style.display = 'none';
       recordStatus.innerText = '발송 완료! 다음 환자 진료 시 [F9]를 누르세요.';
@@ -2268,6 +2452,8 @@
         patientName: pDisplayName,
         receiverPhone: pPhone,
         phone: pPhone,
+        doctorName: docTitle,
+        roomName: currentRoom.roomName || '1진료실',
         diagnosisSummary: parsedResult.summary,
         medicationGuide: parsedResult.medication,
         nextVisitDate: parsedResult.nextDate,

@@ -562,7 +562,82 @@
         </div>
       </div>
     </div>
+
+    <!-- 3. 우리 병원 진료실(의사) 슬롯 관리 -->
+    <div class="card" id="clinicRoomsCard">
+      <div class="card-header">
+        <div class="card-title-box">
+          <span class="card-icon">🩺</span>
+          <h3 class="card-title">우리 병원 진료실(의사) 슬롯 관리</h3>
+        </div>
+        <button type="button" class="btn" onclick="openAddRoomModal()"
+          style="background: #0284c7; color: white; border: none; padding: 9px 18px; border-radius: 9px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">
+          <span>➕</span> 진료실 슬롯 추가
+        </button>
+      </div>
+
+      <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; font-size: 13.5px; color: #475569; line-height: 1.65;">
+        <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <span>💡</span> 다인 진료실(Multi-Doctor Clinic) 시스템 안내
+        </div>
+        <p>• <strong>병원 대표 계정 1개</strong>로 각 진료실 PC에서 로그인 후 해당 진료실 방을 선택하여 진료할 수 있습니다.</p>
+        <p>• 기본 요금제에 <strong>1진료실(메인)과 수납 데스크 1대</strong>가 기본 포함되어 있습니다.</p>
+        <p>• 추가 진료실(부원장님) 슬롯은 정가의 50% 반값 특가(<strong id="slotPriceNoticeText" style="color: #0284c7;">기본형 월 74,000원 / 고급형 월 99,000원</strong>)로 무제한 추가하실 수 있습니다.</p>
+        <p>• 부원장님이 교체되거나 퇴사하신 경우, 추가 비용 없이 언제든 <strong style="color: #0284c7;">[원장명 수정]</strong>을 통해 새 원장님 성함으로 변경하여 즉시 재사용하실 수 있습니다.</p>
+      </div>
+
+      <!-- 진료실 슬롯 목록 테이블 -->
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+          <thead>
+            <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 700;">
+              <th style="padding: 12px 16px;">진료실 명칭</th>
+              <th style="padding: 12px 16px;">담당 원장님</th>
+              <th style="padding: 12px 16px;">구분</th>
+              <th style="padding: 12px 16px;">월 추가 구독료</th>
+              <th style="padding: 12px 16px; text-align: center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="clinicRoomsTableBody">
+            <!-- 자바스크립트로 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
+
+  <!-- 🏥 진료실 슬롯 추가/수정 모달 -->
+  <div id="roomModalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px);">
+    <div style="background: white; border-radius: 18px; width: 100%; max-width: 460px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+        <h3 id="roomModalTitle" style="font-size: 18px; font-weight: 800; color: #0f172a;">진료실 슬롯 추가</h3>
+        <button type="button" onclick="closeRoomModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div id="roomModalPricingNotice" style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+        <!-- 플랜별 슬롯 요금 안내 텍스트 -->
+      </div>
+
+      <form id="roomModalForm" onsubmit="handleSaveRoomModal(event)">
+        <input type="hidden" id="modalRoomId" value="">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">진료실 명칭</label>
+          <input type="text" id="modalRoomName" class="form-input" required placeholder="예: 2진료실, 소아과 1진료실" style="font-size: 14.5px;">
+        </div>
+
+        <div style="margin-bottom: 22px;">
+          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">담당 원장님 성함</label>
+          <input type="text" id="modalDoctorName" class="form-input" required placeholder="예: 이영희 원장, 김철수 부원장" style="font-size: 14.5px;">
+          <p class="form-helper" style="margin-top: 5px;">* 환자 카카오 알림톡 발송 시 '🏥 우리병원 [원장명] 드림'으로 정확하게 발송됩니다.</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" onclick="closeRoomModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;">취소</button>
+          <button type="submit" id="btnSubmitRoomModal" style="background: #0284c7; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">저장하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div id="toast" class="toast">저장되었습니다.</div>
 
@@ -579,6 +654,7 @@
           currentUser = JSON.parse(localStr);
           renderProfile();
           renderPlanInfo();
+          renderClinicRoomsTable();
         } catch (e) { }
       }
 
@@ -590,6 +666,7 @@
             currentUser = fresh;
             renderProfile();
             renderPlanInfo();
+            renderClinicRoomsTable();
           }
         } catch (e) {
           console.warn('DB 최신 프로필 갱신 실패:', e);
@@ -1040,6 +1117,202 @@
         alert(`🎉 [정기결제 테스트 승인 성공!]\n\n• 주문명: 토닥토닥노트 ${planTitle}\n• 결제금액: ${amount.toLocaleString()}원\n• 결제번호: ${data.paymentId}\n\n포트원 관리자 콘솔 [결제 내역]에서도 즉시 확인하실 수 있습니다!`);
       } catch (e) {
         alert("결제 승인 오류: " + e.message);
+      }
+    }
+
+    // 🏥 다인 진료실(Multi-Doctor) 슬롯 관리 로직
+    function getSlotPricing() {
+      const isPro = (currentUser?.plan || 'Pro').toLowerCase() === 'pro';
+      const slotPrice = isPro ? 99000 : 74000;
+      return {
+        isPro,
+        slotPrice,
+        slotPriceText: `월 ${slotPrice.toLocaleString()}원`,
+        planTitle: isPro ? '고급형(Pro)' : '기본형(Standard)'
+      };
+    }
+
+    function renderClinicRoomsTable() {
+      const tbody = document.getElementById('clinicRoomsTableBody');
+      if (!tbody) return;
+
+      const pricing = getSlotPricing();
+      const noticeTextEl = document.getElementById('slotPriceNoticeText');
+      if (noticeTextEl) {
+        noticeTextEl.textContent = `현재 ${pricing.planTitle} 이용 중: 추가 슬롯당 월 ${pricing.slotPrice.toLocaleString()}원 (정가 대비 50% 반값 특가)`;
+      }
+
+      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
+      if (rooms.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">
+              등록된 진료실이 없습니다. [+ 진료실 슬롯 추가]를 눌러 등록해 주세요.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      rooms.forEach((room, idx) => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #f1f5f9';
+
+        const isMain = room.isMain === true || idx === 0;
+        const badgeStyle = isMain
+          ? 'background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;'
+          : 'background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;';
+        const badgeText = isMain ? '👑 메인 진료실 (기본)' : `➕ 추가 슬롯 ${idx}`;
+
+        const priceText = isMain
+          ? '<span style="color: #059669; font-weight: 700;">기본 요금 포함 (0원)</span>'
+          : `<span style="color: #0284c7; font-weight: 700;">${pricing.slotPriceText}</span>`;
+
+        tr.innerHTML = `
+          <td style="padding: 14px 16px; font-weight: 800; color: #0f172a;">${room.roomName || `${idx + 1}진료실`}</td>
+          <td style="padding: 14px 16px; color: #334155; font-weight: 700;">${room.doctorName || '원장'}</td>
+          <td style="padding: 14px 16px;">
+            <span style="font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; ${badgeStyle}">
+              ${badgeText}
+            </span>
+          </td>
+          <td style="padding: 14px 16px; font-size: 13.5px;">${priceText}</td>
+          <td style="padding: 14px 16px; text-align: center;">
+            <div style="display: flex; gap: 6px; justify-content: center;">
+              <button type="button" class="btn" onclick="openEditRoomModal('${room.id}')"
+                style="background: white; color: #0284c7; border: 1px solid #bae6fd; padding: 5px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                ✏️ 수정
+              </button>
+              ${!isMain ? `
+                <button type="button" class="btn" onclick="handleDeleteRoom('${room.id}', '${room.roomName || '진료실'}')"
+                  style="background: white; color: #ef4444; border: 1px solid #fecaca; padding: 5px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                  🗑️ 삭제
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 🏥 모달 열기 (추가 모드)
+    function openAddRoomModal() {
+      const pricing = getSlotPricing();
+      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
+      const nextNum = rooms.length + 1;
+
+      document.getElementById('roomModalTitle').textContent = '➕ 새 진료실 슬롯 추가';
+      document.getElementById('modalRoomId').value = '';
+      document.getElementById('modalRoomName').value = `${nextNum}진료실`;
+      document.getElementById('modalDoctorName').value = '';
+
+      const noticeEl = document.getElementById('roomModalPricingNotice');
+      noticeEl.innerHTML = `
+        <strong>💳 추가 슬롯 요금 안내 (${pricing.planTitle})</strong><br>
+        • 진료실 슬롯당 정가의 50% 반값 특가인 <strong>${pricing.slotPriceText}/월</strong>이 추가됩니다.<br>
+        • 추가 시 다음 정기결제일에 기본 요금과 합산하여 자동 결제됩니다.
+      `;
+
+      document.getElementById('btnSubmitRoomModal').textContent = '➕ 슬롯 추가하기';
+      document.getElementById('roomModalOverlay').style.display = 'flex';
+      setTimeout(() => document.getElementById('modalDoctorName').focus(), 100);
+    }
+
+    // 🏥 모달 열기 (수정 모드 - 부원장 교체/이름 변경)
+    function openEditRoomModal(roomId) {
+      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
+      const target = rooms.find(r => r.id === roomId);
+      if (!target) return;
+
+      document.getElementById('roomModalTitle').textContent = '✏️ 진료실 정보 및 담당 원장 수정';
+      document.getElementById('modalRoomId').value = target.id;
+      document.getElementById('modalRoomName').value = target.roomName || '';
+      document.getElementById('modalDoctorName').value = target.doctorName || '';
+
+      const noticeEl = document.getElementById('roomModalPricingNotice');
+      noticeEl.innerHTML = `
+        <strong>💡 원장님 성함 및 진료실 명칭 변경</strong><br>
+        • 부원장님이 교체되었거나 진료실 명칭을 변경하려는 경우 <strong>추가 비용 없이 무료</strong>로 언제든 수정 가능합니다.<br>
+        • 수정하신 원장님 성함은 환자 알림톡 및 진료 리포트에 즉시 반영됩니다.
+      `;
+
+      document.getElementById('btnSubmitRoomModal').textContent = '💾 수정사항 저장';
+      document.getElementById('roomModalOverlay').style.display = 'flex';
+      setTimeout(() => document.getElementById('modalDoctorName').focus(), 100);
+    }
+
+    function closeRoomModal() {
+      document.getElementById('roomModalOverlay').style.display = 'none';
+      document.getElementById('roomModalForm').reset();
+    }
+
+    // 🏥 진료실 슬롯 저장 (추가 또는 수정)
+    async function handleSaveRoomModal(e) {
+      e.preventDefault();
+      const roomId = document.getElementById('modalRoomId').value.trim();
+      const roomName = document.getElementById('modalRoomName').value.trim();
+      const doctorName = document.getElementById('modalDoctorName').value.trim();
+
+      if (!roomName || !doctorName) {
+        alert('진료실 명칭과 담당 원장님 성함을 모두 입력해 주세요.');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btnSubmitRoomModal');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = '⏳ 저장 중...';
+      submitBtn.disabled = true;
+
+      try {
+        if (roomId) {
+          // 수정 모드
+          await TodakDB.updateClinicRoom(currentUser.email, roomId, { roomName, doctorName });
+          showToast('✅ 진료실 정보가 안전하게 수정되었습니다.');
+        } else {
+          // 신규 슬롯 추가 모드
+          const pricing = getSlotPricing();
+          if (!confirm(`[진료실 슬롯 추가 확인]\n\n• 진료실: ${roomName} (${doctorName})\n• 추가 요금: ${pricing.slotPriceText}/월 (${pricing.planTitle})\n\n슬롯을 추가하시겠습니까?`)) {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+          }
+          await TodakDB.addClinicRoom(currentUser.email, { roomName, doctorName });
+          showToast('🎉 새 진료실 슬롯이 성공적으로 추가되었습니다!');
+        }
+
+        closeRoomModal();
+        // 최신 DB 정보 재동기화
+        const fresh = await TodakDB.getCurrentUserProfile();
+        if (fresh) currentUser = fresh;
+        renderClinicRoomsTable();
+
+      } catch (err) {
+        alert('진료실 저장 실패: ' + (err.message || '오류가 발생했습니다.'));
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // 🏥 진료실 슬롯 삭제
+    async function handleDeleteRoom(roomId, roomName) {
+      if (!confirm(`[진료실 슬롯 삭제]\n\n정말 '${roomName}' 슬롯을 삭제하시겠습니까?\n\n• 삭제 시 해당 진료실 방은 목록에서 즉시 제거됩니다.\n• 다음 결제일부터 추가 슬롯 요금이 청구되지 않습니다.`)) {
+        return;
+      }
+
+      try {
+        showToast('⏳ 슬롯 삭제 중...');
+        await TodakDB.deleteClinicRoom(currentUser.email, roomId);
+        showToast('🗑️ 진료실 슬롯이 삭제되었습니다.');
+
+        // 최신 DB 정보 재동기화
+        const fresh = await TodakDB.getCurrentUserProfile();
+        if (fresh) currentUser = fresh;
+        renderClinicRoomsTable();
+      } catch (err) {
+        alert('삭제 실패: ' + (err.message || '오류가 발생했습니다.'));
       }
     }
 
