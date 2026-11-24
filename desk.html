@@ -525,29 +525,47 @@
     }
 
     // 날짜/시각 포맷터 헬퍼 (날짜와 오전/오후 시각을 2줄로 깔끔하게 분리)
-    function formatDateTime(timestampOrStr) {
-      if (!timestampOrStr) return '-';
+    function formatDateTime(itemOrStr, fallbackTimestamp) {
+      if (!itemOrStr) return '-';
 
       let d = null;
       let timeFallback = '';
+      let str = '';
+      let ts = fallbackTimestamp;
 
-      if (typeof timestampOrStr === 'string') {
+      if (typeof itemOrStr === 'object' && itemOrStr !== null) {
+        str = itemOrStr.createdAt || itemOrStr.time || '';
+        ts = itemOrStr.timestamp;
+        if (!ts && itemOrStr.id && String(itemOrStr.id).startsWith('desk_')) {
+          const parsedId = parseInt(String(itemOrStr.id).replace('desk_', ''), 10);
+          if (!isNaN(parsedId) && parsedId > 1700000000000) ts = parsedId;
+        }
+      } else {
+        str = itemOrStr;
+      }
+
+      // 1. 만약 원본 timestamp가 유효한 숫자면 가장 정확한 실제 생성 시점으로 파싱
+      if (ts && !isNaN(Number(ts))) {
+        const parsedTs = new Date(Number(ts));
+        if (!isNaN(parsedTs.getTime())) {
+          d = parsedTs;
+        }
+      }
+
+      // 2. 문자열 형태에서 날짜/시간 파싱
+      if (!d && typeof str === 'string') {
         // "2026.11.23 21:05" 형태인 경우 파싱
-        const match = timestampOrStr.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
+        const match = str.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})\s+(\d{1,2}):(\d{1,2})/);
         if (match) {
           d = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10), parseInt(match[4], 10), parseInt(match[5], 10));
         } else {
-          // "오후 04:09" 같은 한글 시간 문자열이 포함된 경우
-          const parsed = new Date(timestampOrStr);
+          const parsed = new Date(str);
           if (!isNaN(parsed.getTime())) {
             d = parsed;
           } else {
-            timeFallback = timestampOrStr.replace(/^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}\s*/, '').trim();
+            timeFallback = str.replace(/^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}\s*/, '').trim();
           }
         }
-      } else {
-        const parsed = new Date(timestampOrStr);
-        if (!isNaN(parsed.getTime())) d = parsed;
       }
 
       if (d && !isNaN(d.getTime())) {
@@ -564,12 +582,9 @@
         return `<div style="line-height: 1.35;"><span style="font-size: 13px; color: #334155; font-weight: 700;">${yyyy}.${mm}.${dd}</span><br><span style="font-size: 12px; color: #64748b; font-weight: 500;">${ampm} ${hhStr}:${minutes}</span></div>`;
       }
 
-      // 파싱이 어려웠던 경우 폴백
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      return `<div style="line-height: 1.35;"><span style="font-size: 13px; color: #334155; font-weight: 700;">${yyyy}.${mm}.${dd}</span><br><span style="font-size: 12px; color: #64748b; font-weight: 500;">${timeFallback || timestampOrStr}</span></div>`;
+      // 3. 만약 날짜 파싱이 불가능한 옛날 데이터인 경우:
+      // 화면 열 때마다 오늘 날짜(new Date())로 바뀌지 않도록 접수 시각 그대로 고정 표기
+      return `<div style="line-height: 1.35;"><span style="font-size: 13px; color: #334155; font-weight: 700;">접수</span><br><span style="font-size: 12px; color: #64748b; font-weight: 500;">${timeFallback || str}</span></div>`;
     }
 
     // 현재 병원 ID 식별
@@ -693,7 +708,7 @@
         if (isSent) tr.style.background = '#f8fafc';
 
         // 🌟 접수날짜/시각 완벽 포맷팅
-        const displayDateTime = formatDateTime(item.createdAt || item.timestamp);
+        const displayDateTime = formatDateTime(item);
 
         // 🏥 진료실 / 담당 원장 뱃지 포맷팅
         const roomNameStr = item.roomName || '1진료실';
