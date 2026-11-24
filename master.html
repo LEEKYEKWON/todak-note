@@ -377,10 +377,11 @@
           <thead>
             <tr>
               <th>병원명</th>
-              <th>원장님</th>
+              <th>대표원장</th>
               <th>이메일(ID)</th>
               <th>병원 전화번호</th>
               <th>가입 플랜</th>
+              <th>진료실(슬롯)</th>
               <th>월 구독료</th>
               <th>상태</th>
               <th>관리</th>
@@ -486,6 +487,23 @@
                 }
               }
 
+              // 🏥 clinic_rooms 슬롯 파싱
+              let rooms = [];
+              if (Array.isArray(row.clinic_rooms)) rooms = row.clinic_rooms;
+              else if (typeof row.clinic_rooms === 'string') {
+                try { rooms = JSON.parse(row.clinic_rooms); } catch (e) { }
+              }
+              if (!rooms || rooms.length === 0) {
+                rooms = [{ id: 'room_1', roomName: '1진료실', doctorName: row.doctor_name || '원장', isMain: true }];
+              }
+
+              const isPro = (bPlan || 'Pro').toLowerCase() === 'pro';
+              const basePrice = isPro ? 139000 : 89000;
+              const slotUnitPrice = isPro ? 99000 : 74000;
+              const extraSlotCount = Math.max(0, rooms.length - 1);
+              const extraSlotTotal = extraSlotCount * slotUnitPrice;
+              const totalMonthlyPrice = basePrice + extraSlotTotal;
+
               return {
                 hospitalName: row.hospital_name || '병원명 미입력',
                 doctorName: row.doctor_name || '원장',
@@ -494,7 +512,12 @@
                 plan: bPlan,
                 pendingPlan: pPlan,
                 pendingDate: pDate,
-                joinedAt: row.created_at
+                joinedAt: row.created_at,
+                rooms: rooms,
+                basePrice: basePrice,
+                extraSlotCount: extraSlotCount,
+                extraSlotTotal: extraSlotTotal,
+                totalMonthlyPrice: totalMonthlyPrice
               };
             });
           }
@@ -573,7 +596,7 @@
       if (hospitals.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">
+            <td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;">
               📭 가입된 병원이 없습니다. (새로 회원가입 시 실시간으로 여기에 등록됩니다)
             </td>
           </tr>
@@ -583,21 +606,32 @@
 
       hospitals.forEach((h, idx) => {
         const isPro = (h.plan || 'Pro').toLowerCase() === 'pro';
-        const planPrice = isPro ? 139000 : 89000;
         const isPendingStd = isPro && h.pendingPlan === 'Standard';
+        const roomListStr = (h.rooms || []).map(r => `${r.roomName}(${r.doctorName})`).join(', ');
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><strong>${h.hospitalName || '병원명 미입력'}</strong></td>
           <td>${h.doctorName || '원장님'}</td>
-          <td style="color: #94a3b8;">${h.email || '-'}</td>
+          <td style="color: #94a3b8; font-size: 13px;">${h.email || '-'}</td>
           <td>${h.phone || '-'}</td>
           <td>
             <span class="badge-plan ${isPro ? 'pro' : 'std'}">
               ${isPro ? (isPendingStd ? `⭐ Pro (${h.pendingDate || '다음 결제일'} 기본형 예정)` : '⭐ 고급형 Pro') : '🟢 기본형 Standard'}
             </span>
           </td>
-          <td><strong>${planPrice.toLocaleString()}원</strong></td>
+          <td>
+            <div style="font-weight: 800; color: #0f172a;">총 ${(h.rooms || []).length}개실</div>
+            <div style="font-size: 11.5px; color: #64748b;" title="${roomListStr}">
+              기본 1개${h.extraSlotCount > 0 ? ` + <strong style="color: #0284c7;">추가 ${h.extraSlotCount}개</strong>` : ''}
+            </div>
+          </td>
+          <td>
+            <strong style="font-size: 14.5px; color: #0f172a;">${h.totalMonthlyPrice.toLocaleString()}원 / 월</strong>
+            <div style="font-size: 11.5px; color: #64748b;">
+              (기본 ${(h.basePrice / 10000).toFixed(1)}만${h.extraSlotCount > 0 ? ` + 슬롯 ${(h.extraSlotTotal / 10000).toFixed(1)}만` : ''})
+            </div>
+          </td>
           <td><span class="status-active">${isPendingStd ? '전환 예약됨' : '정상 이용중'}</span></td>
           <td>
             <button class="btn-action" onclick="togglePlan('${h.email}', '${h.plan}')">
@@ -615,8 +649,7 @@
 
       let totalRevenue = 0;
       hospitals.forEach(h => {
-        const isPro = (h.plan || 'Pro').toLowerCase() === 'pro';
-        totalRevenue += isPro ? 139000 : 89000;
+        totalRevenue += (h.totalMonthlyPrice || (h.plan === 'Pro' ? 139000 : 89000));
       });
 
       const revEl = document.getElementById('statMonthlyRevenue');

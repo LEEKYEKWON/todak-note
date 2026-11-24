@@ -924,8 +924,14 @@
       if (unitReviewEl) unitReviewEl.textContent = `건 (클릭률 ${reviewRate}%)`;
       if (footerReviewEl) footerReviewEl.textContent = `🔥 이번 달 누적 ${reviewCount}건 달성!`;
 
-      // 마케팅 ROI 계산
-      const userPlanPrice = (currentUser && currentUser.planPrice) ? Number(currentUser.planPrice) : 139000;
+      // 마케팅 ROI 계산 (기본 플랜 + 추가 슬롯 합산)
+      const extraSlots = Math.max(0, rooms.length - 1);
+      const isProUser = (currentUser?.plan || 'Pro').toLowerCase() === 'pro';
+      const basePlanPrice = isProUser ? 139000 : 89000;
+      const slotPrice = isProUser ? 99000 : 74000;
+      const totalInvestPrice = basePlanPrice + (extraSlots * slotPrice);
+
+      const userPlanPrice = (currentUser && currentUser.planPrice) ? Number(currentUser.planPrice) : totalInvestPrice;
       const priceInManwon = (userPlanPrice / 10000).toFixed(1);
       const marketingValue = reviewCount * 7500;
       const roiPercent = marketingValue > 0 ? Math.round((marketingValue / userPlanPrice) * 100) : 0;

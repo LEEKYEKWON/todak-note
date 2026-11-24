@@ -754,17 +754,33 @@
       }
     }
 
-    // 플랜별 가격 헬퍼 (얼리버드 vs 정가 동적 판별)
+    // 플랜별 가격 헬퍼 (얼리버드 vs 정가 동적 판별 및 진료실 슬롯 합산)
     function getPlanPricing() {
       // 선착순 얼리버드 50명 가입자 여부 판별 (기본값: 현재 얼리버드 진행 중)
       const isEarlyBird = currentUser.isEarlyBird !== false;
       const stdPrice = isEarlyBird ? 89000 : 149000;
       const proPrice = isEarlyBird ? 139000 : 199000;
-      const priceDiff = proPrice - stdPrice; // 얼리버드 50,000원, 정가 50,000원
+      const isPro = (currentUser.plan || 'Pro').toLowerCase() === 'pro';
+      const basePrice = isPro ? proPrice : stdPrice;
+
+      // 🏥 진료실 슬롯 합산 계산
+      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
+      const extraSlotCount = Math.max(0, rooms.length - 1);
+      const slotUnitPrice = isPro ? 99000 : 74000; // 확정된 50% 반값 특가
+      const extraSlotTotal = extraSlotCount * slotUnitPrice;
+      const totalMonthlyPrice = basePrice + extraSlotTotal;
+      const priceDiff = proPrice - stdPrice;
+
       return {
         isEarlyBird,
+        isPro,
         stdPrice,
         proPrice,
+        basePrice,
+        extraSlotCount,
+        slotUnitPrice,
+        extraSlotTotal,
+        totalMonthlyPrice,
         priceDiff,
         stdPriceText: `월 ${stdPrice.toLocaleString()}원`,
         proPriceText: `월 ${proPrice.toLocaleString()}원`,
@@ -825,7 +841,11 @@
           badge.textContent = '⭐ 고급형 Pro 이용중';
           planNameEl.textContent = '고급형 (Pro)';
         }
-        planPriceEl.textContent = `${pricing.proPriceText} ${pricing.priceLabel}`;
+        if (pricing.extraSlotCount > 0) {
+          planPriceEl.innerHTML = `월 <strong>${pricing.totalMonthlyPrice.toLocaleString()}원</strong> <span style="font-size: 13px; font-weight: 500; color: #64748b;">(기본 ${pricing.basePrice.toLocaleString()}원 + 추가 슬롯 ${pricing.extraSlotCount}개 ${pricing.extraSlotTotal.toLocaleString()}원)</span>`;
+        } else {
+          planPriceEl.textContent = `${pricing.proPriceText} ${pricing.priceLabel}`;
+        }
         upgradeBanner.style.display = 'none';
         if (downgradeBanner) downgradeBanner.style.display = 'flex';
 
@@ -861,7 +881,11 @@
         badge.className = 'card-badge badge-std';
         badge.textContent = '🟢 기본형 Standard 이용중';
         planNameEl.textContent = '기본형 (Standard)';
-        planPriceEl.textContent = `${pricing.stdPriceText} ${pricing.priceLabel}`;
+        if (pricing.extraSlotCount > 0) {
+          planPriceEl.innerHTML = `월 <strong>${pricing.totalMonthlyPrice.toLocaleString()}원</strong> <span style="font-size: 13px; font-weight: 500; color: #64748b;">(기본 ${pricing.basePrice.toLocaleString()}원 + 추가 슬롯 ${pricing.extraSlotCount}개 ${pricing.extraSlotTotal.toLocaleString()}원)</span>`;
+        } else {
+          planPriceEl.textContent = `${pricing.stdPriceText} ${pricing.priceLabel}`;
+        }
         upgradeBanner.style.display = 'flex';
         if (downgradeBanner) downgradeBanner.style.display = 'none';
 
@@ -1097,11 +1121,12 @@
         return;
       }
 
-      const isPro = (currentUser.plan || 'Pro').toLowerCase() === 'pro';
-      const amount = isPro ? 139000 : 89000;
+      const pricing = getPlanPricing();
+      const amount = pricing.totalMonthlyPrice;
       const planTitle = isPro ? '고급형(Pro) 월 구독료' : '기본형(Standard) 월 구독료';
+      const slotDesc = pricing.extraSlotCount > 0 ? ` (기본 1개 + 추가 슬롯 ${pricing.extraSlotCount}개)` : '';
 
-      if (!confirm(`[정기결제 1회 승인 테스트]\n\n• 플랜: ${planTitle}\n• 결제금액: ${amount.toLocaleString()}원\n\n등록된 빌링키로 실제 결제 승인을 요청하시겠습니까? (테스트 카드 승인)`)) {
+      if (!confirm(`[정기결제 1회 승인 테스트]\n\n• 주문명: 토닥토닥노트 ${planTitle}${slotDesc}\n• 결제금액: ${amount.toLocaleString()}원 (기본 ${pricing.basePrice.toLocaleString()}원${pricing.extraSlotCount > 0 ? ` + 추가 슬롯 ${pricing.extraSlotTotal.toLocaleString()}원` : ''})\n\n등록된 빌링키로 실제 결제 승인을 요청하시겠습니까? (테스트 카드 승인)`)) {
         return;
       }
 
@@ -1148,12 +1173,18 @@
       if (!tbody) return;
 
       const pricing = getSlotPricing();
+      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
+      const extraCount = Math.max(0, rooms.length - 1);
       const noticeTextEl = document.getElementById('slotPriceNoticeText');
       if (noticeTextEl) {
-        noticeTextEl.textContent = `현재 ${pricing.planTitle} 이용 중: 추가 슬롯당 월 ${pricing.slotPrice.toLocaleString()}원 (정가 대비 50% 반값 특가)`;
+        if (extraCount > 0) {
+          const slotTotal = extraCount * pricing.slotPrice;
+          noticeTextEl.innerHTML = `현재 ${pricing.planTitle} 이용 중: 추가 슬롯당 월 <strong>${pricing.slotPrice.toLocaleString()}원</strong> (정가 대비 50% 반값 특가)<br><span style="color: #0284c7; font-weight: 800;">💡 현재 추가 진료실 ${extraCount}개 운영 중 ➔ 추가 슬롯 합계: 월 ${slotTotal.toLocaleString()}원 (총 구독료에 합산)</span>`;
+        } else {
+          noticeTextEl.textContent = `현재 ${pricing.planTitle} 이용 중: 추가 슬롯당 월 ${pricing.slotPrice.toLocaleString()}원 (정가 대비 50% 반값 특가)`;
+        }
       }
 
-      const rooms = Array.isArray(currentUser?.clinicRooms) ? currentUser.clinicRooms : [];
       if (rooms.length === 0) {
         tbody.innerHTML = `
           <tr>
