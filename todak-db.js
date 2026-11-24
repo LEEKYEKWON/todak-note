@@ -113,6 +113,18 @@ const TodakDB = {
           // 🌟 [자동 전환 엔진] 만약 오늘 날짜가 전환 예정일(pending_date)에 도달했거나 지났다면 자동으로 기본형으로 영구 전환
           fresh = await this.checkAndExecuteAutoTransition(fresh);
 
+          // 🌟 세션 상태 완벽 보존 (부원장 로그인 상태 유지 & 마스터 비번 은닉)
+          if (localUser.isMaster === false) {
+            fresh.isMaster = false;
+            fresh.role = 'doctor';
+            const matchedRoom = (fresh.clinicRooms || []).find(r => r.id === localUser.selectedRoom?.id) || localUser.selectedRoom;
+            fresh.selectedRoom = matchedRoom;
+            delete fresh.password;
+          } else {
+            fresh.isMaster = true;
+            fresh.role = 'owner';
+          }
+
           localStorage.setItem('todak_current_user', JSON.stringify(fresh));
           return fresh;
         }
@@ -215,7 +227,20 @@ const TodakDB = {
       email: cleanEmail
     });
 
-    // 브라우저 세션 동기화
+    // 브라우저 세션 동기화 (기존 세션 권한 보존)
+    const existingStr = localStorage.getItem('todak_current_user');
+    if (existingStr) {
+      try {
+        const existing = JSON.parse(existingStr);
+        if (existing.isMaster === false) {
+          normalized.isMaster = false;
+          normalized.role = 'doctor';
+          normalized.selectedRoom = existing.selectedRoom;
+          delete normalized.password;
+        }
+      } catch (e) {}
+    }
+
     localStorage.setItem('todak_current_user', JSON.stringify(normalized));
     return normalized;
   },

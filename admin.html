@@ -391,12 +391,12 @@
   <header>
     <div class="header-left">
       <h1 class="header-title">📊 토닥토닥노트 병원 경영 대시보드</h1>
-      <span class="hospital-badge">🏥 연세바른내과의원 · 박준혁 원장</span>
+      <span class="hospital-badge">🏥 진료실 통계 분석 로딩 중...</span>
     </div>
 
     <div class="header-nav">
       <span style="font-size: 13px; opacity: 0.85;">⭐ Pro 플랜 사용 중</span>
-      <a href="settings.html" class="nav-btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);">
+      <a href="settings.html" class="nav-btn" onclick="handleAdminSettingsClick(event)" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);">
         마이페이지
       </a>
       <a href="clinic.html" class="nav-btn">
@@ -627,7 +627,18 @@
     function updateHeaderBadge() {
       const badge = document.querySelector('.hospital-badge');
       if (badge && currentUser && currentUser.hospitalName) {
-        badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
+        if (currentUser.isMaster === false && currentUser.selectedRoom) {
+          badge.textContent = `🏥 ${currentUser.hospitalName} ${currentUser.selectedRoom.roomName} · ${currentUser.selectedRoom.doctorName}`;
+        } else {
+          badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
+        }
+      }
+    }
+
+    function handleAdminSettingsClick(e) {
+      if (currentUser && currentUser.isMaster === false) {
+        e.preventDefault();
+        alert('🔒 [대표원장 전용 메뉴]\n\n구독 요금제 및 진료실 슬롯 관리는 대표원장님 전용 권한입니다.\n대표원장 마스터 계정으로 로그인해 주세요.');
       }
     }
 
@@ -645,6 +656,9 @@
       if (urlRoomId) {
         sessionRoom = rooms.find(r => r.id === urlRoomId);
       }
+      if (!sessionRoom && currentUser && currentUser.selectedRoom) {
+        sessionRoom = rooms.find(r => r.id === currentUser.selectedRoom.id);
+      }
       if (!sessionRoom) {
         const savedRoomStr = localStorage.getItem('todak_selected_room');
         if (savedRoomStr) {
@@ -655,22 +669,18 @@
         }
       }
 
-      // 세션 진료실 결정
-      if (sessionRoom) {
-        currentSessionRoomId = sessionRoom.id;
-        if (sessionRoom.isMain) {
-          // 대표원장 1진료실 PC
-          isMasterUnlocked = true;
-          currentFilterRoomId = 'all';
-        } else {
-          // 부원장 2진료실 PC -> 본인 방으로 기본 제한
-          isMasterUnlocked = false;
-          currentFilterRoomId = sessionRoom.id;
-        }
+      // 세션 진료실 결정 & 부원장/대표원장 보안 분기
+      if (currentUser && currentUser.isMaster === false) {
+        // 부원장 진료실 슬롯 세션: 무조건 본인 진료실로 자동 고정 및 잠금 활성화
+        const myRoom = (currentUser.selectedRoom && rooms.find(r => r.id === currentUser.selectedRoom.id)) || sessionRoom || rooms.find(r => !r.isMain) || rooms[0];
+        currentSessionRoomId = myRoom.id;
+        isMasterUnlocked = false;
+        currentFilterRoomId = myRoom.id;
       } else {
-        // 기본 대표원장 권한
+        // 대표원장 마스터 세션: 모든 권한 허용
+        currentSessionRoomId = sessionRoom ? sessionRoom.id : null;
         isMasterUnlocked = true;
-        currentFilterRoomId = 'all';
+        currentFilterRoomId = (urlRoomId && rooms.some(r => r.id === urlRoomId)) ? urlRoomId : 'all';
       }
 
       renderDoctorFilterTabs();
@@ -775,9 +785,6 @@
         alert('🎉 [대표원장 인증 완료]\n병원 전체 경영 지표 및 모든 진료실 통계가 잠금 해제되었습니다.');
       } else {
         alert('⚠️ 대표원장 마스터 비밀번호와 일치하지 않습니다.\n병원 전체 경영 지표는 대표원장님만 열람하실 수 있습니다.');
-        document.getElementById('inputMasterPassword').focus();
-      }
-    }
         document.getElementById('inputMasterPassword').focus();
       }
     }

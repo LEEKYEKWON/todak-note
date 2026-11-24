@@ -1101,7 +1101,7 @@
       <a href="settings.html" class="dashboard-nav-link" onclick="handleSettingsClick(event)" title="병원 프로필 및 구독 요금제 관리">
         마이페이지
       </a>
-      <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃">
+      <a href="login.html" class="dashboard-nav-link" style="opacity: 0.8;" title="계정 전환 및 로그아웃" onclick="handleLogout(event)">
         로그아웃
       </a>
 
@@ -1497,6 +1497,11 @@
     // 🏥 현재 선택된 진료실 방 획득 (로컬 스토리지 기반 PC 세션)
     function getCurrentSelectedRoom(user) {
       const u = user || cachedCurrentUser;
+      // 🌟 부원장 전용 로그인인 경우, 이미 배정된 본인 방이 최우선!
+      if (u && u.isMaster === false && u.selectedRoom && u.selectedRoom.id) {
+        return u.selectedRoom;
+      }
+
       const rooms = (u && Array.isArray(u.clinicRooms) && u.clinicRooms.length > 0)
         ? u.clinicRooms
         : [{ id: 'room_1', roomName: '1진료실', doctorName: (u && u.doctorName) || '원장', isMain: true }];
@@ -1513,6 +1518,13 @@
 
       // 없거나 불일치하면 기본 첫 번째 방(메인)
       return rooms[0];
+    }
+
+    function handleLogout(e) {
+      if (e) e.preventDefault();
+      localStorage.removeItem('todak_selected_room');
+      localStorage.removeItem('todak_current_user');
+      window.location.href = 'login.html';
     }
 
     // 🏥 진료실 방 변경 저장
