@@ -148,7 +148,7 @@ const TodakDB = {
     if (!email) {
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
-        try { email = JSON.parse(userStr).email; } catch (e) {}
+        try { email = JSON.parse(userStr).email; } catch (e) { }
       }
     }
     const cleanEmail = (email || '').trim().toLowerCase();
@@ -201,7 +201,7 @@ const TodakDB = {
     if (!email) {
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
-        try { email = JSON.parse(userStr).email; } catch (e) {}
+        try { email = JSON.parse(userStr).email; } catch (e) { }
       }
     }
     return await this.updateProfile({ email, plan: newPlan, pendingPlan, pendingDate });
@@ -212,7 +212,7 @@ const TodakDB = {
   async addClinicRoom(email, { roomName, doctorName }) {
     const user = await this.getCurrentUserProfile();
     const rooms = Array.isArray(user?.clinicRooms) ? [...user.clinicRooms] : [];
-    
+
     // 자동 기본 방 이름 부여 (예: "2진료실")
     const nextRoomNum = rooms.length + 1;
     const finalRoomName = (roomName || `${nextRoomNum}진료실`).trim();
@@ -279,7 +279,7 @@ const TodakDB = {
     if (Array.isArray(row.clinic_rooms)) rooms = row.clinic_rooms;
     else if (Array.isArray(row.clinicRooms)) rooms = row.clinicRooms;
     else if (typeof row.clinic_rooms === 'string') {
-      try { rooms = JSON.parse(row.clinic_rooms); } catch (e) {}
+      try { rooms = JSON.parse(row.clinic_rooms); } catch (e) { }
     }
 
     // 기본 진료실이 하나도 없으면 1진료실 기본 생성

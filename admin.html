@@ -355,6 +355,34 @@
       font-size: 11.5px;
       color: #94a3b8;
     }
+
+    /* 🏥 다인 진료실 원장별 필터 탭 스타일 */
+    .filter-tab-btn {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .filter-tab-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .filter-tab-btn.active {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
   </style>
 </head>
 
@@ -378,6 +406,21 @@
   </header>
 
   <div class="container">
+
+    <!-- 🏥 다인 진료실(Multi-Doctor) 원장별 통계 선택 컨트롤 바 -->
+    <div class="doctor-filter-bar" style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 14px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+          <span>🩺</span> 조회 대상:
+        </span>
+        <div id="doctorFilterTabs" style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button type="button" class="filter-tab-btn active" onclick="handleFilterClick('all')">🌟 병원 전체 종합</button>
+        </div>
+      </div>
+      <div id="doctorFilterNotice" style="font-size: 12.5px; color: #0284c7; font-weight: 700; background: #f0f9ff; padding: 4px 10px; border-radius: 8px; border: 1px solid #bae6fd;">
+        전체 병원 종합 통계 조회 중
+      </div>
+    </div>
 
     <!-- 4대 핵심 경영 지표 -->
     <div class="metric-grid">
@@ -457,16 +500,17 @@
         <table class="patient-table">
           <thead>
             <tr>
+              <th>진료실 / 담당의</th>
               <th>환자명</th>
               <th>연락처</th>
-              <th>초진/진료일</th>
+              <th>진료일</th>
               <th>재방문 예정일</th>
               <th>안내 상태</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colspan="5" style="text-align: center; padding: 40px 12px; color: #94a3b8; font-size: 14px;">
+              <td colspan="6" style="text-align: center; padding: 40px 12px; color: #94a3b8; font-size: 14px;">
                 📋 아직 발송된 진료 리포트가 없습니다.<br>
                 <span style="font-size: 12.5px; color: #cbd5e1;">진료실 프로그램에서 환자에게 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>
               </td>
@@ -514,20 +558,47 @@
 
   </div>
 
+  <!-- 🔒 대표원장 전용 보안 인증 모달 -->
+  <div id="adminLockModalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.65); z-index: 99999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 20px; width: 100%; max-width: 440px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; text-align: center;">
+      <span style="font-size: 40px; display: block; margin-bottom: 8px;">🔒</span>
+      <h3 style="font-size: 19px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">대표원장 보안 인증</h3>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 22px;">
+        병원 전체 경영 지표 및 타 진료실 환자 통계는 <strong>대표원장님 전용 권한</strong>입니다.<br>
+        대표원장 계정 비밀번호를 입력해 주세요.
+      </p>
+
+      <form id="adminLockForm" onsubmit="handleAdminLockSubmit(event)">
+        <input type="password" id="inputMasterPassword" required placeholder="대표원장 로그인 비밀번호 입력"
+          style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14.5px; margin-bottom: 18px; outline: none; box-sizing: border-box;">
+        
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button type="button" onclick="closeAdminLockModal()"
+            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer;">취소</button>
+          <button type="submit"
+            style="background: #0284c7; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-size: 13.5px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">잠금 해제</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     // 로그인된 원장님 병원 정보 및 Supabase 실시간 리포트 통계 연동
     let currentUser = null;
+    let allReports = [];
+    let allLogs = [];
+    let currentFilterRoomId = 'all';
+    let currentSessionRoomId = null;
+    let isMasterUnlocked = false;
+    let pendingUnlockTargetId = null;
+
     window.addEventListener('DOMContentLoaded', async () => {
       const userStr = localStorage.getItem('todak_current_user');
       let currentHosp = '';
       if (userStr) {
         try {
           currentUser = JSON.parse(userStr);
-          const badge = document.querySelector('.hospital-badge');
-          if (badge && currentUser.hospitalName) {
-            currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
-            badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
-          }
+          updateHeaderBadge();
         } catch (e) { }
       }
 
@@ -537,24 +608,177 @@
           const fresh = await TodakDB.getCurrentUserProfile();
           if (fresh) {
             currentUser = fresh;
-            const badge = document.querySelector('.hospital-badge');
-            if (badge && currentUser.hospitalName) {
-              currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
-              badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
-            }
+            updateHeaderBadge();
           }
         } catch (e) { }
       }
 
+      if (currentUser && currentUser.hospitalName) {
+        currentHosp = currentUser.hospitalName.replace(/^🏥\s*/, '').trim();
+      }
+
+      // 🏥 세션 판별 및 원장별 탭 초기화
+      initSessionAndTabs();
+
+      // 실시간 데이터 로드
       await loadRealDashboardData(currentHosp);
     });
 
+    function updateHeaderBadge() {
+      const badge = document.querySelector('.hospital-badge');
+      if (badge && currentUser && currentUser.hospitalName) {
+        badge.textContent = `🏥 ${currentUser.hospitalName} · ${currentUser.doctorName || '원장'}`;
+      }
+    }
+
+    // 🏥 세션 진료실 판별 및 탭 초기 셋업
+    function initSessionAndTabs() {
+      const rooms = (currentUser && Array.isArray(currentUser.clinicRooms) && currentUser.clinicRooms.length > 0)
+        ? currentUser.clinicRooms
+        : [{ id: 'room_1', roomName: '1진료실', doctorName: (currentUser && currentUser.doctorName) || '원장', isMain: true }];
+
+      // 1. URL 파라미터 또는 로컬 스토리지에서 현재 PC 진료실 세션 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlRoomId = urlParams.get('roomId');
+      let sessionRoom = null;
+
+      if (urlRoomId) {
+        sessionRoom = rooms.find(r => r.id === urlRoomId);
+      }
+      if (!sessionRoom) {
+        const savedRoomStr = localStorage.getItem('todak_selected_room');
+        if (savedRoomStr) {
+          try {
+            const parsed = JSON.parse(savedRoomStr);
+            sessionRoom = rooms.find(r => r.id === parsed.id);
+          } catch (e) { }
+        }
+      }
+
+      // 세션 진료실 결정
+      if (sessionRoom) {
+        currentSessionRoomId = sessionRoom.id;
+        if (sessionRoom.isMain) {
+          // 대표원장 1진료실 PC
+          isMasterUnlocked = true;
+          currentFilterRoomId = 'all';
+        } else {
+          // 부원장 2진료실 PC -> 본인 방으로 기본 제한
+          isMasterUnlocked = false;
+          currentFilterRoomId = sessionRoom.id;
+        }
+      } else {
+        // 기본 대표원장 권한
+        isMasterUnlocked = true;
+        currentFilterRoomId = 'all';
+      }
+
+      renderDoctorFilterTabs();
+    }
+
+    // 🏥 상단 원장별 필터 탭 렌더링
+    function renderDoctorFilterTabs() {
+      const container = document.getElementById('doctorFilterTabs');
+      if (!container) return;
+
+      const rooms = (currentUser && Array.isArray(currentUser.clinicRooms) && currentUser.clinicRooms.length > 0)
+        ? currentUser.clinicRooms
+        : [{ id: 'room_1', roomName: '1진료실', doctorName: (currentUser && currentUser.doctorName) || '원장', isMain: true }];
+
+      container.innerHTML = '';
+
+      // 1) [🌟 병원 전체 종합] 탭
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.className = `filter-tab-btn ${currentFilterRoomId === 'all' ? 'active' : ''}`;
+      const allLockIcon = (!isMasterUnlocked && currentSessionRoomId) ? ' 🔒' : '';
+      allBtn.innerHTML = `🌟 병원 전체 종합${allLockIcon}`;
+      allBtn.onclick = () => handleFilterClick('all');
+      container.appendChild(allBtn);
+
+      // 2) 각 진료실별 탭
+      rooms.forEach(room => {
+        const isSelected = currentFilterRoomId === room.id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `filter-tab-btn ${isSelected ? 'active' : ''}`;
+
+        // 부원장 PC이고 아직 잠금 미해제 상태에서 타 원장님 방이면 🔒 표시
+        let lockIcon = '';
+        if (!isMasterUnlocked && currentSessionRoomId && room.id !== currentSessionRoomId) {
+          lockIcon = ' 🔒';
+        }
+
+        btn.innerHTML = `🩺 ${room.roomName} (${room.doctorName})${lockIcon}`;
+        btn.onclick = () => handleFilterClick(room.id);
+        container.appendChild(btn);
+      });
+    }
+
+    // 🏥 탭 클릭 처리 (보안 인증 분기 포함)
+    function handleFilterClick(targetRoomId) {
+      // 만약 부원장 PC 세션이고 아직 대표원장 언락이 안 된 상태에서 전체 또는 타 원장님 탭 클릭 시
+      if (!isMasterUnlocked && currentSessionRoomId && targetRoomId !== currentSessionRoomId) {
+        pendingUnlockTargetId = targetRoomId;
+        openAdminLockModal();
+        return;
+      }
+
+      currentFilterRoomId = targetRoomId;
+      renderDoctorFilterTabs();
+      applyDoctorFilter();
+    }
+
+    // 🔒 보안 인증 모달 제어
+    function openAdminLockModal() {
+      document.getElementById('inputMasterPassword').value = '';
+      document.getElementById('adminLockModalOverlay').style.display = 'flex';
+      setTimeout(() => document.getElementById('inputMasterPassword').focus(), 100);
+    }
+
+    function closeAdminLockModal() {
+      document.getElementById('adminLockModalOverlay').style.display = 'none';
+      pendingUnlockTargetId = null;
+    }
+
+    async function handleAdminLockSubmit(e) {
+      e.preventDefault();
+      const inputPass = document.getElementById('inputMasterPassword').value.trim();
+
+      let isCorrect = false;
+      // 1. 현재 사용자 객체 비밀번호 확인
+      if (currentUser && currentUser.password && currentUser.password === inputPass) {
+        isCorrect = true;
+      } else if (currentUser && currentUser.email) {
+        // 2. TodakDB를 통해 DB 실시간 대조
+        try {
+          await TodakDB.signIn({ email: currentUser.email, password: inputPass });
+          isCorrect = true;
+        } catch (authErr) {
+          isCorrect = false;
+        }
+      }
+
+      if (isCorrect) {
+        isMasterUnlocked = true;
+        closeAdminLockModal();
+        currentFilterRoomId = pendingUnlockTargetId || 'all';
+        renderDoctorFilterTabs();
+        applyDoctorFilter();
+        alert('🎉 [대표원장 인증 완료]\n병원 전체 경영 지표 및 모든 진료실 통계가 잠금 해제되었습니다.');
+      } else {
+        alert('⚠️ 비밀번호가 일치하지 않습니다.\n병원 전체 경영 지표는 대표원장님만 열람하실 수 있습니다.');
+        document.getElementById('inputMasterPassword').focus();
+      }
+    }
+
+    // 🌟 실시간 데이터 불러오기 (전체 원본 저장)
     async function loadRealDashboardData(hospitalName) {
       const SUPABASE_URL = 'https://fabzvobawvtsdprixmyf.supabase.co';
       const SUPABASE_KEY = 'sb_publishable_h8kmyQtu5Q25wDiIHv3ZiQ_oiOCAc8O';
 
       try {
-        let queryUrl = `${SUPABASE_URL}/rest/v1/reports?select=*&order=created_at.desc&limit=50`;
+        let queryUrl = `${SUPABASE_URL}/rest/v1/reports?select=*&order=created_at.desc&limit=100`;
         if (hospitalName) {
           queryUrl += `&hospital_name=eq.${encodeURIComponent(hospitalName)}`;
         }
@@ -566,187 +790,258 @@
           }
         });
 
-        if (!res.ok) return;
-        const reports = await res.json();
+        if (res.ok) {
+          allReports = await res.json();
+        }
 
-        // 🌟 실시간 환자 활동 로그(열람, 공유, 리뷰 클릭) Supabase DB 조회
-        let logs = [];
+        // 실시간 활동 로그(열람, 공유, 리뷰 클릭)
         try {
-          let logUrl = `${SUPABASE_URL}/rest/v1/report_logs?select=*&order=created_at.desc&limit=50`;
+          let logUrl = `${SUPABASE_URL}/rest/v1/report_logs?select=*&order=created_at.desc&limit=100`;
           if (hospitalName) logUrl += `&hospital_name=eq.${encodeURIComponent(hospitalName)}`;
           const logRes = await fetch(logUrl, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
           });
-          if (logRes.ok) logs = await logRes.json();
+          if (logRes.ok) allLogs = await logRes.json();
         } catch (e) { }
 
-        // 1. 오늘 날짜 기준 발송 통계 계산
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const todayReports = reports.filter(r => r.created_at && r.created_at.startsWith(todayStr));
-        const totalCount = reports.length;
-        const todayCount = todayReports.length;
-
-        // 지표 카드 숫자 및 퍼센티지 실시간 갱신
-        const valTodayEl = document.getElementById('valTodayCount');
-        const valWeeklyEl = document.getElementById('valWeeklyFollowUp');
-        if (valTodayEl) valTodayEl.textContent = todayCount;
-        if (valWeeklyEl) valWeeklyEl.textContent = totalCount;
-
-        // 실시간 공유 및 리뷰 통계 계산 (실제 DB 로그 집계)
-        // 🌟 환자당/리포트당 중복 클릭 필터링하여 고유(Unique) 반응 수 집계
-        const uniqueShareKeys = new Set();
-        const uniqueReviewKeys = new Set();
-        logs.forEach(l => {
-          const key = (l.report_id && l.report_id !== 'null' && l.report_id !== 'undefined') ? l.report_id : (l.patient_name || 'unknown');
-          if (l.action_type === 'share') uniqueShareKeys.add(key);
-          if (l.action_type === 'review') uniqueReviewKeys.add(key);
-        });
-
-        const shareCount = uniqueShareKeys.size;
-        const shareRate = totalCount > 0 ? ((shareCount / totalCount) * 100).toFixed(1) : '0.0';
-        const reviewCount = uniqueReviewKeys.size;
-        const reviewRate = totalCount > 0 ? ((reviewCount / totalCount) * 100).toFixed(1) : '0.0';
-
-        const valShareEl = document.getElementById('valShareCount');
-        const unitShareEl = document.getElementById('unitShareRate');
-        if (valShareEl) valShareEl.textContent = shareCount;
-        if (unitShareEl) unitShareEl.textContent = `회 (${shareRate}%)`;
-
-        const valReviewEl = document.getElementById('valReviewCount');
-        const unitReviewEl = document.getElementById('unitReviewRate');
-        const footerReviewEl = document.getElementById('footerReviewTotal');
-        if (valReviewEl) valReviewEl.textContent = reviewCount;
-        if (unitReviewEl) unitReviewEl.textContent = `건 (클릭률 ${reviewRate}%)`;
-        if (footerReviewEl) footerReviewEl.textContent = `🔥 이번 달 누적 ${reviewCount}건 달성!`;
-
-        // 마케팅 ROI 계산 (가입 시기에 따른 실제 원장님 구독 결제 금액 기준 동적 계산!)
-        // 선착순 50명 얼리버드는 월 139,000원, 이후 정가 가입자는 월 199,000원
-        const userPlanPrice = (currentUser && currentUser.planPrice) ? Number(currentUser.planPrice) : 139000;
-        const priceInManwon = (userPlanPrice / 10000).toFixed(1);
-
-        const marketingValue = reviewCount * 7500;
-        const roiPercent = marketingValue > 0 ? Math.round((marketingValue / userPlanPrice) * 100) : 0;
-        const badgeRoi = document.getElementById('badgeRoi');
-        const roiDetail = document.getElementById('roiDetailTag');
-        const roiValue = document.getElementById('roiValueText');
-        const roiSub = document.getElementById('roiSubLabel');
-
-        if (badgeRoi) badgeRoi.textContent = `ROI ${roiPercent}% 달성`;
-        if (roiDetail) roiDetail.textContent = `영수증 리뷰 버튼 ${reviewCount}건 클릭 발생 환산`;
-        if (roiValue) roiValue.textContent = `약 ${marketingValue.toLocaleString()}원 상당`;
-        if (roiSub) roiSub.textContent = `월 ${priceInManwon}만원 투자 대비 효과`;
-
-        // 2. 재방문(Follow-up) 실제 환자 테이블 렌더링
-        const tbody = document.querySelector('.patient-table tbody');
-        const badgeCount = document.querySelector('.section-badge');
-        if (badgeCount) {
-          badgeCount.textContent = `누적 케어 환자 ${reports.length}명`;
-        }
-
-        if (tbody) {
-          tbody.innerHTML = '';
-          if (reports.length > 0) {
-            reports.slice(0, 10).forEach(r => {
-              const raw = r.raw_data || {};
-              const created = r.created_at ? new Date(r.created_at) : new Date();
-              const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
-              const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
-
-              // 연락처 표시 (DB에 저장된 실제 환자 수신 번호 표시, 하이픈 자동 포맷)
-              let phoneDisplay = '-';
-              const rawPhone = raw.receiverPhone || raw.phone || r.receiver_phone || r.phone;
-              if (rawPhone) {
-                const p = String(rawPhone).replace(/[^0-9]/g, '');
-                if (p.length === 11) {
-                  phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 7)}-${p.substring(7)}`;
-                } else if (p.length === 10) {
-                  phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 6)}-${p.substring(6)}`;
-                } else if (p.length > 0) {
-                  phoneDisplay = p;
-                }
-              }
-
-              const tr = document.createElement('tr');
-              tr.innerHTML = `
-                <td><strong>${r.patient_name || '환자 님'}</strong></td>
-                <td>${phoneDisplay}</td>
-                <td>${dateStr}</td>
-                <td><span style="color:#0284c7; font-weight:700;">${nextDate}</span></td>
-                <td><span class="tag-status status-done">알림톡 발송완료</span></td>
-              `;
-              tbody.appendChild(tr);
-            });
-          } else {
-            // 발송 이력이 아직 없을 때 깨끗한 대기 상태 안내
-            tbody.innerHTML = `
-              <tr>
-                <td colspan="5" style="text-align: center; padding: 36px 12px; color: #94a3b8; font-size: 14px;">
-                  📋 아직 발송된 진료 리포트가 없습니다.<br>
-                  <span style="font-size: 12.5px; color: #cbd5e1;">진료실 프로그램에서 환자에게 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>
-                </td>
-              </tr>
-            `;
-          }
-        }
-
-        // 3. 실시간 환자 반응 로그 갱신 (DB 로그 기반 실제 활동 표시 - 최근 30건 스크롤 지원)
-        const feedList = document.getElementById('reviewFeedList');
-        if (feedList) {
-          if (logs.length > 0) {
-            feedList.innerHTML = '';
-            logs.slice(0, 30).forEach(log => {
-              const pName = log.patient_name || '환자 님';
-              const logTime = log.created_at ? new Date(log.created_at) : new Date();
-              const timeStr = `${logTime.getHours().toString().padStart(2, '0')}:${logTime.getMinutes().toString().padStart(2, '0')}`;
-              
-              let icon = '✓';
-              let iconBg = '#e0f2fe';
-              let iconColor = '#0284c7';
-              let textContent = '';
-
-              if (log.action_type === 'view') {
-                icon = '✓';
-                iconBg = '#e0f2fe';
-                iconColor = '#0284c7';
-                textContent = `<strong>${pName}</strong>이 안심 진료 리포트를 열람했습니다.`;
-              } else if (log.action_type === 'share') {
-                icon = '👨‍👩‍👧';
-                iconBg = '#fef9c3';
-                iconColor = '#ca8a04';
-                textContent = `<strong>${pName}</strong>의 보호자(가족)가 <strong>가족 단톡방에 진료 리포트를 공유</strong>했습니다.`;
-              } else if (log.action_type === 'review') {
-                icon = '★';
-                iconBg = '#dcfce7';
-                iconColor = '#16a34a';
-                textContent = `<strong>${pName}</strong>이 리포트 확인 후 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.`;
-              }
-
-              const item = document.createElement('div');
-              item.className = 'review-feed-item';
-              item.innerHTML = `
-                <div class="feed-avatar" style="background:${iconBg}; color:${iconColor};">${icon}</div>
-                <div class="feed-content">
-                  ${textContent}
-                  <div class="feed-time">${timeStr}</div>
-                </div>
-              `;
-              feedList.appendChild(item);
-            });
-          } else {
-            feedList.innerHTML = `
-              <div class="review-feed-item">
-                <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
-                <div class="feed-content" style="color:#94a3b8;">
-                  환자 반응 로그 대기 중입니다. 진료 리포트 발송 시 환자의 열람 및 네이버 리뷰 클릭 반응이 실시간으로 기록됩니다.
-                  <div class="feed-time">실시간 대기 중</div>
-                </div>
-              </div>
-            `;
-          }
-        }
+        // 현재 선택된 탭에 맞춰 화면 렌더링
+        applyDoctorFilter();
 
       } catch (err) {
-        console.warn("대시보드 실시간 데이터 로드 실패, 기본값 유지:", err);
+        console.warn("대시보드 실시간 데이터 로드 실패:", err);
+      }
+    }
+
+    // 🏥 선택된 진료실/원장님 필터에 따라 화면 지표 & 테이블 재계산
+    function applyDoctorFilter() {
+      const rooms = (currentUser && Array.isArray(currentUser.clinicRooms) && currentUser.clinicRooms.length > 0)
+        ? currentUser.clinicRooms
+        : [{ id: 'room_1', roomName: '1진료실', doctorName: (currentUser && currentUser.doctorName) || '원장', isMain: true }];
+
+      let filteredReports = [];
+      let targetRoom = null;
+      const noticeEl = document.getElementById('doctorFilterNotice');
+
+      if (currentFilterRoomId === 'all') {
+        filteredReports = allReports;
+        if (noticeEl) {
+          noticeEl.innerHTML = `🌟 <strong>우리 병원 전체 종합 통계</strong> (${filteredReports.length}건 누적)`;
+          noticeEl.style.background = '#f0f9ff';
+          noticeEl.style.color = '#0284c7';
+        }
+      } else {
+        targetRoom = rooms.find(r => r.id === currentFilterRoomId);
+        const targetDoc = targetRoom ? (targetRoom.doctorName || '').trim() : '';
+        const targetRoomName = targetRoom ? (targetRoom.roomName || '').trim() : '';
+
+        filteredReports = allReports.filter(r => {
+          const raw = r.raw_data || {};
+          const rId = raw.roomId || r.room_id;
+          const rDoctor = (raw.doctorName || r.doctor_name || '').trim();
+          const rRoom = (raw.roomName || r.room_name || '').trim();
+
+          // 1. 방 ID 매칭
+          if (rId && rId === currentFilterRoomId) return true;
+          // 2. 원장명 매칭
+          if (targetDoc && rDoctor && (rDoctor === targetDoc || rDoctor.includes(targetDoc))) return true;
+          // 3. 방 이름 매칭
+          if (targetRoomName && rRoom && rRoom === targetRoomName) return true;
+          // 4. 과거 레코드이거나 미지정인 경우 메인 진료실(대표원장)로 귀속
+          if (targetRoom && targetRoom.isMain && !rId && !rDoctor) return true;
+
+          return false;
+        });
+
+        if (noticeEl && targetRoom) {
+          noticeEl.innerHTML = `🩺 <strong>${targetRoom.roomName} (${targetRoom.doctorName})</strong> 담당 환자 통계 (${filteredReports.length}건)`;
+          noticeEl.style.background = '#ecfdf5';
+          noticeEl.style.color = '#047857';
+        }
+      }
+
+      // 해당 환자들의 활동 로그 필터링
+      const filteredReportIds = new Set(filteredReports.map(r => String(r.id)));
+      const filteredPatientNames = new Set(filteredReports.map(r => (r.patient_name || '').trim()));
+
+      const filteredLogs = allLogs.filter(l => {
+        if (currentFilterRoomId === 'all') return true;
+        const repId = String(l.report_id || '');
+        const pName = (l.patient_name || '').trim();
+        return (repId && filteredReportIds.has(repId)) || (pName && filteredPatientNames.has(pName));
+      });
+
+      // 1. 오늘 날짜 기준 발송 통계 계산
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayReports = filteredReports.filter(r => r.created_at && r.created_at.startsWith(todayStr));
+      const totalCount = filteredReports.length;
+      const todayCount = todayReports.length;
+
+      const valTodayEl = document.getElementById('valTodayCount');
+      const valWeeklyEl = document.getElementById('valWeeklyFollowUp');
+      if (valTodayEl) valTodayEl.textContent = todayCount;
+      if (valWeeklyEl) valWeeklyEl.textContent = totalCount;
+
+      // 실시간 공유 및 리뷰 통계 계산
+      const uniqueShareKeys = new Set();
+      const uniqueReviewKeys = new Set();
+      filteredLogs.forEach(l => {
+        const key = (l.report_id && l.report_id !== 'null' && l.report_id !== 'undefined') ? l.report_id : (l.patient_name || 'unknown');
+        if (l.action_type === 'share') uniqueShareKeys.add(key);
+        if (l.action_type === 'review') uniqueReviewKeys.add(key);
+      });
+
+      const shareCount = uniqueShareKeys.size;
+      const shareRate = totalCount > 0 ? ((shareCount / totalCount) * 100).toFixed(1) : '0.0';
+      const reviewCount = uniqueReviewKeys.size;
+      const reviewRate = totalCount > 0 ? ((reviewCount / totalCount) * 100).toFixed(1) : '0.0';
+
+      const valShareEl = document.getElementById('valShareCount');
+      const unitShareEl = document.getElementById('unitShareRate');
+      if (valShareEl) valShareEl.textContent = shareCount;
+      if (unitShareEl) unitShareEl.textContent = `회 (${shareRate}%)`;
+
+      const valReviewEl = document.getElementById('valReviewCount');
+      const unitReviewEl = document.getElementById('unitReviewRate');
+      const footerReviewEl = document.getElementById('footerReviewTotal');
+      if (valReviewEl) valReviewEl.textContent = reviewCount;
+      if (unitReviewEl) unitReviewEl.textContent = `건 (클릭률 ${reviewRate}%)`;
+      if (footerReviewEl) footerReviewEl.textContent = `🔥 이번 달 누적 ${reviewCount}건 달성!`;
+
+      // 마케팅 ROI 계산
+      const userPlanPrice = (currentUser && currentUser.planPrice) ? Number(currentUser.planPrice) : 139000;
+      const priceInManwon = (userPlanPrice / 10000).toFixed(1);
+      const marketingValue = reviewCount * 7500;
+      const roiPercent = marketingValue > 0 ? Math.round((marketingValue / userPlanPrice) * 100) : 0;
+
+      const badgeRoi = document.getElementById('badgeRoi');
+      const roiDetail = document.getElementById('roiDetailTag');
+      const roiValue = document.getElementById('roiValueText');
+      const roiSub = document.getElementById('roiSubLabel');
+
+      if (badgeRoi) badgeRoi.textContent = `ROI ${roiPercent}% 달성`;
+      if (roiDetail) roiDetail.textContent = `영수증 리뷰 버튼 ${reviewCount}건 클릭 발생 환산`;
+      if (roiValue) roiValue.textContent = `약 ${marketingValue.toLocaleString()}원 상당`;
+      if (roiSub) roiSub.textContent = `월 ${priceInManwon}만원 투자 대비 효과`;
+
+      // 2. 재방문(Follow-up) 환자 테이블 렌더링
+      const tbody = document.querySelector('.patient-table tbody');
+      const badgeCount = document.getElementById('badgeFollowUpCount');
+      if (badgeCount) {
+        const label = targetRoom ? `${targetRoom.roomName} 케어 환자` : '누적 케어 환자';
+        badgeCount.textContent = `${label} ${filteredReports.length}명`;
+      }
+
+      if (tbody) {
+        tbody.innerHTML = '';
+        if (filteredReports.length > 0) {
+          filteredReports.slice(0, 15).forEach(r => {
+            const raw = r.raw_data || {};
+            const created = r.created_at ? new Date(r.created_at) : new Date();
+            const dateStr = `${created.getMonth() + 1}.${created.getDate()}`;
+            const nextDate = r.next_visit_date || raw.nextVisitDate || '일정 확인 중';
+
+            // 진료실 / 담당의 표기
+            const rRoomDisplay = raw.roomName || r.room_name || '1진료실';
+            const rDocDisplay = raw.doctorName || r.doctor_name || (currentUser && currentUser.doctorName) || '원장';
+
+            // 연락처 표시
+            let phoneDisplay = '-';
+            const rawPhone = raw.receiverPhone || raw.phone || r.receiver_phone || r.phone;
+            if (rawPhone) {
+              const p = String(rawPhone).replace(/[^0-9]/g, '');
+              if (p.length === 11) {
+                phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 7)}-${p.substring(7)}`;
+              } else if (p.length === 10) {
+                phoneDisplay = `${p.substring(0, 3)}-${p.substring(3, 6)}-${p.substring(6)}`;
+              } else if (p.length > 0) {
+                phoneDisplay = p;
+              }
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>
+                <span style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px;">
+                  🩺 ${rRoomDisplay} (${rDocDisplay})
+                </span>
+              </td>
+              <td><strong>${r.patient_name || '환자 님'}</strong></td>
+              <td>${phoneDisplay}</td>
+              <td>${dateStr}</td>
+              <td><span style="color:#0284c7; font-weight:700;">${nextDate}</span></td>
+              <td><span class="tag-status status-done">알림톡 발송완료</span></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          const emptyText = targetRoom
+            ? `📋 '${targetRoom.roomName} (${targetRoom.doctorName})'에서 발송된 리포트가 아직 없습니다.<br><span style="font-size: 12.5px; color: #cbd5e1;">해당 진료실에서 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>`
+            : `📋 아직 발송된 진료 리포트가 없습니다.<br><span style="font-size: 12.5px; color: #cbd5e1;">진료실 프로그램에서 환자에게 리포트를 발송하시면 실시간으로 케어 명단이 등록됩니다.</span>`;
+
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 36px 12px; color: #94a3b8; font-size: 14px;">
+                ${emptyText}
+              </td>
+            </tr>
+          `;
+        }
+      }
+
+      // 3. 실시간 환자 반응 로그 갱신
+      const feedList = document.getElementById('reviewFeedList');
+      if (feedList) {
+        if (filteredLogs.length > 0) {
+          feedList.innerHTML = '';
+          filteredLogs.slice(0, 30).forEach(log => {
+            const pName = log.patient_name || '환자 님';
+            const logTime = log.created_at ? new Date(log.created_at) : new Date();
+            const timeStr = `${logTime.getHours().toString().padStart(2, '0')}:${logTime.getMinutes().toString().padStart(2, '0')}`;
+            
+            let icon = '✓';
+            let iconBg = '#e0f2fe';
+            let iconColor = '#0284c7';
+            let textContent = '';
+
+            if (log.action_type === 'view') {
+              icon = '✓';
+              iconBg = '#e0f2fe';
+              iconColor = '#0284c7';
+              textContent = `<strong>${pName}</strong>이 안심 진료 리포트를 열람했습니다.`;
+            } else if (log.action_type === 'share') {
+              icon = '👨‍👩‍👧';
+              iconBg = '#fef9c3';
+              iconColor = '#ca8a04';
+              textContent = `<strong>${pName}</strong>의 보호자(가족)가 <strong>가족 단톡방에 진료 리포트를 공유</strong>했습니다.`;
+            } else if (log.action_type === 'review') {
+              icon = '★';
+              iconBg = '#dcfce7';
+              iconColor = '#16a34a';
+              textContent = `<strong>${pName}</strong>이 리포트 확인 후 <strong>[네이버 영수증 리뷰 남기기]</strong> 버튼을 클릭했습니다.`;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'review-feed-item';
+            item.innerHTML = `
+              <div class="feed-avatar" style="background:${iconBg}; color:${iconColor};">${icon}</div>
+              <div class="feed-content">
+                ${textContent}
+                <div class="feed-time">${timeStr}</div>
+              </div>
+            `;
+            feedList.appendChild(item);
+          });
+        } else {
+          feedList.innerHTML = `
+            <div class="review-feed-item">
+              <div class="feed-avatar" style="background:#f1f5f9; color:#94a3b8;">✓</div>
+              <div class="feed-content" style="color:#94a3b8;">
+                해당 진료실 환자의 반응 로그 대기 중입니다. 진료 리포트 발송 시 환자의 열람 및 네이버 리뷰 클릭 반응이 실시간으로 기록됩니다.
+                <div class="feed-time">실시간 대기 중</div>
+              </div>
+            </div>
+          `;
+        }
       }
     }
   </script>

@@ -1717,6 +1717,14 @@
       if (!isPro) {
         e.preventDefault(); // 기본 이동 차단하고 세련된 모달 열기
         openProModal();
+        return;
+      }
+
+      // 🏥 현재 선택된 진료실 방 정보를 파라미터로 함께 전달하여 대시보드 자동 필터링 연동
+      const currentRoom = getCurrentSelectedRoom(cachedCurrentUser || user);
+      if (currentRoom && currentRoom.id) {
+        e.preventDefault();
+        window.location.href = `admin.html?roomId=${encodeURIComponent(currentRoom.id)}`;
       }
     }
 
