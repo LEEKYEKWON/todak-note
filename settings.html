@@ -1374,6 +1374,8 @@
         const fresh = await TodakDB.getCurrentUserProfile();
         if (fresh) currentUser = fresh;
         renderClinicRoomsTable();
+        renderPlanInfo(); // 🌟 상단 총 월 구독료 즉시 실시간 갱신
+        renderPlanInfo(); // 🌟 상단 총 월 구독료(337,000원 등) 즉시 실시간 갱신
 
       } catch (err) {
         alert('진료실 저장 실패: ' + (err.message || '오류가 발생했습니다.'));
@@ -1398,6 +1400,7 @@
         const fresh = await TodakDB.getCurrentUserProfile();
         if (fresh) currentUser = fresh;
         renderClinicRoomsTable();
+        renderPlanInfo(); // 🌟 상단 총 월 구독료 즉시 실시간 갱신
       } catch (err) {
         alert('삭제 실패: ' + (err.message || '오류가 발생했습니다.'));
       }
