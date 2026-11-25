@@ -1385,14 +1385,14 @@
       }
     }
 
-    // 🏥 진료실 슬롯 삭제
+    // 🏥 진료실 슬롯 삭제 (방식 A: 다음 결제일부터 청구 제외)
     async function handleDeleteRoom(roomId, roomName) {
-      if (!confirm(`[진료실 슬롯 삭제]\n\n정말 '${roomName}' 슬롯을 삭제하시겠습니까?\n\n• 삭제 시 해당 진료실 방은 목록에서 즉시 제거됩니다.\n• 다음 결제일부터 추가 슬롯 요금이 청구되지 않습니다.`)) {
+      if (!confirm(`[진료실 슬롯 삭제 확인]\n\n정말 '${roomName}' 슬롯을 삭제하시겠습니까?\n\n• 삭제 즉시 해당 진료실 방은 목록에서 제외됩니다.\n• 이미 결제하신 이번 주기까지는 추가 과금이 없으며, 다음 정기 결제일부터 슬롯 요금이 청구되지 않습니다.\n\n(참고: 부원장님 교체 시에는 [수정]을 통해 무료로 정보만 변경하실 수 있습니다)`)) {
         return;
       }
 
       try {
-        showToast('⏳ 슬롯 삭제 중...');
+        showToast('⏳ 슬롯 삭제 처리 중...');
         await TodakDB.deleteClinicRoom(currentUser.email, roomId);
         showToast('🗑️ 진료실 슬롯이 삭제되었습니다.');
 
@@ -1401,6 +1401,8 @@
         if (fresh) currentUser = fresh;
         renderClinicRoomsTable();
         renderPlanInfo(); // 🌟 상단 총 월 구독료 즉시 실시간 갱신
+
+        alert(`[진료실 슬롯 삭제 완료]\n\n'${roomName}' 슬롯이 안전하게 삭제되었습니다.\n다음 정기 결제일부터 해당 슬롯 요금이 청구되지 않습니다.`);
       } catch (err) {
         alert('삭제 실패: ' + (err.message || '오류가 발생했습니다.'));
       }
