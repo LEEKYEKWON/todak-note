@@ -721,7 +721,7 @@
       const hospEl = document.getElementById('hospName');
       const hospClean = hospEl ? hospEl.textContent.replace('🏥', '').trim() : '';
       if (hospClean && hospClean !== '토닥토닥 안심진료') {
-        const searchUrl = `https://m.search.naver.com/search.naver?query=${encodeURIComponent(hospClean + ' 리뷰')}`;
+        const searchUrl = `https://m.search.naver.com/search.naver?query=${encodeURIComponent(hospClean)}`;
         window.location.href = searchUrl;
         return;
       }
