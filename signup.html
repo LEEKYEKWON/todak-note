@@ -195,12 +195,20 @@
     <div class="plan-selector-group">
       <div class="plan-radio-box" id="tabPlanStandard" onclick="selectPlan('standard')">
         <div class="plan-radio-name">🟢 기본형 Standard</div>
-        <div class="plan-radio-price">월 89,000원</div>
+        <div style="font-size: 11.5px; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px;">정가 149,000원</div>
+        <div class="plan-radio-price"><span style="font-size: 11px; color: #38bdf8; font-weight: 800; background: rgba(56, 189, 248, 0.15); padding: 1px 5px; border-radius: 4px; margin-right: 2px;">얼리버드</span> 월 89,000원</div>
       </div>
       <div class="plan-radio-box active plan-pro" id="tabPlanPro" onclick="selectPlan('pro')">
         <div class="plan-radio-name">⭐ 고급형 Pro</div>
-        <div class="plan-radio-price">월 139,000원</div>
+        <div style="font-size: 11.5px; color: #94a3b8; text-decoration: line-through; margin-bottom: 2px;">정가 199,000원</div>
+        <div class="plan-radio-price"><span style="font-size: 11px; color: #fee500; font-weight: 800; background: rgba(254, 229, 0, 0.15); padding: 1px 5px; border-radius: 4px; margin-right: 2px;">얼리버드</span> 월 139,000원</div>
       </div>
+    </div>
+
+    <!-- 7일 무료체험 얼리버드 혜택 안내 배너 -->
+    <div style="background: rgba(14, 165, 233, 0.1); border: 1.5px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 13px 16px; margin-bottom: 22px; text-align: center; font-size: 13.5px; color: #7dd3fc; line-height: 1.55; word-break: keep-all;">
+      🎁 <strong>7일 무료체험이 끝나기 전에 구독 결제 하시면 얼리버드 할인가로 적용 됩니다.</strong><br>
+      <span style="font-size: 12px; color: #94a3b8;">(무료체험 종료 후 결제시 정가 적용)</span>
     </div>
 
     <form onsubmit="handleSignup(event)">
@@ -236,7 +244,7 @@
       </div>
 
       <button type="submit" class="btn-submit">
-        가입 완료하고 진료실 프로그램 시작하기
+        7일 무료체험 시작하기
       </button>
     </form>
 
@@ -309,7 +317,7 @@
         localStorage.setItem('todak_current_user', JSON.stringify(user));
         localStorage.removeItem('todak_desk_queue');
 
-        alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n회원가입이 완료되어 진료실 프로그램으로 즉시 입장합니다.`);
+        alert(`🎉 환영합니다, ${user.hospitalName} ${user.doctorName}님!\n7일간 무료체험이 시작되었습니다.\n진료실 프로그램으로 즉시 입장합니다.`);
         window.location.href = 'clinic.html';
       } catch (err) {
         alert(err.message || '회원가입 처리 중 오류가 발생했습니다.');
