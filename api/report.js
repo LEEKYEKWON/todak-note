@@ -94,6 +94,7 @@ module.exports = async (req, res) => {
         const row = sbRes.data[0];
         const reportData = row.raw_data || {
           hospitalName: row.hospital_name,
+          doctorName: (row.raw_data && row.raw_data.doctorName) || '',
           patientName: row.patient_name,
           diagnosisSummary: row.diagnosis_summary,
           medicationGuide: row.medication_guide,

@@ -2527,7 +2527,8 @@
         parsedResult.warmMessage || '',
         hospId,
         reportId,
-        naverUrl || ''
+        naverUrl || '',
+        docTitle || ''
       ];
       const compactToken = toBase64Url(compactPayload);
       const reportUrl = `${window.location.origin}/report.html?c=${compactToken}`;
