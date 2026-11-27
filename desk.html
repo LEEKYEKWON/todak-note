@@ -151,7 +151,7 @@
       box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35);
     }
 
-    /* 📱 데스크 발송 검토 모달 (진료실 화면과 100% 동일한 스마트폰 목업 탑재) */
+    /* 데스크 발송 검토 모달 (진료실 화면과 100% 동일한 스마트폰 목업 탑재) */
     .desk-modal-overlay {
       display: none;
       position: fixed;
@@ -295,12 +295,12 @@
   <header>
     <div class="header-left">
       <img src="open_book_heart_clean_1794109984125.jpg" alt="로고" class="logo-img" id="deskAppLogo">
-      <h1 class="header-title">📋 토닥토닥노트 수납 데스크 발송 모드</h1>
+      <h1 class="header-title">토닥토닥노트 수납 데스크 발송 모드</h1>
       <div id="deskHospitalBadge" style="display: flex; align-items: center; gap: 8px; margin-left: 10px;"></div>
     </div>
     <div class="header-nav">
       <a href="clinic.html" class="nav-btn">
-        🩺 진료실 프로그램으로 이동
+        진료실 프로그램으로 이동
       </a>
     </div>
   </header>
@@ -323,7 +323,7 @@
             <button class="quick-chip-btn filter-btn" id="filterWeek" onclick="setFilter('week')">이번 주</button>
             <button class="quick-chip-btn filter-btn" id="filterMonth" onclick="setFilter('month')">이번 달</button>
           </div>
-          <button class="quick-chip-btn" onclick="loadDeskQueue()" style="padding: 7px 12px; font-weight: 800;">🔄 새로고침</button>
+          <button class="quick-chip-btn" onclick="loadDeskQueue()" style="padding: 7px 12px; font-weight: 800;">새로고침</button>
         </div>
 
         <!-- 우측 끝 영역: 🔍 실시간 검색창 -->
@@ -356,7 +356,7 @@
     </div>
   </main>
 
-  <!-- 📱 2안: 데스크 전용 설정 & 실시간 폰 화면 발송 모달 -->
+  <!-- 2안: 데스크 전용 설정 & 실시간 폰 화면 발송 모달 -->
   <div class="desk-modal-overlay" id="deskModalOverlay">
     <div class="desk-modal-card">
       <!-- 좌측: 복약 및 내원일 설정 폼 -->
@@ -366,7 +366,7 @@
           <div>
             <h3 style="font-size: 18px; font-weight: 800; color: #0f172a;" id="modalPatientTitle">환자 리포트 검토 및 발송</h3>
             <div style="font-size: 13px; color: #0284c7; font-weight: 700; margin-top: 2px;"
-              id="modalPatientPhoneDisplay">📞 수신번호: 010-0000-0000</div>
+              id="modalPatientPhoneDisplay">수신번호: 010-0000-0000</div>
           </div>
           <button
             style="border: none; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: 700; cursor: pointer; color: #475569;"
@@ -375,13 +375,13 @@
 
         <div
           style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.5; color: #0369a1;">
-          <strong>📢 원장님 진료 핵심:</strong><br>
+          <strong>원장님 진료 핵심:</strong><br>
           <span id="modalSummaryPreview" style="color: #1e293b;"></span>
         </div>
 
         <!-- 1. 처방약 복용법 설정 (좌측 세로 4대 칩 + 우측 직접입력 2단 배치) -->
         <div>
-          <span style="font-size: 13px; font-weight: 800; color: #334155;">💊 처방약 복용법:</span>
+          <span style="font-size: 13px; font-weight: 800; color: #334155;">처방약 복용법:</span>
           <div style="display: flex; gap: 12px; margin-top: 6px; align-items: flex-start;">
             <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
               <button type="button" class="quick-chip-btn" style="text-align: left;"
@@ -395,7 +395,7 @@
             </div>
             <div
               style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;">
-              <span style="font-size: 11px; color: #64748b; font-weight: 700;">✍️ 직접 입력 또는 세부 메모:</span>
+              <span style="font-size: 11px; color: #64748b; font-weight: 700;">직접 입력 또는 세부 메모:</span>
               <textarea id="modalMedInput" class="form-input"
                 style="width: 100%; height: 75px; resize: none; font-size: 12px; line-height: 1.4;"
                 placeholder="예) 아침·저녁 1포씩 복용 (14일분)" oninput="updateModalPhoneView()"></textarea>
@@ -405,7 +405,7 @@
 
         <!-- 2. 다음 내원일 달력 / 시각 설정 -->
         <div style="border-top: 1px dashed #e2e8f0; padding-top: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: #334155;">🗓️ 다음 내원일 (달력/시각 선택):</span>
+          <span style="font-size: 13px; font-weight: 800; color: #334155;">다음 내원일 (달력/시각 선택):</span>
           <div style="display: flex; gap: 8px; margin-top: 6px;">
             <input type="date" id="modalDatePicker" class="form-input" style="flex: 1;"
               onchange="updateModalDateFromPicker()">
@@ -422,19 +422,19 @@
 
         <div style="display: flex; gap: 8px; margin-top: 10px;">
           <button type="button" class="btn-send-final" id="btnDeskSendInstant" style="flex: 1; background: #fee500; color: #191919; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; box-shadow: 0 2px 8px rgba(254, 229, 0, 0.35); transition: all 0.2s;" onclick="submitDeskSend(0)">
-            ⚡ 즉시 발송
+            즉시 발송
           </button>
           <button type="button" class="btn-send-final" id="btnDeskSendScheduled" style="flex: 1.2; background: #10b981; color: white; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25); transition: all 0.2s;" onclick="submitDeskSend('scheduled')">
-            ⏱️ 예약 발송 (10분 후)
+            예약 발송 (10분 후)
           </button>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
           <button type="button" onclick="markDeskItemAsSentDirectly()" style="background: none; border: none; color: #16a34a; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 4px;">
-            ✅ 카톡 재발송 없이 [발송 완료]로 변경
+            카톡 재발송 없이 [발송 완료]로 변경
           </button>
           <button type="button" onclick="deleteDeskItemDirectly()" style="background: none; border: none; color: #94a3b8; font-size: 12.5px; cursor: pointer; text-decoration: underline; padding: 4px;">
-            🗑️ 목록에서 삭제
+            목록에서 삭제
           </button>
         </div>
       </div>
@@ -443,7 +443,7 @@
       <div class="modal-right">
         <div class="phone-mockup">
           <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 10px;">
-            <span style="font-size: 11px; color: #0284c7; font-weight: 800;" id="phoneHospTag">🏥 안심 진료노트</span>
+            <span style="font-size: 11px; color: #0284c7; font-weight: 800;" id="phoneHospTag">안심 진료노트</span>
             <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;" id="phonePatientName">김영희 님
             </div>
             <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;" id="phoneTodayDate"></div>
@@ -452,24 +452,24 @@
           <!-- 1. 요약 -->
           <div
             style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">📢 오늘 원장님 말씀 요약</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">오늘 원장님 말씀 요약</div>
             <div style="font-size: 11.5px; line-height: 1.5; color: #334155; white-space: pre-wrap;" id="phoneSummary"></div>
           </div>
 
           <!-- 2. 처방된 약 -->
           <div
             style="background: white; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">💊 오늘 처방된 약 & 복용 방법</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">오늘 처방된 약 & 복용 방법</div>
             <div style="font-size: 11.5px; line-height: 1.5; color: #059669; font-weight: 700; white-space: pre-wrap;" id="phoneMed"></div>
             <div style="margin-top: 6px; padding: 6px 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; font-size: 10.5px; color: #9a3412; line-height: 1.35;">
-              ⚠️ 상세 복약법은 반드시 <strong>약국 약 봉투 안내</strong>를 꼭 확인해 주세요!
+              상세 복약법은 반드시 <strong>약국 약 봉투 안내</strong>를 꼭 확인해 주세요!
             </div>
           </div>
 
           <!-- 3. 다음 내원일 -->
           <div
             style="background: #eff6ff; border-left: 3px solid #0284c7; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 4px;">🗓️ 다음 병원 오시는 날 (놓치지 마세요!)</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 4px;">다음 병원 오시는 날 (놓치지 마세요!)</div>
             <div style="font-size: 13px; font-weight: 800; color: #0284c7;" id="phoneNextDate"></div>
             <div style="font-size: 11px; color: #1e3a8a; margin-top: 2px;" id="phoneNextNotice"></div>
           </div>
@@ -477,21 +477,21 @@
           <!-- 4. 맞춤 생활 건강 팁 -->
           <div
             style="background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 4px;">💡 꼭 지켜주셔야 할 맞춤 생활 팁</div>
+            <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 4px;">꼭 지켜주셔야 할 맞춤 생활 팁</div>
             <div style="font-size: 11.5px; line-height: 1.5; color: #78350f; white-space: pre-wrap;" id="phoneLifestyleTips"></div>
           </div>
 
           <!-- 5. 토닥토닥 안심 한마디 -->
           <div
             style="background: #fdf2f8; border-left: 3px solid #ec4899; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #be185d; margin-bottom: 4px;">🌷 토닥토닥 마음 안심 한마디</div>
+            <div style="font-size: 12px; font-weight: 700; color: #be185d; margin-bottom: 4px;">토닥토닥 마음 안심 한마디</div>
             <div style="font-size: 11.5px; line-height: 1.5; color: #831843;" id="phoneWarmMessage"></div>
           </div>
 
           <!-- 6. 안심 법적 고지 배너 -->
           <div
             style="margin-top: 10px; padding: 8px 10px; background: #fefce8; border: 1.5px solid #fde047; border-radius: 8px; font-size: 10.5px; color: #854d0e; line-height: 1.4;">
-            📢 <strong>[보호자 및 환자 안내]</strong><br>
+            <strong>[보호자 및 환자 안내]</strong><br>
             본 리포트는 진료실 대화를 AI로 요약한 참고 자료이며, <strong>약국 약 봉투의 안내가 절대 우선</strong>됩니다.
           </div>
 
@@ -499,13 +499,13 @@
           <div
             style="margin-top: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 8px; text-align: center;">
             <p style="font-size: 11px; font-weight: 700; color: #166534; margin-bottom: 2px;">
-              🩺 오늘 진료와 설명이 안심이 되셨나요?
+              오늘 진료와 설명이 안심이 되셨나요?
             </p>
             <p style="font-size: 10px; color: #15803d; margin-bottom: 6px;">
-              원장님과 의료진에게 따뜻한 응원의 한마디를 남겨주세요 ❤️
+              원장님과 의료진에게 따뜻한 응원의 한마디를 남겨주세요
             </p>
             <button type="button" style="background: #03c75a; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer;">
-              ⭐ 네이버 영수증 리뷰 남기기
+              네이버 영수증 리뷰 남기기
             </button>
           </div>
         </div>
@@ -621,7 +621,7 @@
       renderDeskTable();
     }
 
-    // 🌟 서버 클라우드와 로컬 저장소를 동시에 조회 및 실시간 동기화
+    // 서버 클라우드와 로컬 저장소를 동시에 조회 및 실시간 동기화
     async function loadDeskQueue() {
       const hospId = getHospitalId();
 
@@ -637,7 +637,7 @@
             const localSaved = JSON.parse(localStorage.getItem(`todak_desk_queue_${hospId}`) || '[]');
             const localMap = {};
             localSaved.forEach(item => {
-              // ⏱️ 예약 발송 시간이 지났으면 자동으로 'sent (발송 완료)'로 갱신
+              // 예약 발송 시간이 지났으면 자동으로 'sent (발송 완료)'로 갱신
               if (item.status === 'scheduled' && item.scheduledTimestamp && Date.now() >= item.scheduledTimestamp) {
                 item.status = 'sent';
               }
@@ -721,12 +721,12 @@
       if (!filtered || filtered.length === 0) {
         const emptyMsg = searchQuery 
           ? `🔍 "<strong>${escapeHtml(searchQuery)}</strong>" 검색 결과가 없습니다.<br><span style="font-size: 12.5px; color: #94a3b8;">환자명, 전화번호 또는 진료실을 다시 확인해 주세요.</span>`
-          : `해당 기간의 환자 리포트 내역이 없습니다.<br>진료실 프로그램에서 [📋 데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.`;
+          : `해당 기간의 환자 리포트 내역이 없습니다.<br>진료실 프로그램에서 [데스크로 전달] 버튼을 누르면 실시간으로 등록됩니다.`;
 
         tbody.innerHTML = `
           <tr>
             <td colspan="6" style="text-align: center; padding: 48px 20px; color: #94a3b8;">
-              <span style="font-size: 32px; display: block; margin-bottom: 8px;">${searchQuery ? '🔎' : '📭'}</span>
+              <span style="font-size: 32px; display: block; margin-bottom: 8px;">${searchQuery ? '🔍' : ''}</span>
               ${emptyMsg}
             </td>
           </tr>
@@ -741,26 +741,26 @@
         const tr = document.createElement('tr');
         if (isSent) tr.style.background = '#f8fafc';
 
-        // 🌟 접수날짜/시각 완벽 포맷팅
+        // 접수날짜/시각 완벽 포맷팅
         const displayDateTime = formatDateTime(item);
 
-        // 🏥 진료실 / 담당 원장 뱃지 포맷팅
+        // 진료실 / 담당 원장 뱃지 포맷팅
         const roomNameStr = item.roomName || '1진료실';
         const docNameStr = item.doctorName || '원장';
         const roomBadgeHtml = `
           <span style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-            <span>🩺</span> ${highlightSearch(roomNameStr, searchQuery)} (${highlightSearch(docNameStr, searchQuery)})
+            ${highlightSearch(roomNameStr, searchQuery)} (${highlightSearch(docNameStr, searchQuery)})
           </span>
         `;
 
-        // 🌟 3단계 발송 상태 뱃지 및 작업 버튼 (미발송 대기 vs 예약 발송 대기 vs 발송 완료)
+        // 3단계 발송 상태 뱃지 및 작업 버튼 (미발송 대기 vs 예약 발송 대기 vs 발송 완료)
         const isScheduled = item.status === 'scheduled';
         let statusBadgeHtml = '';
         let actionBtnHtml = '';
 
         if (isSent) {
           // 1. 발송 완료
-          statusBadgeHtml = `<span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>`;
+          statusBadgeHtml = `<span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">발송 완료</span>`;
           actionBtnHtml = `<button class="btn-open-setting" style="background: #ffffff; color: #0284c7; border: 1.5px solid #cbd5e1;" onclick="openDeskModal(${originalIndex})">
             🔍 발송 내용 확인
           </button>`;
@@ -768,16 +768,16 @@
           // 2. 예약 발송 대기 중 (시간 되면 자동 발송)
           const reserveTimeStr = item.sentAt || '예약됨';
           statusBadgeHtml = `<span style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;" title="지정된 시간에 환자 카카오톡으로 자동 발송됩니다">
-            ⏱️ ${reserveTimeStr}
+            ${reserveTimeStr}
           </span>`;
           actionBtnHtml = `<button class="btn-open-setting" style="background: #f5f3ff; color: #4338ca; border: 1.5px solid #c7d2fe; font-weight: 800;" onclick="openDeskModal(${originalIndex})">
-            ⏱️ 예약 접수됨 (확인)
+            예약 접수됨 (확인)
           </button>`;
         } else {
           // 3. 순수 미발송 (데스크에서 확인 후 발송 필요)
-          statusBadgeHtml = `<span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 미발송 (수납 대기)</span>`;
+          statusBadgeHtml = `<span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">미발송 (수납 대기)</span>`;
           actionBtnHtml = `<button class="btn-open-setting" style="background: #0284c7; color: white; border: none; font-weight: 800; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);" onclick="openDeskModal(${originalIndex})">
-            ⚡ 복약 확인 & 발송
+            복약 확인 & 발송
           </button>`;
         }
 
@@ -821,11 +821,11 @@
       const btnScheduled = document.getElementById('btnDeskSendScheduled');
       if (btnInstant && btnScheduled) {
         if (isSent) {
-          btnInstant.innerText = '⚡ 즉시 재발송';
+          btnInstant.innerText = '즉시 재발송';
         } else if (isScheduled) {
-          btnInstant.innerText = '⚡ 지금 즉시 발송하기';
+          btnInstant.innerText = '지금 즉시 발송하기';
         } else {
-          btnInstant.innerText = '⚡ 즉시 발송';
+          btnInstant.innerText = '즉시 발송';
         }
         btnInstant.style.background = '#fee500';
         btnInstant.style.color = '#191919';
@@ -835,11 +835,11 @@
 
       const roomLabel = item.roomName ? ` [${item.roomName} · ${item.doctorName || '원장'}]` : '';
       let statusNotice = '';
-      if (isSent) statusNotice = ' (✅ 발송완료)';
-      else if (isScheduled) statusNotice = ` (⏱️ ${item.sentAt || '예약 발송 접수됨'})`;
+      if (isSent) statusNotice = ' (발송완료)';
+      else if (isScheduled) statusNotice = ` (${item.sentAt || '예약 발송 접수됨'})`;
 
       document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토${roomLabel}${statusNotice}`;
-      document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
+      document.getElementById('modalPatientPhoneDisplay').innerText = `수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
       document.getElementById('modalNoticeInput').value = item.nextNotice || '';
@@ -860,7 +860,7 @@
       const phoneHospEl = document.getElementById('phoneHospTag');
       if (phoneHospEl) {
         const roomDocStr = item.roomName ? `${item.roomName} · ${docName} 원장` : `${docName} 원장`;
-        phoneHospEl.innerText = `🏥 ${hospName} (${roomDocStr})`;
+        phoneHospEl.innerText = `${hospName} (${roomDocStr})`;
       }
 
       const now = new Date();
@@ -938,7 +938,7 @@
       }
     }
 
-    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (계정별 100% 독립 분리, 기본값: 10분)
+    // 카카오 알림톡 예약 발송 지연 시간 읽기 (계정별 100% 독립 분리, 기본값: 10분)
     function getDeskKakaoDelayMinutes() {
       let userEmail = '';
       const userStr = localStorage.getItem('todak_current_user');
@@ -959,17 +959,17 @@
       const minutes = getDeskKakaoDelayMinutes();
       const btn = document.getElementById('btnDeskSendScheduled');
       if (btn) {
-        btn.innerHTML = `⏱️ 예약 발송 (${minutes}분 후)`;
+        btn.innerHTML = `예약 발송 (${minutes}분 후)`;
       }
     }
 
-    // ✅ 카톡 재발송 없이 데스크에서 수동으로 '발송 완료' 처리
+    // 카톡 재발송 없이 데스크에서 수동으로 '발송 완료' 처리
     function markDeskItemAsSentDirectly() {
       if (activeQueueIndex < 0) return;
       const item = deskQueueData[activeQueueIndex];
       if (!item) return;
 
-      if (!confirm(`[상태 직접 변경]\n\n${item.patientName} 환자분의 상태를 카카오톡 재발송 없이 [✅ 발송 완료]로 변경하시겠습니까?`)) {
+      if (!confirm(`[상태 직접 변경]\n\n${item.patientName} 환자분의 상태를 카카오톡 재발송 없이 [발송 완료]로 변경하시겠습니까?`)) {
         return;
       }
 
@@ -992,7 +992,7 @@
       renderDeskTable();
     }
 
-    // 🗑️ 대기열 목록에서 환자 삭제
+    // 대기열 목록에서 환자 삭제
     function deleteDeskItemDirectly() {
       if (activeQueueIndex < 0) return;
       const item = deskQueueData[activeQueueIndex];
@@ -1024,11 +1024,11 @@
 
       const pPhoneClean = (item.phone || '').replace(/[^0-9]/g, '');
       if (!pPhoneClean || pPhoneClean.length < 9) {
-        alert("⚠️ 환자 전화번호가 올바르지 않아 알림톡을 발송할 수 없습니다!\n전화번호를 확인해 주세요.");
+        alert("환자 전화번호가 올바르지 않아 알림톡을 발송할 수 없습니다!\n전화번호를 확인해 주세요.");
         return;
       }
 
-      // ⏱️ 즉시 발송 vs 지연 예약 발송 판별
+      // 즉시 발송 vs 지연 예약 발송 판별
       const isScheduled = (delayMode === 'scheduled' || (typeof delayMode === 'number' && delayMode > 0));
       const targetDelay = isScheduled ? getDeskKakaoDelayMinutes() : 0;
 
@@ -1036,12 +1036,12 @@
       const finalNextDate = document.getElementById('phoneNextDate').innerText;
       const finalNotice = document.getElementById('modalNoticeInput').value.trim();
 
-      const actionTitle = isScheduled ? `[⏱️ ${targetDelay}분 후 예약 발송]` : `[⚡ 즉시 발송]`;
+      const actionTitle = isScheduled ? `[${targetDelay}분 후 예약 발송]` : `[즉시 발송]`;
       if (!confirm(`${item.patientName} 환자분께 알림톡을 ${actionTitle} 하시겠습니까?\n\n• 복약: ${finalMed}\n• 내원: ${finalNextDate}`)) {
         return;
       }
 
-      // ⏳ 발송 중 상태 UI 즉시 피드백 (중복 클릭 방지)
+      // 발송 중 상태 UI 즉시 피드백 (중복 클릭 방지)
       const btnInstant = document.getElementById('btnDeskSendInstant');
       const btnScheduled = document.getElementById('btnDeskSendScheduled');
       if (btnInstant) btnInstant.disabled = true;
@@ -1078,7 +1078,7 @@
         } catch (e) { }
       }
 
-      // 🏥 담당 원장님 성함: 대기열 item.doctorName 우선 바인딩
+      // 담당 원장님 성함: 대기열 item.doctorName 우선 바인딩
       const sendDoctorName = item.doctorName || currentDoc;
 
       const reportId = Date.now().toString();
@@ -1145,12 +1145,12 @@
         if (isScheduled) {
           const scheduledTime = new Date(Date.now() + targetDelay * 60 * 1000);
           const scheduledClock = scheduledTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          alert(`⏱️ [예약 발송 접수 완료!]\n\n${item.patientName} 환자분께 ${targetDelay}분 후(약 ${scheduledClock}) 알림톡이 자동으로 발송되도록 예약되었습니다.`);
+          alert(`[예약 발송 접수 완료!]\n\n${item.patientName} 환자분께 ${targetDelay}분 후(약 ${scheduledClock}) 알림톡이 자동으로 발송되도록 예약되었습니다.`);
           item.status = 'scheduled';
           item.scheduledTimestamp = scheduledTime.getTime();
           item.sentAt = `${scheduledClock} 발송예약`;
         } else {
-          alert(`🎉 [즉시 발송 성공!]\n\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
+          alert(`[즉시 발송 성공!]\n\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
           item.status = 'sent';
           item.scheduledTimestamp = null;
           item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1208,7 +1208,7 @@
       badgeArea.innerHTML = `
         <span style="background: ${isPro ? 'linear-gradient(135deg, #0284c7, #0ea5e9)' : '#e2e8f0'}; color: ${isPro ? 'white' : '#334155'}; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: ${isPro ? '0 2px 6px rgba(2,132,199,0.3)' : 'none'}; display: flex; align-items: center; gap: 6px;">
           ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
-          🏥 ${user.hospitalName} ${isPro ? '<span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>' : ''}
+          ${user.hospitalName} ${isPro ? '<span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">고급형 Pro</span>' : ''}
         </span>
       `;
     }

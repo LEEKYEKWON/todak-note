@@ -260,7 +260,7 @@
         <img id="hospLogoImg" src="" alt="병원 로고" style="max-height: 40px; max-width: 140px; object-fit: contain;">
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
-        <div class="hospital-tag" id="hospName">🏥 토닥토닥 안심진료</div>
+        <div class="hospital-tag" id="hospName">토닥토닥 안심진료</div>
         <div class="doctor-tag" id="reportDoctorTag" style="display: none; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 12.5px; font-weight: 700; padding: 2.5px 9px; border-radius: 6px; align-items: center; gap: 4px;">
           <span>👨‍⚕️</span> <span id="reportDoctorName">담당 원장</span>
         </div>
@@ -557,14 +557,11 @@
           } catch(e) {}
         }
       }
-
       // 병원명
       if (data.hospitalName) {
-        document.getElementById('hospName').textContent = data.hospitalName.includes('🏥')
-          ? data.hospitalName
-          : `🏥 ${data.hospitalName}`;
+        const cleanHosp = data.hospitalName.replace(/^[🏥🏢🏛️\s]+/, '').trim();
+        document.getElementById('hospName').textContent = cleanHosp || '토닥토닥 안심진료';
       }
-
       // 👨‍⚕️ 담당 원장님 성함 연동
       const docName = data.doctorName || (data.raw_data && data.raw_data.doctorName) || '';
       const docTagEl = document.getElementById('reportDoctorTag');
@@ -727,7 +724,7 @@
       }
 
       // 3) 기본 안내
-      alert('🏥 병원의 네이버 플레이스 정보가 아직 설정되지 않았습니다.\n(마이페이지에서 병원 네이버 플레이스 링크를 등록해 주시면 클릭 즉시 바로 이동합니다!)');
+      alert('병원의 네이버 플레이스 정보가 아직 설정되지 않았습니다.\n(마이페이지에서 병원 네이버 플레이스 링크를 등록해 주시면 클릭 즉시 바로 이동합니다!)');
     }
   </script>
 

@@ -158,7 +158,7 @@ module.exports = async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const finalReportUrl = reportUrl || `${protocol}://${host}/report.html`;
 
-    const currentHosp = hospitalName || '길동이의원';
+    const currentHosp = (hospitalName || '길동이의원').replace(/^[🏥🏢🏛️\s]+/, '').trim();
     const currentPatient = patientName || '환자';
     const currentDoctor = doctorName || '홍길동';
 

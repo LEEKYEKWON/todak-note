@@ -1666,11 +1666,11 @@
           hospTag.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <img src="${user.logoUrl}" alt="병원로고" style="max-height: 28px; max-width: 90px; object-fit: contain; border-radius: 4px;">
-              <span>🏥 ${user.hospitalName} (${docDisplay})</span>
+              <span>${user.hospitalName} (${docDisplay})</span>
             </div>
           `;
         } else {
-          hospTag.textContent = `🏥 ${user.hospitalName} (${docDisplay})`;
+          hospTag.textContent = `${user.hospitalName} (${docDisplay})`;
         }
       }
 
@@ -1704,14 +1704,14 @@
           badgeArea.innerHTML = `
             <span style="background: linear-gradient(135deg, #0284c7, #0ea5e9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 6px;">
               ${user.logoUrl ? `<img src="${user.logoUrl}" style="height: 18px; width: auto; max-width: 50px; background: white; border-radius: 3px; padding: 1px;" alt="로고">` : ''}
-              🏥 ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">${subText}</span>
+              ${user.hospitalName} <span style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 8px; font-size: 11px;">${subText}</span>
             </span>
             ${roomBadgeHtml}
           `;
         } else {
           badgeArea.innerHTML = `
             <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700;">
-              🏥 ${user.hospitalName} (${subText})
+              ${user.hospitalName} (${subText})
             </span>
             ${roomBadgeHtml}
           `;
@@ -2496,6 +2496,7 @@
           hospTitle = txt.split('·')[0].trim() || '길동이의원';
         }
       }
+      hospTitle = hospTitle.replace(/^[🏥🏢🏛️\s]+/, '').trim();
 
       // 🏥 현재 선택된 진료실 및 담당 원장 정보로 정밀 덮어쓰기
       const currentRoom = getCurrentSelectedRoom(cachedCurrentUser);
