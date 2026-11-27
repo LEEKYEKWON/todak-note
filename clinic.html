@@ -2638,13 +2638,18 @@
           timestamp: Date.now()
         };
 
-        // 로컬 데스크 큐에 즉시 추가
+        // 로컬 데스크 큐에 즉시 추가 (기존 대기열 항목이 있다면 상태 최신화)
         try {
           const queueKey = `todak_desk_queue_${hospId}`;
           const qList = JSON.parse(localStorage.getItem(queueKey) || '[]');
-          const exIdx = qList.findIndex(q => q.id === reportId);
-          if (exIdx >= 0) qList[exIdx] = queueItem;
-          else qList.unshift(queueItem);
+          const cleanP = pPhone.replace(/[^0-9]/g, '');
+          const exIdx = qList.findIndex(q => (q.id === reportId) || (cleanP.length >= 8 && (q.phone || '').replace(/[^0-9]/g, '') === cleanP));
+          if (exIdx >= 0) {
+            queueItem.id = qList[exIdx].id;
+            qList[exIdx] = { ...qList[exIdx], ...queueItem };
+          } else {
+            qList.unshift(queueItem);
+          }
           localStorage.setItem(queueKey, JSON.stringify(qList.slice(0, 50)));
         } catch (e) {}
 

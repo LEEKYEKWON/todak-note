@@ -60,10 +60,14 @@ module.exports = async (req, res) => {
       global._deskQueueCache[key] = [];
     }
 
-    // 중복 방지 (동일 ID인 경우 최신화)
-    const existingIndex = global._deskQueueCache[key].findIndex(q => q.id === item.id);
+    // 중복 방지 (동일 ID 또는 동일 환자 전화번호&이름인 경우 최신 상태로 갱신)
+    const cleanItemPhone = (item.phone || '').replace(/[^0-9]/g, '');
+    const existingIndex = global._deskQueueCache[key].findIndex(q => 
+      q.id === item.id || 
+      (cleanItemPhone && cleanItemPhone.length >= 8 && (q.phone || '').replace(/[^0-9]/g, '') === cleanItemPhone)
+    );
     if (existingIndex >= 0) {
-      global._deskQueueCache[key][existingIndex] = { ...global._deskQueueCache[key][existingIndex], ...item };
+      global._deskQueueCache[key][existingIndex] = { ...global._deskQueueCache[key][existingIndex], ...item, id: global._deskQueueCache[key][existingIndex].id };
     } else {
       global._deskQueueCache[key].unshift(item); // 최신 환자 맨 위에 추가
     }

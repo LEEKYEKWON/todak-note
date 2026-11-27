@@ -744,29 +744,44 @@
           </span>
         `;
 
+        // 🌟 3단계 발송 상태 뱃지 및 작업 버튼 (미발송 대기 vs 예약 발송 대기 vs 발송 완료)
+        const isScheduled = item.status === 'scheduled';
+        let statusBadgeHtml = '';
+        let actionBtnHtml = '';
+
+        if (isSent) {
+          // 1. 발송 완료
+          statusBadgeHtml = `<span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>`;
+          actionBtnHtml = `<button class="btn-open-setting" style="background: #ffffff; color: #0284c7; border: 1.5px solid #cbd5e1;" onclick="openDeskModal(${originalIndex})">
+            🔍 발송 내용 확인
+          </button>`;
+        } else if (isScheduled) {
+          // 2. 예약 발송 대기 중 (시간 되면 자동 발송)
+          const reserveTimeStr = item.sentAt || '예약됨';
+          statusBadgeHtml = `<span style="background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;" title="지정된 시간에 환자 카카오톡으로 자동 발송됩니다">
+            ⏱️ ${reserveTimeStr}
+          </span>`;
+          actionBtnHtml = `<button class="btn-open-setting" style="background: #f5f3ff; color: #4338ca; border: 1.5px solid #c7d2fe; font-weight: 800;" onclick="openDeskModal(${originalIndex})">
+            ⏱️ 예약 접수됨 (확인)
+          </button>`;
+        } else {
+          // 3. 순수 미발송 (데스크에서 확인 후 발송 필요)
+          statusBadgeHtml = `<span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 미발송 (수납 대기)</span>`;
+          actionBtnHtml = `<button class="btn-open-setting" style="background: #0284c7; color: white; border: none; font-weight: 800; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);" onclick="openDeskModal(${originalIndex})">
+            ⚡ 복약 확인 & 발송
+          </button>`;
+        }
+
         tr.innerHTML = `
           <td style="color: #475569; font-size: 13px; font-weight: 600;">${displayDateTime}</td>
           <td>${roomBadgeHtml}</td>
           <td><strong>${highlightSearch(item.patientName, searchQuery)}</strong></td>
           <td style="color: #334155; font-weight: 600;">${highlightSearch(item.phone, searchQuery)}</td>
           <td style="text-align: center;">
-            ${isSent 
-              ? `<span style="background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>` 
-              : (item.status === 'scheduled'
-                  ? `<span style="background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;" title="예약 발송 접수됨">⏱️ ${item.sentAt || '예약됨'}</span>`
-                  : `<span style="background: #fef3c7; color: #b45309; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 발송 대기</span>`
-                )
-            }
+            ${statusBadgeHtml}
           </td>
           <td style="text-align: center;">
-            ${isSent
-              ? `<button class="btn-open-setting" style="background: #ffffff; color: #0284c7; border: 1.5px solid #0284c7;" onclick="openDeskModal(${originalIndex})">
-                  🔍 발송 내용 확인
-                </button>`
-              : `<button class="btn-open-setting" onclick="openDeskModal(${originalIndex})">
-                  ⚙️ 복약/예약 확인 및 발송
-                </button>`
-            }
+            ${actionBtnHtml}
           </td>
         `;
         tbody.appendChild(tr);
@@ -792,11 +807,14 @@
       if (!item) return;
 
       const isSent = item.status === 'sent';
+      const isScheduled = item.status === 'scheduled';
       const btnInstant = document.getElementById('btnDeskSendInstant');
       const btnScheduled = document.getElementById('btnDeskSendScheduled');
       if (btnInstant && btnScheduled) {
         if (isSent) {
           btnInstant.innerText = '⚡ 즉시 재발송';
+        } else if (isScheduled) {
+          btnInstant.innerText = '⚡ 지금 즉시 발송하기';
         } else {
           btnInstant.innerText = '⚡ 즉시 발송';
         }
@@ -807,7 +825,11 @@
       }
 
       const roomLabel = item.roomName ? ` [${item.roomName} · ${item.doctorName || '원장'}]` : '';
-      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토${roomLabel} ${isSent ? '(발송완료)' : ''}`;
+      let statusNotice = '';
+      if (isSent) statusNotice = ' (✅ 발송완료)';
+      else if (isScheduled) statusNotice = ` (⏱️ ${item.sentAt || '예약 발송 접수됨'})`;
+
+      document.getElementById('modalPatientTitle').innerText = `${item.patientName} 리포트 검토${roomLabel}${statusNotice}`;
       document.getElementById('modalPatientPhoneDisplay').innerText = `📞 수신 번호: ${item.phone}`;
       document.getElementById('modalSummaryPreview').innerText = item.summary || '정상 소견';
       document.getElementById('modalMedInput').value = item.medication || '식후 30분(3일분)';
