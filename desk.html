@@ -421,7 +421,7 @@
         </div>
 
         <div style="display: flex; gap: 8px; margin-top: 10px;">
-          <button type="button" class="btn-send-final" id="btnDeskSendInstant" style="flex: 1; background: #0284c7; color: white; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; transition: all 0.2s;" onclick="submitDeskSend(0)">
+          <button type="button" class="btn-send-final" id="btnDeskSendInstant" style="flex: 1; background: #fee500; color: #191919; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; box-shadow: 0 2px 8px rgba(254, 229, 0, 0.35); transition: all 0.2s;" onclick="submitDeskSend(0)">
             ⚡ 즉시 발송
           </button>
           <button type="button" class="btn-send-final" id="btnDeskSendScheduled" style="flex: 1.2; background: #10b981; color: white; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25); transition: all 0.2s;" onclick="submitDeskSend('scheduled')">
@@ -772,17 +772,18 @@
       if (!item) return;
 
       const isSent = item.status === 'sent';
-      const sendBtn = document.querySelector('.btn-send-final');
-      if (sendBtn) {
+      const btnInstant = document.getElementById('btnDeskSendInstant');
+      const btnScheduled = document.getElementById('btnDeskSendScheduled');
+      if (btnInstant && btnScheduled) {
         if (isSent) {
-          sendBtn.innerText = '🔁 이미 발송된 리포트 (필요 시 알림톡 재발송)';
-          sendBtn.style.background = '#e2e8f0';
-          sendBtn.style.color = '#334155';
+          btnInstant.innerText = '⚡ 즉시 재발송';
         } else {
-          sendBtn.innerText = '📲 확인 완료 & 환자 카카오 알림톡 발송';
-          sendBtn.style.background = '#fee500';
-          sendBtn.style.color = '#191919';
+          btnInstant.innerText = '⚡ 즉시 발송';
         }
+        btnInstant.style.background = '#fee500';
+        btnInstant.style.color = '#191919';
+        btnScheduled.style.background = '#10b981';
+        btnScheduled.style.color = '#ffffff';
       }
 
       const roomLabel = item.roomName ? ` [${item.roomName} · ${item.doctorName || '원장'}]` : '';

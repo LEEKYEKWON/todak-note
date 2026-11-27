@@ -26,7 +26,7 @@ function formatSolapiDate(date) {
   const hh = String(kst.getUTCHours()).padStart(2, '0');
   const min = String(kst.getUTCMinutes()).padStart(2, '0');
   const ss = String(kst.getUTCSeconds()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+09:00`;
 }
 
 // 🌟 카카오 알림톡 버튼 링크 100자 이내 준수를 위한 초경량 단축 URL 생성기 (is.gd / tinyurl 백업)
@@ -215,18 +215,20 @@ ${shortenedUrl}
       text: fallbackText
     };
 
-    // ⏱️ 지연 시간(delayMinutes > 0)이 설정된 경우 솔라피 예약 발송 적용
+    // ⏱️ 지연 시간(delayMinutes > 0)이 설정된 경우 솔라피 최상위 루트 예약 발송 적용
     let scheduledDateStr = null;
+    const requestBody = {
+      messages: [messagePayload]
+    };
+
     const delayNum = parseInt(delayMinutes, 10);
     if (!isNaN(delayNum) && delayNum > 0) {
       const scheduledTime = new Date(Date.now() + delayNum * 60 * 1000);
       scheduledDateStr = formatSolapiDate(scheduledTime);
-      messagePayload.scheduledDate = scheduledDateStr;
+      requestBody.scheduledDate = scheduledDateStr; // 🌟 솔라피 공식 규격: 최상위 루트에 지정
     }
 
-    const payload = JSON.stringify({
-      messages: [messagePayload]
-    });
+    const payload = JSON.stringify(requestBody);
 
     const options = {
       hostname: 'api.solapi.com',
