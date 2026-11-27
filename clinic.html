@@ -2424,16 +2424,20 @@
       showToast('🗑️ 진료실 입력 내용이 깨끗하게 비워졌습니다.');
     }
 
-    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (기본값: 10분)
+    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (계정별 100% 독립 분리, 기본값: 10분)
     function getKakaoDelayMinutes() {
+      let userEmail = '';
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
+          if (u.email) userEmail = u.email;
           if (u.kakaoDelayMinutes) return parseInt(u.kakaoDelayMinutes, 10);
         } catch (e) {}
       }
-      const delayStr = localStorage.getItem('todak_kakao_delay');
+      const clean = (userEmail || '').trim().toLowerCase();
+      const accountKey = clean ? `todak_kakao_delay_${clean}` : 'todak_kakao_delay_default';
+      const delayStr = localStorage.getItem(accountKey) || localStorage.getItem('todak_kakao_delay');
       return delayStr ? parseInt(delayStr, 10) : 10;
     }
 
@@ -2643,7 +2647,12 @@
           const queueKey = `todak_desk_queue_${hospId}`;
           const qList = JSON.parse(localStorage.getItem(queueKey) || '[]');
           const cleanP = pPhone.replace(/[^0-9]/g, '');
-          const exIdx = qList.findIndex(q => (q.id === reportId) || (cleanP.length >= 8 && (q.phone || '').replace(/[^0-9]/g, '') === cleanP));
+          // 🌟 환자 이름과 전화번호를 종합 매칭하여 정확한 대기열 항목 최신화
+          const exIdx = qList.findIndex(q => 
+            (q.id === reportId) || 
+            (q.patientName === pDisplayName) ||
+            (q.patientName && q.patientName.includes(pNameOnly) && cleanP.length >= 8 && (q.phone || '').replace(/[^0-9]/g, '') === cleanP)
+          );
           if (exIdx >= 0) {
             queueItem.id = qList[exIdx].id;
             qList[exIdx] = { ...qList[exIdx], ...queueItem };

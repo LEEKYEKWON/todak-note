@@ -773,6 +773,11 @@
       }
     }
 
+    function getKakaoDelayKey(email) {
+      const clean = (email || '').trim().toLowerCase();
+      return clean ? `todak_kakao_delay_${clean}` : 'todak_kakao_delay_default';
+    }
+
     function renderProfile() {
       document.getElementById('inputHospitalName').value = currentUser.hospitalName || '';
       document.getElementById('inputDoctorName').value = currentUser.doctorName || '';
@@ -780,8 +785,10 @@
       document.getElementById('inputEmail').value = currentUser.email || '';
       document.getElementById('inputNaverReviewUrl').value = currentUser.naverReviewUrl || '';
 
-      // ⏱️ 카카오 알림톡 예약 발송 지연 시간 반영 (기본 10분)
-      const currentDelay = currentUser.kakaoDelayMinutes || localStorage.getItem('todak_kakao_delay') || 10;
+      // ⏱️ 카카오 알림톡 예약 발송 지연 시간 반영 (계정별 100% 독립 분리)
+      const uEmail = (currentUser && currentUser.email) || '';
+      const accountDelayKey = getKakaoDelayKey(uEmail);
+      const currentDelay = currentUser.kakaoDelayMinutes || localStorage.getItem(accountDelayKey) || 10;
       const targetRadio = document.querySelector(`input[name="kakaoDelayMinutes"][value="${currentDelay}"]`);
       if (targetRadio) {
         targetRadio.checked = true;
@@ -1006,10 +1013,12 @@
       const logoUrl = currentUser.logoUrl || '';
       const currentPlan = currentUser.plan || 'Pro';
 
-      // ⏱️ 카카오 알림톡 예약 발송 지연 시간
+      // ⏱️ 카카오 알림톡 예약 발송 지연 시간 (계정별 독립 저장)
       const selectedDelayEl = document.querySelector('input[name="kakaoDelayMinutes"]:checked');
       const kakaoDelayMinutes = parseInt(selectedDelayEl ? selectedDelayEl.value : '10', 10);
-      localStorage.setItem('todak_kakao_delay', kakaoDelayMinutes);
+      const uEmail = (currentUser && currentUser.email) || '';
+      localStorage.setItem(getKakaoDelayKey(uEmail), kakaoDelayMinutes);
+      currentUser.kakaoDelayMinutes = kakaoDelayMinutes;
 
       const saveBtn = document.querySelector('.save-btn');
       const originalText = saveBtn.textContent;

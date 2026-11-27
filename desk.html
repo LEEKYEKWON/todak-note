@@ -428,6 +428,15 @@
             ⏱️ 예약 발송 (10분 후)
           </button>
         </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+          <button type="button" onclick="markDeskItemAsSentDirectly()" style="background: none; border: none; color: #16a34a; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 4px;">
+            ✅ 카톡 재발송 없이 [발송 완료]로 변경
+          </button>
+          <button type="button" onclick="deleteDeskItemDirectly()" style="background: none; border: none; color: #94a3b8; font-size: 12.5px; cursor: pointer; text-decoration: underline; padding: 4px;">
+            🗑️ 목록에서 삭제
+          </button>
+        </div>
       </div>
 
       <!-- 우측: 스마트폰 실시간 미리보기 목업 -->
@@ -929,16 +938,20 @@
       }
     }
 
-    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (기본값: 10분)
+    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (계정별 100% 독립 분리, 기본값: 10분)
     function getDeskKakaoDelayMinutes() {
+      let userEmail = '';
       const userStr = localStorage.getItem('todak_current_user');
       if (userStr) {
         try {
           const u = JSON.parse(userStr);
+          if (u.email) userEmail = u.email;
           if (u.kakaoDelayMinutes) return parseInt(u.kakaoDelayMinutes, 10);
         } catch (e) {}
       }
-      const delayStr = localStorage.getItem('todak_kakao_delay');
+      const clean = (userEmail || '').trim().toLowerCase();
+      const accountKey = clean ? `todak_kakao_delay_${clean}` : 'todak_kakao_delay_default';
+      const delayStr = localStorage.getItem(accountKey) || localStorage.getItem('todak_kakao_delay');
       return delayStr ? parseInt(delayStr, 10) : 10;
     }
 
@@ -948,6 +961,60 @@
       if (btn) {
         btn.innerHTML = `⏱️ 예약 발송 (${minutes}분 후)`;
       }
+    }
+
+    // ✅ 카톡 재발송 없이 데스크에서 수동으로 '발송 완료' 처리
+    function markDeskItemAsSentDirectly() {
+      if (activeQueueIndex < 0) return;
+      const item = deskQueueData[activeQueueIndex];
+      if (!item) return;
+
+      if (!confirm(`[상태 직접 변경]\n\n${item.patientName} 환자분의 상태를 카카오톡 재발송 없이 [✅ 발송 완료]로 변경하시겠습니까?`)) {
+        return;
+      }
+
+      item.status = 'sent';
+      item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      item.scheduledTimestamp = null;
+
+      const hospId = getHospitalId();
+      localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
+
+      try {
+        fetch('/api/desk-queue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hospitalId: hospId, item: item })
+        });
+      } catch (e) {}
+
+      document.getElementById('deskModalOverlay').style.display = 'none';
+      renderDeskTable();
+    }
+
+    // 🗑️ 대기열 목록에서 환자 삭제
+    function deleteDeskItemDirectly() {
+      if (activeQueueIndex < 0) return;
+      const item = deskQueueData[activeQueueIndex];
+      if (!item) return;
+
+      if (!confirm(`[목록 삭제]\n\n${item.patientName} 환자를 수납 데스크 목록에서 삭제하시겠습니까?`)) {
+        return;
+      }
+
+      const hospId = getHospitalId();
+      const delId = item.id;
+      deskQueueData.splice(activeQueueIndex, 1);
+      localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
+
+      try {
+        fetch(`/api/desk-queue?hospitalId=${encodeURIComponent(hospId)}&id=${encodeURIComponent(delId)}`, {
+          method: 'DELETE'
+        });
+      } catch (e) {}
+
+      document.getElementById('deskModalOverlay').style.display = 'none';
+      renderDeskTable();
     }
 
     async function submitDeskSend(delayMode = 0) {
