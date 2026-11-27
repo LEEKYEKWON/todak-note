@@ -366,6 +366,7 @@ const TodakDB = {
       naverReviewUrl: row.naver_review_url || row.naverReviewUrl || '',
       logoUrl: row.logo_url || row.logoUrl || '',
       joinedAt: row.created_at || row.joinedAt,
+      kakaoDelayMinutes: parseInt(row.kakao_delay_minutes || row.kakaoDelayMinutes || localStorage.getItem('todak_kakao_delay') || 10, 10),
       clinicRooms: rooms
     };
   }

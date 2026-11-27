@@ -327,6 +327,37 @@
     }
 
     /* 토스트 알림 */
+    .delay-radio-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 15px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      background: white;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .delay-radio-chip:hover {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+    .delay-radio-chip input[type="radio"] {
+      accent-color: #0284c7;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .delay-radio-chip.selected {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      color: #0369a1;
+      box-shadow: 0 1px 3px rgba(2, 132, 199, 0.15);
+    }
+
     .toast {
       position: fixed;
       bottom: 24px;
@@ -463,6 +494,40 @@
               placeholder="https://m.place.naver.com/hospital/...">
             <p class="form-helper">입력하시면 환자 진료 리포트 하단의 [네이버 영수증 리뷰 남기기] 버튼 클릭 시 우리 병원 플레이스로 즉시 이동합니다.</p>
           </div>
+
+          <!-- ⏱️ 카카오 알림톡 예약 발송 지연 시간 설정 -->
+          <div class="form-group full" style="margin-top: 10px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 18px 20px;">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-weight: 800; color: #0f172a; font-size: 14.5px;">⏱️ 환자 카카오 알림톡 [예약 발송] 지연 시간</span>
+              <span style="font-size: 12px; color: #0284c7; font-weight: 700;">진료실 및 수납 데스크 버튼 연동</span>
+            </label>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 14px; line-height: 1.5;">
+              진료실 및 데스크에서 <strong>[⏱️ 예약 발송]</strong> 버튼을 누르면 설정된 시간 후에 환자분께 알림톡이 자동 발송됩니다.<br>
+              환자가 진료실을 나와 수납하고 약국으로 이동할 때쯤 자연스럽게 리포트를 받아보실 수 있습니다.
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="delayOptionGroup">
+              <label class="delay-radio-chip">
+                <input type="radio" name="kakaoDelayMinutes" value="10" checked onchange="handleDelayRadioChange(this)">
+                <span>10분 후 (기본 권장)</span>
+              </label>
+              <label class="delay-radio-chip">
+                <input type="radio" name="kakaoDelayMinutes" value="20" onchange="handleDelayRadioChange(this)">
+                <span>20분 후</span>
+              </label>
+              <label class="delay-radio-chip">
+                <input type="radio" name="kakaoDelayMinutes" value="30" onchange="handleDelayRadioChange(this)">
+                <span>30분 후</span>
+              </label>
+              <label class="delay-radio-chip">
+                <input type="radio" name="kakaoDelayMinutes" value="40" onchange="handleDelayRadioChange(this)">
+                <span>40분 후</span>
+              </label>
+              <label class="delay-radio-chip">
+                <input type="radio" name="kakaoDelayMinutes" value="60" onchange="handleDelayRadioChange(this)">
+                <span>60분 후</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
@@ -576,14 +641,19 @@
         </button>
       </div>
 
-      <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; font-size: 13.5px; color: #475569; line-height: 1.65;">
-        <div style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+      <div
+        style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; font-size: 13.5px; color: #475569; line-height: 1.65;">
+        <div
+          style="font-weight: 800; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
           <span>💡</span> 다인 진료실(Multi-Doctor Clinic) 시스템 안내
         </div>
-        <p>• <strong>대표원장 계정 비밀번호 노출 방지</strong>: 각 진료실마다 부여된 <strong>[진료실 전용 접속 비밀번호]</strong>만 부원장님께 전달해 주시면 안전하게 로그인할 수 있습니다.</p>
+        <p>• <strong>대표원장 계정 비밀번호 노출 방지</strong>: 각 진료실마다 부여된 <strong>[진료실 전용 접속 비밀번호]</strong>만 부원장님께 전달해 주시면 안전하게 로그인할
+          수 있습니다.</p>
         <p>• 기본 요금제에 <strong>1진료실(메인)과 수납 데스크 1대</strong>가 기본 포함되어 있습니다.</p>
-        <p>• 추가 진료실(부원장님) 슬롯은 정가의 50% 반값 특가(<strong id="slotPriceNoticeText" style="color: #0284c7;">기본형 월 74,000원 / 고급형 월 99,000원</strong>)로 무제한 추가하실 수 있습니다.</p>
-        <p>• 부원장님이 교체되거나 퇴사하신 경우, 추가 비용 없이 언제든 <strong style="color: #0284c7;">[수정]</strong>을 통해 새 원장님 성함과 새 접속 비밀번호로 변경하여 즉시 재사용하실 수 있습니다.</p>
+        <p>• 추가 진료실(부원장님) 슬롯은 정가의 50% 반값 특가(<strong id="slotPriceNoticeText" style="color: #0284c7;">기본형 월 74,000원 / 고급형
+            월 99,000원</strong>)로 무제한 추가하실 수 있습니다.</p>
+        <p>• 부원장님이 교체되거나 퇴사하신 경우, 추가 비용 없이 언제든 <strong style="color: #0284c7;">[수정]</strong>을 통해 새 원장님 성함과 새 접속 비밀번호로
+          변경하여 즉시 재사용하실 수 있습니다.</p>
       </div>
 
       <!-- 진료실 슬롯 목록 테이블 -->
@@ -608,27 +678,36 @@
   </main>
 
   <!-- 🏥 진료실 슬롯 추가/수정 모달 -->
-  <div id="roomModalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px);">
-    <div style="background: white; border-radius: 18px; width: 100%; max-width: 470px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+  <div id="roomModalOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px);">
+    <div
+      style="background: white; border-radius: 18px; width: 100%; max-width: 470px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
         <h3 id="roomModalTitle" style="font-size: 18px; font-weight: 800; color: #0f172a;">진료실 슬롯 추가</h3>
-        <button type="button" onclick="closeRoomModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+        <button type="button" onclick="closeRoomModal()"
+          style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
       </div>
 
-      <div id="roomModalPricingNotice" style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+      <div id="roomModalPricingNotice"
+        style="background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px; color: #0369a1; line-height: 1.5;">
         <!-- 플랜별 슬롯 요금 안내 텍스트 -->
       </div>
 
       <form id="roomModalForm" onsubmit="handleSaveRoomModal(event)">
         <input type="hidden" id="modalRoomId" value="">
         <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">진료실 명칭</label>
-          <input type="text" id="modalRoomName" class="form-input" required placeholder="예: 2진료실, 소아과 1진료실" style="font-size: 14.5px;">
+          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">진료실
+            명칭</label>
+          <input type="text" id="modalRoomName" class="form-input" required placeholder="예: 2진료실, 소아과 1진료실"
+            style="font-size: 14.5px;">
         </div>
 
         <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">담당 원장님 성함</label>
-          <input type="text" id="modalDoctorName" class="form-input" required placeholder="예: 이영희 원장, 김철수 부원장" style="font-size: 14.5px;">
+          <label style="display: block; font-size: 13.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">담당 원장님
+            성함</label>
+          <input type="text" id="modalDoctorName" class="form-input" required placeholder="예: 이영희 원장, 김철수 부원장"
+            style="font-size: 14.5px;">
           <p class="form-helper" style="margin-top: 5px;">* 환자 카카오 알림톡 발송 시 '🏥 우리병원 [원장명] 드림'으로 정확하게 발송됩니다.</p>
         </div>
 
@@ -636,15 +715,18 @@
           <label style="display: block; font-size: 13.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">
             🔑 진료실 전용 접속 비밀번호 (부원장 로그인용)
           </label>
-          <input type="text" id="modalRoomPin" class="form-input" required placeholder="예: 2222 (부원장님께 전달할 접속 비밀번호)" style="font-size: 14.5px; font-weight: 700; border-color: #93c5fd;" maxlength="20">
+          <input type="text" id="modalRoomPin" class="form-input" required placeholder="예: 2222 (부원장님께 전달할 접속 비밀번호)"
+            style="font-size: 14.5px; font-weight: 700; border-color: #93c5fd;" maxlength="20">
           <p class="form-helper" style="margin-top: 5px; color: #0369a1;">
             * 부원장님은 대표원장 비밀번호 대신 이 접속 코드로 로그인합니다. <strong>(대표원장 개인 비밀번호 완벽 보호)</strong>
           </p>
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button type="button" onclick="closeRoomModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;">취소</button>
-          <button type="submit" id="btnSubmitRoomModal" style="background: #0284c7; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">저장하기</button>
+          <button type="button" onclick="closeRoomModal()"
+            style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;">취소</button>
+          <button type="submit" id="btnSubmitRoomModal"
+            style="background: #0284c7; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">저장하기</button>
         </div>
       </form>
     </div>
@@ -698,8 +780,25 @@
       document.getElementById('inputEmail').value = currentUser.email || '';
       document.getElementById('inputNaverReviewUrl').value = currentUser.naverReviewUrl || '';
 
+      // ⏱️ 카카오 알림톡 예약 발송 지연 시간 반영 (기본 10분)
+      const currentDelay = currentUser.kakaoDelayMinutes || localStorage.getItem('todak_kakao_delay') || 10;
+      const targetRadio = document.querySelector(`input[name="kakaoDelayMinutes"][value="${currentDelay}"]`);
+      if (targetRadio) {
+        targetRadio.checked = true;
+        handleDelayRadioChange(targetRadio);
+      }
+
       // 병원 전용 로고 UI 렌더링
       renderLogoUI();
+    }
+
+    function handleDelayRadioChange(radioEl) {
+      document.querySelectorAll('#delayOptionGroup .delay-radio-chip').forEach(chip => {
+        chip.classList.remove('selected');
+      });
+      if (radioEl && radioEl.checked) {
+        radioEl.closest('.delay-radio-chip')?.classList.add('selected');
+      }
     }
 
     function renderLogoUI() {
@@ -907,6 +1006,11 @@
       const logoUrl = currentUser.logoUrl || '';
       const currentPlan = currentUser.plan || 'Pro';
 
+      // ⏱️ 카카오 알림톡 예약 발송 지연 시간
+      const selectedDelayEl = document.querySelector('input[name="kakaoDelayMinutes"]:checked');
+      const kakaoDelayMinutes = parseInt(selectedDelayEl ? selectedDelayEl.value : '10', 10);
+      localStorage.setItem('todak_kakao_delay', kakaoDelayMinutes);
+
       const saveBtn = document.querySelector('.save-btn');
       const originalText = saveBtn.textContent;
       saveBtn.textContent = '⏳ 저장 중...';
@@ -925,6 +1029,10 @@
           pendingPlan: currentUser.pendingPlan || null,
           pendingDate: currentUser.pendingDate || null
         });
+
+        // 지연 시간 로컬/메모리 동기화 보장
+        currentUser.kakaoDelayMinutes = kakaoDelayMinutes;
+        localStorage.setItem('todak_current_user', JSON.stringify(currentUser));
 
         // 성공 UI 피드백
         saveBtn.textContent = '✅ 수정사항 저장 완료!';
@@ -1214,8 +1322,8 @@
         const pinDisplay = isMain
           ? '<span style="color: #64748b; font-size: 12.5px; font-weight: 600;">🔒 대표원장 마스터 비번</span>'
           : (room.pin
-              ? `<code style="background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1px solid #bae6fd; font-size: 13px;">${room.pin}</code>`
-              : '<span style="color: #f87171; font-size: 12px; font-weight: 700;">⚠️ 미설정 (수정 필요)</span>');
+            ? `<code style="background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1px solid #bae6fd; font-size: 13px;">${room.pin}</code>`
+            : '<span style="color: #f87171; font-size: 12px; font-weight: 700;">⚠️ 미설정 (수정 필요)</span>');
 
         tr.innerHTML = `
           <td style="padding: 14px 16px; font-weight: 800; color: #0f172a;">${room.roomName || `${idx + 1}진료실`}</td>

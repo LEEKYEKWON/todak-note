@@ -16,6 +16,19 @@ function getSolapiAuthHeader() {
   return `HMAC-SHA256 apiKey=${SOLAPI_API_KEY}, date=${date}, salt=${salt}, signature=${signature}`;
 }
 
+// ⏱️ 솔라피 예약 발송용 날짜 포맷팅 (KST 한국 표준시 기준 YYYY-MM-DD HH:mm:ss)
+function formatSolapiDate(date) {
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kst = new Date(date.getTime() + kstOffset);
+  const yyyy = kst.getUTCFullYear();
+  const mm = String(kst.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(kst.getUTCDate()).padStart(2, '0');
+  const hh = String(kst.getUTCHours()).padStart(2, '0');
+  const min = String(kst.getUTCMinutes()).padStart(2, '0');
+  const ss = String(kst.getUTCSeconds()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+}
+
 // 🌟 카카오 알림톡 버튼 링크 100자 이내 준수를 위한 초경량 단축 URL 생성기 (is.gd / tinyurl 백업)
 async function getShortUrl(longUrl) {
   // 1순위: is.gd (매우 짧고 빠름)
@@ -130,7 +143,8 @@ module.exports = async (req, res) => {
       doctorName,
       summary,
       medication,
-      nextDate
+      nextDate,
+      delayMinutes // ⏱️ 지연 시간(분) (0 또는 없으면 즉시, >0이면 예약 발송)
     } = req.body || {};
 
     const recipientPhone = (to || receiverPhone || '').replace(/[^0-9]/g, '');
@@ -201,6 +215,15 @@ ${shortenedUrl}
       text: fallbackText
     };
 
+    // ⏱️ 지연 시간(delayMinutes > 0)이 설정된 경우 솔라피 예약 발송 적용
+    let scheduledDateStr = null;
+    const delayNum = parseInt(delayMinutes, 10);
+    if (!isNaN(delayNum) && delayNum > 0) {
+      const scheduledTime = new Date(Date.now() + delayNum * 60 * 1000);
+      scheduledDateStr = formatSolapiDate(scheduledTime);
+      messagePayload.scheduledDate = scheduledDateStr;
+    }
+
     const payload = JSON.stringify({
       messages: [messagePayload]
     });
@@ -230,7 +253,14 @@ ${shortenedUrl}
             });
             return;
           }
-          res.status(200).json({ success: true, type: 'ATA(알림톡)', solapi: parsed });
+          res.status(200).json({
+            success: true,
+            type: 'ATA(알림톡)',
+            isScheduled: Boolean(scheduledDateStr),
+            delayMinutes: delayNum || 0,
+            scheduledDate: scheduledDateStr,
+            solapi: parsed
+          });
         } catch (e) {
           res.status(200).json({ success: true, raw: solapiData });
         }

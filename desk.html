@@ -420,9 +420,14 @@
           </div>
         </div>
 
-        <button type="button" class="btn-send-final" onclick="submitDeskSend()">
-          📲 확인 완료 & 환자 카카오 알림톡 발송
-        </button>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button type="button" class="btn-send-final" id="btnDeskSendInstant" style="flex: 1; background: #0284c7; color: white; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; transition: all 0.2s;" onclick="submitDeskSend(0)">
+            ⚡ 즉시 발송
+          </button>
+          <button type="button" class="btn-send-final" id="btnDeskSendScheduled" style="flex: 1.2; background: #10b981; color: white; border: none; font-weight: 800; padding: 13px 10px; border-radius: 10px; cursor: pointer; font-size: 14.5px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25); transition: all 0.2s;" onclick="submitDeskSend('scheduled')">
+            ⏱️ 예약 발송 (10분 후)
+          </button>
+        </div>
       </div>
 
       <!-- 우측: 스마트폰 실시간 미리보기 목업 -->
@@ -727,7 +732,10 @@
           <td style="text-align: center;">
             ${isSent 
               ? `<span style="background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">✅ 발송 완료</span>` 
-              : `<span style="background: #fef3c7; color: #b45309; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 발송 대기</span>`
+              : (item.status === 'scheduled'
+                  ? `<span style="background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;" title="예약 발송 접수됨">⏱️ ${item.sentAt || '예약됨'}</span>`
+                  : `<span style="background: #fef3c7; color: #b45309; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">⏳ 발송 대기</span>`
+                )
             }
           </td>
           <td style="text-align: center;">
@@ -822,6 +830,7 @@
       }
 
       updateModalPhoneView();
+      updateDeskKakaoDelayButtonLabels();
       document.getElementById('deskModalOverlay').style.display = 'flex';
     }
 
@@ -877,7 +886,28 @@
       }
     }
 
-    async function submitDeskSend() {
+    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (기본값: 10분)
+    function getDeskKakaoDelayMinutes() {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.kakaoDelayMinutes) return parseInt(u.kakaoDelayMinutes, 10);
+        } catch (e) {}
+      }
+      const delayStr = localStorage.getItem('todak_kakao_delay');
+      return delayStr ? parseInt(delayStr, 10) : 10;
+    }
+
+    function updateDeskKakaoDelayButtonLabels() {
+      const minutes = getDeskKakaoDelayMinutes();
+      const btn = document.getElementById('btnDeskSendScheduled');
+      if (btn) {
+        btn.innerHTML = `⏱️ 예약 발송 (${minutes}분 후)`;
+      }
+    }
+
+    async function submitDeskSend(delayMode = 0) {
       if (activeQueueIndex < 0) return;
       const item = deskQueueData[activeQueueIndex];
       if (!item) return;
@@ -888,21 +918,29 @@
         return;
       }
 
+      // ⏱️ 즉시 발송 vs 지연 예약 발송 판별
+      const isScheduled = (delayMode === 'scheduled' || (typeof delayMode === 'number' && delayMode > 0));
+      const targetDelay = isScheduled ? getDeskKakaoDelayMinutes() : 0;
+
       const finalMed = document.getElementById('modalMedInput').value.trim() || '약국 봉투 안내 참고';
       const finalNextDate = document.getElementById('phoneNextDate').innerText;
       const finalNotice = document.getElementById('modalNoticeInput').value.trim();
 
-      if (!confirm(`${item.patientName} 환자분께 알림톡을 발송하시겠습니까?\n\n• 복약: ${finalMed}\n• 내원: ${finalNextDate}`)) {
+      const actionTitle = isScheduled ? `[⏱️ ${targetDelay}분 후 예약 발송]` : `[⚡ 즉시 발송]`;
+      if (!confirm(`${item.patientName} 환자분께 알림톡을 ${actionTitle} 하시겠습니까?\n\n• 복약: ${finalMed}\n• 내원: ${finalNextDate}`)) {
         return;
       }
 
-      // ⏳ 발송 중 상태 UI 즉시 피드백 (중복 클릭 방지 & 로딩 스피너)
-      const sendBtn = document.querySelector('.btn-send-final');
-      const originalBtnText = sendBtn ? sendBtn.innerHTML : '';
-      if (sendBtn) {
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = `<span class="spinner-icon"></span>📲 카카오 알림톡 발송 중입니다... 잠시만 기다려 주세요`;
-        sendBtn.style.background = '#fef08a';
+      // ⏳ 발송 중 상태 UI 즉시 피드백 (중복 클릭 방지)
+      const btnInstant = document.getElementById('btnDeskSendInstant');
+      const btnScheduled = document.getElementById('btnDeskSendScheduled');
+      if (btnInstant) btnInstant.disabled = true;
+      if (btnScheduled) btnScheduled.disabled = true;
+
+      const targetBtn = isScheduled ? btnScheduled : btnInstant;
+      const originalBtnText = targetBtn ? targetBtn.innerHTML : '';
+      if (targetBtn) {
+        targetBtn.innerHTML = `<span class="spinner-icon"></span>접수 중...`;
       }
 
       function toBase64Url(obj) {
@@ -989,15 +1027,22 @@
             summary: item.summary,
             medication: finalMed,
             nextDate: finalNextDate,
-            reportUrl: reportUrl
+            reportUrl: reportUrl,
+            delayMinutes: targetDelay
           })
         });
 
-        alert(`🎉 [발송 성공!]\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
+        if (isScheduled) {
+          const scheduledClock = new Date(Date.now() + targetDelay * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          alert(`⏱️ [예약 발송 접수 완료!]\n\n${item.patientName} 환자분께 ${targetDelay}분 후(약 ${scheduledClock}) 알림톡이 자동으로 발송되도록 예약되었습니다.`);
+          item.status = 'scheduled';
+          item.sentAt = `${scheduledClock} 발송예약`;
+        } else {
+          alert(`🎉 [즉시 발송 성공!]\n\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
+          item.status = 'sent';
+          item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
 
-        // 🌟 서버 클라우드 대기열에서도 'status: sent'로 상태 갱신
-        item.status = 'sent';
-        item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         item.medication = finalMed;
         item.nextDate = finalNextDate;
         item.nextNotice = finalNotice;
@@ -1021,10 +1066,10 @@
       } catch (e) {
         alert("발송 오류: " + e.message);
       } finally {
-        if (sendBtn) {
-          sendBtn.disabled = false;
-          sendBtn.innerHTML = originalBtnText || '📲 확인 완료 & 환자 카카오 알림톡 발송';
-          sendBtn.style.background = '#fee500';
+        if (btnInstant) btnInstant.disabled = false;
+        if (btnScheduled) btnScheduled.disabled = false;
+        if (targetBtn && originalBtnText) {
+          targetBtn.innerHTML = originalBtnText;
         }
       }
     }

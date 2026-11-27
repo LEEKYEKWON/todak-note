@@ -1276,10 +1276,13 @@
             </div>
           </div>
 
-          <div class="action-buttons">
-            <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;"
+          <div class="action-buttons" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; flex: 1; min-width: 110px;"
               onclick="sendToDeskQueue()">📋 데스크로 전달</button>
-            <button class="btn btn-primary" id="sendBtn" onclick="sendReport()">📲 환자 카톡 발송</button>
+            <button class="btn btn-primary" id="btnSendInstant" style="background: #0284c7; color: white; border: none; font-weight: 800; flex: 1; min-width: 110px;"
+              onclick="sendReport(0)">⚡ 즉시 발송</button>
+            <button class="btn" id="btnSendScheduled" style="background: #10b981; color: white; border: none; font-weight: 800; flex: 1.2; min-width: 150px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);"
+              onclick="sendReport('scheduled')">⏱️ 예약 발송 (10분 후)</button>
           </div>
         </div>
       </div>
@@ -1477,6 +1480,7 @@
         try { cachedCurrentUser = JSON.parse(localStr); } catch (e) {}
       }
       renderHospitalHeader(cachedCurrentUser);
+      updateKakaoDelayButtonLabels();
 
       // 2. 🌟 TodakDB를 통해 Supabase DB의 최신 프로필(pendingPlan, clinicRooms 등) 실시간 동기화
       if (window.TodakDB) {
@@ -1485,6 +1489,7 @@
           if (freshUser) {
             cachedCurrentUser = freshUser;
             renderHospitalHeader(freshUser);
+            updateKakaoDelayButtonLabels();
             // 진료실 방이 2개 이상일 때 미선택 상태라면 선택 팝업 호출
             checkRoomSelectionOnLoad(freshUser);
           }
@@ -2419,7 +2424,28 @@
       showToast('🗑️ 진료실 입력 내용이 깨끗하게 비워졌습니다.');
     }
 
-    async function sendReport() {
+    // ⏱️ 카카오 알림톡 예약 발송 지연 시간 읽기 (기본값: 10분)
+    function getKakaoDelayMinutes() {
+      const userStr = localStorage.getItem('todak_current_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.kakaoDelayMinutes) return parseInt(u.kakaoDelayMinutes, 10);
+        } catch (e) {}
+      }
+      const delayStr = localStorage.getItem('todak_kakao_delay');
+      return delayStr ? parseInt(delayStr, 10) : 10;
+    }
+
+    function updateKakaoDelayButtonLabels() {
+      const minutes = getKakaoDelayMinutes();
+      const btn = document.getElementById('btnSendScheduled');
+      if (btn) {
+        btn.innerHTML = `⏱️ 예약 발송 (${minutes}분 후)`;
+      }
+    }
+
+    async function sendReport(delayMode = 0) {
       if (!parsedResult) {
         alert("⚠️ 먼저 진료 녹음을 진행하거나 [텍스트 직접 입력 시 수동 요약]을 완료해 주세요.");
         return;
@@ -2438,6 +2464,10 @@
       }
       const pAge = document.getElementById('patientAge').value.trim();
       const pDisplayName = pAge ? `${pNameOnly} 님 (만 ${pAge}세)` : `${pNameOnly} 님`;
+
+      // ⏱️ 즉시 발송 vs 지연 예약 발송 판별
+      const isScheduled = (delayMode === 'scheduled' || (typeof delayMode === 'number' && delayMode > 0));
+      const targetDelay = isScheduled ? getKakaoDelayMinutes() : 0;
 
       // 병원명/원장명 동적 획득
       let hospTitle = '길동이의원';
@@ -2469,9 +2499,15 @@
         docTitle = currentRoom.doctorName;
       }
 
-      showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
-      summaryReviewCard.style.display = 'none';
-      recordStatus.innerText = '발송 완료! 다음 환자 진료 시 [F9]를 누르세요.';
+      if (isScheduled) {
+        showToast(`⏱️ ${pDisplayName} 휴대폰으로 ${targetDelay}분 후 예약 발송 접수 중...`);
+        summaryReviewCard.style.display = 'none';
+        recordStatus.innerHTML = `⏱️ <strong>${targetDelay}분 후 예약 발송 접수됨</strong> (다음 환자 진료 시 [F9])`;
+      } else {
+        showToast(`📲 ${pDisplayName} 휴대폰으로 메시지 발송 중...`);
+        summaryReviewCard.style.display = 'none';
+        recordStatus.innerText = '발송 완료! 다음 환자 진료 시 [F9]를 누르세요.';
+      }
 
       // 화면 목업 렌더링
       document.getElementById('reportPatientName').innerText = `${pDisplayName}의 안심 진료노트`;
@@ -2558,7 +2594,8 @@
             summary: parsedResult.summary,
             medication: parsedResult.medication,
             nextDate: parsedResult.nextDate,
-            reportUrl: reportUrl
+            reportUrl: reportUrl,
+            delayMinutes: targetDelay
           })
         });
 
@@ -2579,7 +2616,12 @@
           return;
         }
 
-        alert(`🎉 [발송 성공!]\n${pPhone} 번호로 안심 리포트 문자가 발송되었습니다!\n스마트폰을 확인해 보세요.`);
+        if (isScheduled) {
+          const scheduledClock = new Date(Date.now() + targetDelay * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          alert(`⏱️ [예약 발송 접수 완료]\n\n${pDisplayName} 환자분께 ${targetDelay}분 후(약 ${scheduledClock}) 알림톡이 자동으로 발송됩니다.\n환자분이 병원을 나설 때쯤 리포트를 편안히 받아보실 수 있습니다.`);
+        } else {
+          alert(`🎉 [즉시 발송 완료]\n\n${pPhone} 번호로 안심 리포트 알림톡이 즉시 발송되었습니다!\n스마트폰을 확인해 보세요.`);
+        }
       } catch (e) {
         console.error("발송 실패:", e);
         hideToast();
