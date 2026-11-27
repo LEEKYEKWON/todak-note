@@ -624,27 +624,34 @@
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.queue)) {
-            // 기존 발송완료된 로컬 이력과 서버의 신규 대기 항목 병합
+            // 기존 발송완료 및 예약된 로컬 이력 불러오기
             const localSaved = JSON.parse(localStorage.getItem(`todak_desk_queue_${hospId}`) || '[]');
-            const localSentMap = {};
+            const localMap = {};
             localSaved.forEach(item => {
-              if (item.status === 'sent') localSentMap[item.id] = item;
+              // ⏱️ 예약 발송 시간이 지났으면 자동으로 'sent (발송 완료)'로 갱신
+              if (item.status === 'scheduled' && item.scheduledTimestamp && Date.now() >= item.scheduledTimestamp) {
+                item.status = 'sent';
+              }
+              localMap[item.id] = item;
             });
 
-            // 서버에서 온 항목 중 이미 로컬에서 발송완료된 것은 상태 유지
+            // 서버 대기열 항목과 로컬 상태 정밀 병합 (로컬의 최신 상태 우선)
             const merged = data.queue.map(item => {
-              if (localSentMap[item.id]) {
-                return localSentMap[item.id];
+              if (localMap[item.id]) {
+                return localMap[item.id];
               }
               return { ...item, status: item.status || 'pending', timestamp: item.timestamp || Date.now() };
             });
 
-            // 로컬에만 있는 발송완료 내역도 보존
+            // 로컬에만 있는 항목(진료실 직접 발송 및 로컬 저장 건)도 모두 영구 보존!
             localSaved.forEach(item => {
-              if (item.status === 'sent' && !merged.find(m => m.id === item.id)) {
+              if (!merged.find(m => m.id === item.id)) {
                 merged.push(item);
               }
             });
+
+            // 최신 접수순 정렬
+            merged.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
             deskQueueData = merged;
             localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
@@ -652,6 +659,19 @@
         }
       } catch (err) {
         deskQueueData = JSON.parse(localStorage.getItem(`todak_desk_queue_${hospId}`) || '[]');
+      }
+
+      // 화면 렌더링 전 예약 시간 경과 여부 실시간 체크 및 자동 완료 전환
+      const nowTs = Date.now();
+      let hasStatusChanged = false;
+      deskQueueData.forEach(item => {
+        if (item.status === 'scheduled' && item.scheduledTimestamp && nowTs >= item.scheduledTimestamp) {
+          item.status = 'sent';
+          hasStatusChanged = true;
+        }
+      });
+      if (hasStatusChanged) {
+        localStorage.setItem(`todak_desk_queue_${hospId}`, JSON.stringify(deskQueueData));
       }
 
       renderDeskTable();
@@ -1034,13 +1054,16 @@
         });
 
         if (isScheduled) {
-          const scheduledClock = new Date(Date.now() + targetDelay * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const scheduledTime = new Date(Date.now() + targetDelay * 60 * 1000);
+          const scheduledClock = scheduledTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           alert(`⏱️ [예약 발송 접수 완료!]\n\n${item.patientName} 환자분께 ${targetDelay}분 후(약 ${scheduledClock}) 알림톡이 자동으로 발송되도록 예약되었습니다.`);
           item.status = 'scheduled';
+          item.scheduledTimestamp = scheduledTime.getTime();
           item.sentAt = `${scheduledClock} 발송예약`;
         } else {
           alert(`🎉 [즉시 발송 성공!]\n\n${item.patientName} 환자분께 알림톡이 성공적으로 발송되었습니다.`);
           item.status = 'sent';
+          item.scheduledTimestamp = null;
           item.sentAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
